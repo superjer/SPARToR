@@ -20,4 +20,5 @@
   . 4
 .end
 
-flower 0 96 18 28
+flower  pos 0 96  size 18 28
+same-flower 0 96 18 28

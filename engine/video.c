@@ -409,6 +409,7 @@ int make_sure_texture_is_loaded(const char *texfile)
       SJC_Write("Texture %s is new, using slot %d",texfile,j);
       textures[j].filename = malloc( strlen(texfile) + 1 );
       strcpy(textures[j].filename,texfile);
+      load_sprites(j);
     } else if( !strcmp(textures[j].filename,texfile) ) {
       SJC_Write("Texture %s was loaded before, reusing slot %d",texfile,j);
       if( textures[j].generated )
@@ -434,8 +435,6 @@ int make_sure_texture_is_loaded(const char *texfile)
     for( k=0; k<num_sys_tex; k++ )
       if( strstr( textures[j].filename, sys_tex[k].name ) )
         sys_tex[k].num = j;
-
-    load_sprites(j);
 
     return j;
   }

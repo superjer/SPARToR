@@ -7,7 +7,7 @@ typedef struct {
   int    texnum;
   char  *name;
   REC    rec;
-  int    ax,ay; // anchor position
+  int    ancx,ancy; // anchor position
 } SPRITE_T;
 
 

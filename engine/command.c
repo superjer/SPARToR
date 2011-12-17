@@ -22,6 +22,7 @@
 #include "video.h"
 #include "input.h"
 #include "saveload.h"
+#include "sprite.h"
 
 
 void command(const char *s){
@@ -134,6 +135,19 @@ void command(const char *s){
         break;
       }
       load_context( name, mycontext, hotfr );
+    }else if( strcmp(q,"spr")==0 ){
+      char *num = strtok(NULL," ");
+      if( num==NULL ) {
+        SJC_Write("There are %d sprites",spr_count);
+        break;
+      }
+      size_t n = atoi(num);
+      if( n >= spr_count ) {
+        SJC_Write("Invalid sprite number #%d (max %d)",n,spr_count-1);
+        break;
+      }
+      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\"",n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename);
+      SJC_Write("  pos %d %d  size %d %d  anchor %d %d",sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
     }else if( mod_command(q) ){
       SJC_Write("Huh?");
     }

@@ -19,10 +19,6 @@ int    setmodel = -1;
 void obj_player_draw( int objid, OBJ_t *o )
 {
   PLAYER_t *pl = o->data;
-  int gunshift;
-  if( pl->goingu ) gunshift = 96;
-  if( pl->goingd ) gunshift = 48;
-  if( pl->goingu==pl->goingd ) gunshift = 0;
   int x = pl->pos.x-10;
   int y = pl->pos.y-15;
   int z = y + pl->hull[1].y;
@@ -31,25 +27,10 @@ void obj_player_draw( int objid, OBJ_t *o )
   SJGL_SetTex( sys_tex[TEX_PLAYER].num );
 
   if( pl->facingr ) {
-    if( pl->model==4 ) //girl hair
-      SJGL_Blit( &(SDL_Rect){80,120,20,15}, x-4, y+(pl->goingd?4:0)+pl->gundown/7, z );
-
     SJGL_Blit( &(SDL_Rect){xshift,pl->model*30,20,30}, x, y, z);
-
-    if( !pl->stabbing ) //gun
-      SJGL_Blit( &(SDL_Rect){0+gunshift,150,24,27}, pl->pos.x- 5-pl->gunback, pl->pos.y-10+pl->gundown/5, z );
   } else {
-    if( pl->model==4 ) //girl hair
-      SJGL_Blit( &(SDL_Rect){100,120,20,15}, x+4, y+(pl->goingd?4:0)+pl->gundown/7, z );
-
     SJGL_Blit( &(SDL_Rect){xshift,pl->model*30,20,30}, x, y, z);
-
-    if( !pl->stabbing ) //gun
-      SJGL_Blit( &(SDL_Rect){24+gunshift,150,24,27}, pl->pos.x-19+pl->gunback, pl->pos.y-10+pl->gundown/5, z );
   }
-
-  if( pl->stabbing ) //up/down stabbing
-    SJGL_Blit( &(SDL_Rect){148+(pl->stabbing<0?5:0),150,5,27}, pl->pos.x-2, pl->pos.y-(pl->stabbing<0?30:0), z );
 }
 
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

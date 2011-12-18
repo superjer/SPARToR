@@ -90,7 +90,7 @@ void mod_setup(Uint32 setupfr)
   MAYBE_BIND(INP_JAXP,0            ,RIGHT); MAYBE_BIND(INP_JAXP,3            ,RIGHT);
   MAYBE_BIND(INP_JAXN,1            ,UP   ); MAYBE_BIND(INP_JAXN,4            ,UP   );
   MAYBE_BIND(INP_JAXP,1            ,DOWN ); MAYBE_BIND(INP_JAXP,4            ,DOWN );
-  MAYBE_BIND(INP_JBUT,1            ,JUMP );
+  MAYBE_BIND(INP_JBUT,0            ,JUMP );
   MAYBE_BIND(INP_JBUT,2            ,FIRE );
 
   MAYBE_BIND(INP_MBUT,1            ,EPANT); //editing controls...

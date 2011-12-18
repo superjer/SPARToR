@@ -259,11 +259,13 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
         myspr = (myspr + spr_count - 1) % spr_count;
+        mytex = sprites[myspr].texnum;
         return -1;
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
         myspr = (myspr + 1) % spr_count;
+        mytex = sprites[myspr].texnum;
         return -1;
       }
 
@@ -271,12 +273,16 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPGUP ) { //prev texture file
-        mytex = (mytex + tex_count - 1) % tex_count;
+        if( textures[mytex].filename ) do {
+          mytex = (mytex + tex_count - 1) % tex_count;
+        } while( !textures[mytex].filename );
         return -1;
       }
 
       if( c->cmd==CMDT_1EPGDN ) { //next texture file
-        mytex = (mytex + 1) % tex_count;
+        if( textures[mytex].filename ) do {
+          mytex = (mytex + 1) % tex_count;
+        } while( !textures[mytex].filename );
         return -1;
       }
 
@@ -599,8 +605,10 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
       SJGL_Blit( &(REC){0,0,2,2}, x+sprites[i].ancx-1, y+sprites[i].ancy-1, 0 );
   }
 
-  SJF_DrawText( w-sz, sz+4, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, "Layer %d", ylayer );
+  glColor4f(1,1,1,1);
+  SJF_DrawText( w-sz, sz+ 4, "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+  SJF_DrawText( w-sz, sz+14, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+  SJF_DrawText( w-sz, sz+24, "Layer %d", ylayer );
 
   glPopAttrib();
 }

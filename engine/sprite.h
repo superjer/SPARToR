@@ -3,6 +3,19 @@
 #define SPARTOR_SPRITE_H_
 
 
+//tool textures
+enum { TOOL_NUL = 1,
+       TOOL_SOL,
+       TOOL_PLAT,
+       TOOL_OPN,
+       TOOL_COPY,
+       TOOL_PSTE,
+       TOOL_OBJ,
+       TOOL_ERAS,
+       TOOL_VIS,
+       TOOL_MASK = 255 };
+
+
 typedef struct {
   int    texnum;
   char  *name;

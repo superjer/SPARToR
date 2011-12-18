@@ -123,25 +123,26 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
       continue;
     }
 
+    // copy map data to dmap if setting sol, plat or opn
+    if( (tool_num == TOOL_SOL || tool_num == TOOL_PLAT || tool_num == TOOL_OPN) && co->dmap[pos].flags & CBF_NULL )
+      memcpy( co->dmap+pos, co->map+pos, sizeof co->map[0] );
+
     switch( tool_num ) {
     case TOOL_NUL:
-      co->dmap[pos].flags |=  CBF_NULL;
+      co->dmap[pos].flags |= CBF_NULL;
       break;
 
     case TOOL_SOL:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_PLAT);
-      co->dmap[pos].flags |=  CBF_SOLID;
+      co->dmap[pos].flags |= CBF_SOLID;
       break;
 
     case TOOL_PLAT:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID);
-      co->dmap[pos].flags |=  CBF_PLAT;
+      co->dmap[pos].flags |= CBF_PLAT;
       break;
 
     case TOOL_OPN:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID|CBF_PLAT);
       break;
 
@@ -167,11 +168,11 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
       break;
 
     case TOOL_ERAS:
-      co->dmap[pos].flags &= ~CBF_VIS;
+      co->dmap[pos].flags &= ~(CBF_VIS|CBF_NULL);
       break;
 
     case TOOL_VIS:
-      co->map[pos].flags |= CBF_VIS;
+      co->map[pos].flags |= CBF_VIS; // hack for making a loaded-from-file tile visible (format change mess)
       break;
 
     }

@@ -31,16 +31,25 @@
 #define TILEY 21
 
 // macros for translating to/from isometric:
-#define TILE2NATIVE_X(co,x,y,z) (((x)-(z))*(co)->tileuw/2      )
-#define TILE2NATIVE_Y(co,x,y,z) (((x)+(z))*(co)->tileuh/2 + (y))
-#define POINT2NATIVE_X(o)       (((o).x-(o).z)          )
-#define POINT2NATIVE_Y(o)       (((o).x+(o).z)/2 + (o).y)
-#define ISO_SHIFTX(co,x)        ((x) - (co)->tileuw/2)
-#define ISO_SHIFTY(co,y)        ((y)                                )
-#define NATIVE2TILE_X(co,x,y)   ((ISO_SHIFTX(co,x)+ISO_SHIFTY(co,y)*2)/(co)->tileuw) // times 2 b/c tiles are twice as wide as tall
-#define NATIVE2TILE_Y(co,x,y)   0
-#define NATIVE2TILE_Z(co,x,y)   ((ISO_SHIFTY(co,y)-ISO_SHIFTX(co,x)/2)/(co)->tileuh)
-
+#ifdef ISOMETRIC
+  #define TILE2NATIVE_X(co,x,y,z) (((x)-(z))*(co)->tileuw/2      )
+  #define TILE2NATIVE_Y(co,x,y,z) (((x)+(z))*(co)->tileuh/2 + (y))
+  #define POINT2NATIVE_X(o)       (((o).x-(o).z)          )
+  #define POINT2NATIVE_Y(o)       (((o).x+(o).z)/2 + (o).y)
+  #define ISO_SHIFTX(co,x)        ((x) - (co)->tileuw/2)
+  #define ISO_SHIFTY(co,y)        ((y)                 )
+  #define NATIVE2TILE_X(co,x,y)   ((ISO_SHIFTX(co,x)+ISO_SHIFTY(co,y)*2)/(co)->tileuw) // times 2 b/c tiles are twice as wide as tall
+  #define NATIVE2TILE_Y(co,x,y)   0
+  #define NATIVE2TILE_Z(co,x,y)   ((ISO_SHIFTY(co,y)-ISO_SHIFTX(co,x)/2)/(co)->tileuh)
+#else
+  #define TILE2NATIVE_X(co,x,y,z) ((x)*(co)->tileuw)
+  #define TILE2NATIVE_Y(co,x,y,z) ((y)*(co)->tileuh)
+  #define POINT2NATIVE_X(o)       ((o).x)
+  #define POINT2NATIVE_Y(o)       ((o).y)
+  #define NATIVE2TILE_X(co,x,y)   ((x)/(co)->tileuw)
+  #define NATIVE2TILE_Y(co,x,y)   ((y)/(co)->tileuh)
+  #define NATIVE2TILE_Z(co,x,y)   0
+#endif
 
 #define TEX_TOOL   0
 #define TEX_PLAYER 1

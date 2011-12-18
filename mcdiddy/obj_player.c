@@ -12,8 +12,13 @@
 
 #include "obj_.h"
 
-//FIXME REMOVE! change local player model
-int    setmodel = -1;
+#define DASH_COOLDOWN 30
+#define FLAIL_COOLDOWN 20
+
+#define MAX_WALK 2.5f
+
+//FIXME REMOVE! hack
+int smack = 0;
 //
 
 void obj_player_draw( int objid, OBJ_t *o )
@@ -25,6 +30,9 @@ void obj_player_draw( int objid, OBJ_t *o )
   int xshift = (pl->goingd>0 ? 40 : 0) + (pl->turning ? 80 : (pl->facingr ? 0 : 20 ));
 
   SJGL_SetTex( sys_tex[TEX_PLAYER].num );
+
+  if( smack )
+    SJGL_Blit( &(SDL_Rect){236,0,20,36}, x+smack*10, y-3, z);
 
   if( pl->facingr ) {
     SJGL_Blit( &(SDL_Rect){xshift,pl->model*30,20,30}, x, y, z);
@@ -44,9 +52,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   int cmd = fr[b].cmds[gh->client].cmd;
 
-  if( newme->cooldown && cmd%2 ) //keydowns are odd numbers -- FIXME: WARNING: ALERT: CAUTION: HACK
-    ; // no control while dashing
-  else switch( cmd ) {
+  switch( cmd ) {
     case CMDT_1LEFT:  newme->goingl  = 1;
                       if( newme->facingr) newme->turning = 3;
                       newme->facingr = 0;                      break;
@@ -70,18 +76,35 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     return;
   }
 
-  gh->vel.x = newme->pos.x - gh->pos.x; //put ghost in the right spot
+  // cancel most inputs when busy
+  int busy = newme->cooldown > FLAIL_COOLDOWN;
+
+  // put ghost in the right spot
+  gh->vel.x = newme->pos.x - gh->pos.x;
   gh->vel.y = newme->pos.y - gh->pos.y;
 
-  if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) { //local client match
+  // check if this player is that of the local client
+  if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) {
     v_camx = gh->pos.x;
     v_camy = gh->pos.y;
   }
 
-  // friction
-  if(      newme->vel.x> 0.2f ) newme->vel.x -= 0.2f;
-  else if( newme->vel.x>-0.2f ) newme->vel.x  = 0.0f;
-  else                          newme->vel.x += 0.2f;
+  // -- HIT WALL? --
+  smack = 0;
+  if( newme->vel.x==0 ) {
+    if( oldme->vel.x < -4 )
+      smack = -1;
+    else if( oldme->vel.x > 4 )
+      smack = 1;
+    if( newme->cooldown > FLAIL_COOLDOWN )
+    newme->cooldown = FLAIL_COOLDOWN;
+  }
+
+  // -- FRICTION --
+  if(      newme->vel.x> 0.5f ) newme->vel.x -= 0.5f;
+  else if( newme->vel.x>-0.5f ) newme->vel.x  = 0.0f;
+  else                          newme->vel.x += 0.5f;
+
   if(      newme->pvel.x> 0.5f ) newme->pvel.x -= 0.5f;
   else if( newme->pvel.x>-0.5f ) newme->pvel.x  = 0.0f;
   else                           newme->pvel.x += 0.5f;
@@ -89,13 +112,17 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   // -- WALK --
   if( newme->turning )
     newme->turning--;
-  if( newme->goingl ) {
-    if(      newme->pvel.x>-2.0f ) newme->pvel.x += -1.0f;
-    else if( newme->pvel.x>-3.0f ) newme->pvel.x  = -3.0f;
+
+  if( !busy && newme->goingl ) {
+    newme->pvel.x += -1;
+    if( newme->pvel.x < -MAX_WALK )
+      newme->pvel.x = -MAX_WALK;
   }
-  if( newme->goingr ) {
-    if(      newme->pvel.x< 2.0f ) newme->pvel.x +=  1.0f;
-    else if( newme->pvel.x< 3.0f ) newme->pvel.x  =  3.0f;
+
+  if( !busy && newme->goingr ) {
+    newme->pvel.x +=  1;
+    if( newme->pvel.x >  MAX_WALK )
+      newme->pvel.x =  MAX_WALK;
   }
 
   // -- JUMP --
@@ -108,25 +135,50 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->pvel.y   = 0.0f;
     newme->jumping  = 0;             //must press jump again now
   }
+
   if( !newme->jumping )              //low-jump, cancel jump velocity early
     newme->pvel.y   = 0.0f;
-  if( (newme->vel.y==0.0f || oldme->vel.y==0.0f) && newme->jumping ) //FIXME 0 velocity means grounded? not really
-    newme->pvel.y   = -9.1f;         //initiate jump!
 
+  int cool_enough = ( (newme->cooldown<FLAIL_COOLDOWN && newme->grounded) || !newme->cooldown );
+
+  if( newme->jumping &&
+      (newme->vel.y==0.0f || oldme->vel.y==0.0f) &&
+      cool_enough                                   ) {
+    newme->pvel.y   = -7.5f;         //initiate jump!
+    newme->cooldown = 0;
+  }
+
+  // -- COOLDOWN & GROUNDEDNESS --
   if( newme->cooldown )
     newme->cooldown--;
 
+  if( newme->cooldown == FLAIL_COOLDOWN-2 && newme->vel.y==0 )
+    newme->grounded = 1;
+
+  if( newme->vel.y!=0 || !newme->cooldown )
+    newme->grounded = 0;
+
   // -- DASH --
+  SJC_Write("cooldown: %d      dashing: %d",newme->cooldown,newme->dashing);
   if( !newme->cooldown && newme->dashing ) {
-    newme->pvel.x = newme->facingr ? 10 : -10;
-    newme->pvel.y = 0;
-    newme->vel.x = 0;
+    newme->vel.x = newme->facingr ? 10 : -10;
     newme->vel.y = 0;
+    newme->pvel.x = 0;
+    newme->pvel.y = 0;
     newme->jumping = 0;
-    newme->cooldown = 10;
+    newme->grounded = 0;
+    newme->cooldown = DASH_COOLDOWN;
   }
 
-  for(i=0;i<objid;i++)  //find other players to interact with -- who've already MOVED
+  if( newme->cooldown && newme->cooldown <= FLAIL_COOLDOWN ) {
+    if( newme->vel.x < 0 )
+      newme->vel.x = -MAX_WALK;
+    else
+      newme->vel.x =  MAX_WALK;
+  }
+
+  // -- INTERACTION --
+  for(i=0;i<objid;i++)
     if(fr[b].objs[i].type==OBJT_PLAYER) {
       PLAYER_t *oldyou = fr[a].objs[i].data;
       PLAYER_t *newyou = fr[b].objs[i].data;
@@ -145,8 +197,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       }
     }
 
-  //gravity?
-  if( !newme->cooldown )
-    newme->vel.y += 0.7f;
+  // -- GRAVITY --
+  if( newme->cooldown < FLAIL_COOLDOWN )
+    newme->vel.y += 0.5f;
 }
 

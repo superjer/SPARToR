@@ -58,6 +58,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     pl->jumping = 0;
     pl->dashing = 0;
     pl->cooldown = 0;
+    pl->grounded = 0;
     pl->facingr = 1;
     pl->turning = 0;
   } //end for i<maxclients

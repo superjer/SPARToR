@@ -19,7 +19,7 @@
 #define FOBJ( n )               fr[b].objs[(n)]
 
 //tool textures
-enum { TOOL_NUL = 0,
+enum { TOOL_NUL = 1,
        TOOL_SOL,
        TOOL_PLAT,
        TOOL_OPN,
@@ -27,7 +27,8 @@ enum { TOOL_NUL = 0,
        TOOL_PSTE,
        TOOL_OBJ,
        TOOL_ERAS,
-       TOOL_VIS };
+       TOOL_VIS,
+       TOOL_MASK = 255 };
 
 
 //cmd types

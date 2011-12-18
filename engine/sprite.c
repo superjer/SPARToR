@@ -60,7 +60,7 @@ int load_sprites(int texnum)
   enum { READY, DEFAULT, GRID, GRIDITEM, NOMORE } mode = READY;
   int gridcols = 1; // just to avoid compiler warning
   int gridoffs = 0; // "
-  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32};
+  SPRITE_T defs = {0, NULL, 0, {0, 0, 32, 32}, 16, 32};
   SPRITE_T gdefs;
 
   line_num = 0;
@@ -203,6 +203,7 @@ static SPRITE_T *new_sprite(int texnum,const char *name)
   sprites[spr_count].texnum = texnum;
   sprites[spr_count].name = malloc(strlen(name)+1);
   strcpy( sprites[spr_count].name, name );
+  sprites[spr_count].flags = 0;
   return sprites + spr_count++;
 }
 

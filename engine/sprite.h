@@ -6,6 +6,7 @@
 typedef struct {
   int    texnum;
   char  *name;
+  short  flags;
   REC    rec;
   int    ancx,ancy; // anchor position
 } SPRITE_T;

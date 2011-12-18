@@ -2,6 +2,7 @@
 *.[oa]
 *.swp
 *.sh
+cscope.*
 tags
 spartor_linux
 spartor_win32.exe

@@ -50,19 +50,16 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     pl->pvel = (V){0.0f,0.0f,0.0f};
     pl->model = i%5;
     pl->ghost = ghostslot;
+    pl->beholden = 0;
     pl->goingl = 0;
     pl->goingr = 0;
     pl->goingu = 0;
     pl->goingd = 0;
     pl->jumping = 0;
-    pl->firing = 0;
+    pl->dashing = 0;
     pl->cooldown = 0;
-    pl->projectiles = 0;
-    pl->grounded = 0;
     pl->facingr = 1;
     pl->turning = 0;
-    pl->stabbing = 0;
-    pl->hovertime = 0;
   } //end for i<maxclients
 
   //create a slug every now and then

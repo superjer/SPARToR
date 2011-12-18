@@ -21,6 +21,7 @@ void obj_bullet_draw( int objid, OBJ_t *o )
 
 void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
+  /*
   int i;
   BULLET_t  *bu = ob->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
@@ -44,5 +45,6 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       ((PLAYER_t *)fr[b].objs[bu->owner].data)->projectiles--;
     ob->flags |= OBJF_DEL;
   }
+  */
 }
 

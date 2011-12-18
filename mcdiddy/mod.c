@@ -28,7 +28,7 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
                             {"right"      ,CMDT_1RIGHT,CMDT_0RIGHT},
                             {"up"         ,CMDT_1UP   ,CMDT_0UP   },
                             {"down"       ,CMDT_1DOWN ,CMDT_0DOWN },
-                            {"fire"       ,CMDT_1FIRE ,CMDT_0FIRE },
+                            {"fire"       ,CMDT_1DASH ,CMDT_0DASH },
                             {"jump"       ,CMDT_1JUMP ,CMDT_0JUMP },
                             {"edit-paint" ,CMDT_1EPANT,CMDT_0EPANT},
                             {"edit-prev"  ,CMDT_1EPREV,CMDT_0EPREV},
@@ -84,14 +84,14 @@ void mod_setup(Uint32 setupfr)
   MAYBE_BIND(INP_KEYB,SDLK_UP      ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_w       ,UP   );
   MAYBE_BIND(INP_KEYB,SDLK_DOWN    ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_s       ,DOWN );
   MAYBE_BIND(INP_KEYB,SDLK_z       ,JUMP ); MAYBE_BIND(INP_KEYB,SDLK_SPACE   ,JUMP );
-  MAYBE_BIND(INP_KEYB,SDLK_x       ,FIRE ); MAYBE_BIND(INP_KEYB,SDLK_LSHIFT  ,FIRE );
+  MAYBE_BIND(INP_KEYB,SDLK_x       ,DASH ); MAYBE_BIND(INP_KEYB,SDLK_LSHIFT  ,DASH );
 
   MAYBE_BIND(INP_JAXN,0            ,LEFT ); MAYBE_BIND(INP_JAXN,3            ,LEFT ); //joystick or gamepad
   MAYBE_BIND(INP_JAXP,0            ,RIGHT); MAYBE_BIND(INP_JAXP,3            ,RIGHT);
   MAYBE_BIND(INP_JAXN,1            ,UP   ); MAYBE_BIND(INP_JAXN,4            ,UP   );
   MAYBE_BIND(INP_JAXP,1            ,DOWN ); MAYBE_BIND(INP_JAXP,4            ,DOWN );
   MAYBE_BIND(INP_JBUT,0            ,JUMP );
-  MAYBE_BIND(INP_JBUT,2            ,FIRE );
+  MAYBE_BIND(INP_JBUT,2            ,DASH );
 
   MAYBE_BIND(INP_MBUT,1            ,EPANT); //editing controls...
   MAYBE_BIND(INP_MBUT,4            ,EPREV);

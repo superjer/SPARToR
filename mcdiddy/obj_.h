@@ -68,20 +68,17 @@ typedef struct{
   V pvel;
   int model;
   int ghost;
+  int beholden;
   char goingl;
   char goingr;
   char goingu;
   char goingd;
   char jumping;
-  char firing;
+  char dashing;
   char cooldown;
-  char projectiles;
-  char gunback,gundown;
   char grounded;
   char facingr;
   char turning;
-  char stabbing;
-  char hovertime;
 } PLAYER_t;
 
 void obj_player_draw( int objid, OBJ_t *o );

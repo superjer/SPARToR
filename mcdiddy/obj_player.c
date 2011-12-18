@@ -36,12 +36,17 @@ void obj_player_draw( int objid, OBJ_t *o )
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   int i;
-  int slot0;
   PLAYER_t *oldme = oa->data;
   PLAYER_t *newme = ob->data;
   GHOST_t *gh = fr[b].objs[newme->ghost].data;
 
-  switch( fr[b].cmds[gh->client].cmd ) {
+  newme->dashing = 0;
+
+  int cmd = fr[b].cmds[gh->client].cmd;
+
+  if( newme->cooldown && cmd%2 ) //keydowns are odd numbers -- FIXME: WARNING: ALERT: CAUTION: HACK
+    ; // no control while dashing
+  else switch( cmd ) {
     case CMDT_1LEFT:  newme->goingl  = 1;
                       if( newme->facingr) newme->turning = 3;
                       newme->facingr = 0;                      break;
@@ -56,8 +61,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     case CMDT_0DOWN:  newme->goingd  = 0;                      break;
     case CMDT_1JUMP:  newme->jumping = 1;                      break;
     case CMDT_0JUMP:  newme->jumping = 0;                      break;
-    case CMDT_1FIRE:  newme->firing  = 1;                      break;
-    case CMDT_0FIRE:  newme->firing  = 0; newme->cooldown = 0; break;
+    case CMDT_1DASH:  newme->dashing = 1;                      break;
+    case CMDT_0DASH:  newme->dashing = 0;                      break;
   }
 
   if( !oldme ) { //FIXME why's this null?
@@ -71,44 +76,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) { //local client match
     v_camx = gh->pos.x;
     v_camy = gh->pos.y;
-    if( setmodel>-1 ) { //FIXME -- just for fun, will not sync!
-      newme->model = setmodel;
-      setmodel = -1;
-    }
   }
-
-  if( newme->firing || (newme->stabbing<0 && !newme->goingu)
-                    || (newme->stabbing>0 && !newme->goingd) ) //firing or stopping pressing up/down
-    newme->stabbing = 0;
-  else if( !newme->stabbing && newme->vel.y!=0.0 ) {       //freefalling, not stabbing
-    if( newme->goingu && !oldme->goingu )                  //just pressed up
-      newme->stabbing = -4;
-    if( newme->goingd && !oldme->goingd )                  //just pressed down
-      newme->stabbing = 4;
-  }
-  if( newme->stabbing==-1 || newme->stabbing==1 )          //last frame of stabbing is over
-    newme->stabbing = 0;
-  if( newme->stabbing && newme->vel.y==0.0 ) {             //tink tink tink!
-    if( newme->stabbing>0 )
-      newme->vel.y -= 0.8f*oldme->vel.y;
-    newme->stabbing += (newme->stabbing>0 ? -1 : 1);
-  }
-  if(        newme->stabbing && newme->goingu ) {          //expand hull for stabbing
-    newme->hull[0] = (V){-6.0f,-29.0f,0.0f};
-    newme->hull[1] = (V){ 6.0f, 15.0f,0.0f};
-  } else if( newme->stabbing && newme->goingd ) {
-    newme->hull[0] = (V){-6.0f,-15.0f,0.0f};
-    newme->hull[1] = (V){ 6.0f, 25.0f,0.0f};
-  } else {
-    newme->hull[0] = (V){-6.0f,-15.0f,0.0f};
-    newme->hull[1] = (V){ 6.0f, 15.0f,0.0f};
-  }
-
-  newme->gunback = 0; //reset gun position
-  if(newme->goingr||newme->goingl)
-    newme->gundown = (newme->gundown+1)%10;
-  else
-    newme->gundown = 0;
 
   // friction
   if(      newme->vel.x> 0.2f ) newme->vel.x -= 0.2f;
@@ -143,35 +111,19 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( !newme->jumping )              //low-jump, cancel jump velocity early
     newme->pvel.y   = 0.0f;
   if( (newme->vel.y==0.0f || oldme->vel.y==0.0f) && newme->jumping ) //FIXME 0 velocity means grounded? not really
-    newme->pvel.y  = -9.1f;         //initiate jump!
+    newme->pvel.y   = -9.1f;         //initiate jump!
 
-  // -- FIRE --
-  if( newme->cooldown>0 )
+  if( newme->cooldown )
     newme->cooldown--;
-  if( newme->firing && newme->cooldown==0 && newme->projectiles<5 ) { // create bullet
-    MKOBJ( bu, BULLET, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
-    if( newme->facingr ) {
-      bu->pos = (V){newme->pos.x+19.0f,newme->pos.y-3.0f,0.0f};
-      bu->vel = (V){ 8.0f,0.0f,0.0f};
-    } else {
-      bu->pos = (V){newme->pos.x-19.0f,newme->pos.y-3.0f,0.0f};
-      bu->vel = (V){-8.0f,0.0f,0.0f};
-    }
-    if( newme->goingu ) { // aiming
-      bu->vel.y += -8.0f;
-      bu->pos.x += -2.0f;
-      bu->pos.y += -7.0f;
-    }
-    if( newme->goingd ) {
-      bu->vel.y +=  8.0f;
-      bu->pos.y += 16.0f;
-    }
-    bu->model = 1;
-    bu->owner = objid;
-    bu->ttl = 50;
-    newme->cooldown = 5;
-    newme->projectiles++;
-    newme->gunback = 2;
+
+  // -- DASH --
+  if( !newme->cooldown && newme->dashing ) {
+    newme->pvel.x = newme->facingr ? 10 : -10;
+    newme->pvel.y = 0;
+    newme->vel.x = 0;
+    newme->vel.y = 0;
+    newme->jumping = 0;
+    newme->cooldown = 10;
   }
 
   for(i=0;i<objid;i++)  //find other players to interact with -- who've already MOVED
@@ -193,10 +145,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       }
     }
 
-  if( newme->hovertime ) { //gravity?
-    newme->hovertime--;
-    newme->vel.y += 0.3f;
-  } else
-    newme->vel.y += newme->hovertime ? 0.3f : 0.7f;
+  //gravity?
+  if( !newme->cooldown )
+    newme->vel.y += 0.7f;
 }
 

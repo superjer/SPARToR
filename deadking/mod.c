@@ -14,6 +14,7 @@
 #include "mod.h"
 #include "saveload.h"
 #include "sjglob.h"
+#include "sprite.h"
 
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
@@ -350,40 +351,39 @@ int safe_atoi(const char *s)
 
 int mod_command(char *q)
 {
-  TRY
-    if( q==NULL ){
-      ;
-    }else if( strcmp(q,"edit")==0 ){
-      editmode = editmode ? 0 : 1;
-      v_center = editmode ? 0 : 1;
-      return 0;
-    }else if( strcmp(q,"model")==0 ){
-      setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
-      return 0;
-    }else if( strcmp(q,"bounds")==0 ){
-      size_t n = 0;
-      int x = safe_atoi(strtok(NULL," "));
-      int y = safe_atoi(strtok(NULL," "));
-      int z = safe_atoi(strtok(NULL," "));
+  if( q==NULL ){
+    ;
+  }else if( strcmp(q,"edit")==0 ){
+    editmode = editmode ? 0 : 1;
+    v_center = editmode ? 0 : 1;
+    return 0;
+  }else if( strcmp(q,"model")==0 ){
+    setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
+    return 0;
+  }else if( strcmp(q,"bounds")==0 ){
+    size_t n = 0;
+    int x = safe_atoi(strtok(NULL," "));
+    int y = safe_atoi(strtok(NULL," "));
+    int z = safe_atoi(strtok(NULL," "));
 
-      if( !x || !y || !z ) {
-        CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
-        SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
-        return 0;
-      }
-
-      memset(&magic_c,0,sizeof magic_c);
-      packbytes(magic_c.data,'b',&n,1);
-      packbytes(magic_c.data,  x,&n,4);
-      packbytes(magic_c.data,  y,&n,4);
-      packbytes(magic_c.data,  z,&n,4);
-      magic_c.datasz = n;
-      magic_c.flags |= CMDF_DATA;
-      magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
-      putcmd(0,0,0);
+    if( !x || !y || !z ) {
+      CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
+      SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
       return 0;
     }
-  HARDER
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,'b',&n,1);
+    packbytes(magic_c.data,  x,&n,4);
+    packbytes(magic_c.data,  y,&n,4);
+    packbytes(magic_c.data,  z,&n,4);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    putcmd(0,0,0);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -584,6 +584,37 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   SJGL_Blit( &(REC){0,0,co->tilew+4,        2}, x-        2, y+co->tileh, 0 );
   SJGL_Blit( &(REC){0,0,          2,co->tileh}, x-        2, y          , 0 );
   SJGL_Blit( &(REC){0,0,          2,co->tileh}, x+co->tilew, y          , 0 );
+
+  size_t i;
+
+  // draw sprite boxes
+  glColor4f(1,1,1,0.8f);
+  for( i=0; i<spr_count; i++ ) {
+    if( sprites[i].texnum != mytex )
+      continue;
+
+    REC rec = sprites[i].rec; 
+    int x = w-sz+rec.x;
+    int y =      rec.y;
+
+    SJGL_Blit( &(REC){0,0,rec.w+2,    1}, x-    1, y-    1, 0 );
+    SJGL_Blit( &(REC){0,0,rec.w+2,    1}, x-    1, y+rec.h, 0 );
+    SJGL_Blit( &(REC){0,0,      1,rec.h}, x-    1, y      , 0 );
+    SJGL_Blit( &(REC){0,0,      1,rec.h}, x+rec.w, y      , 0 );
+  }
+
+  // draw anchor points
+  glColor4f(1,0,0,0.8f);
+  for( i=0; i<spr_count; i++ ) {
+    if( sprites[i].texnum != mytex )
+      continue;
+
+    REC rec = sprites[i].rec; 
+    int x = w-sz+rec.x;
+    int y =      rec.y;
+
+    SJGL_Blit( &(REC){0,0,2,2}, x+sprites[i].ancx-1, y+sprites[i].ancy-1, 0 );
+  }
 
   SJF_DrawText( w-sz, sz+4, mytex < tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
   SJF_DrawText( w-sz, sz+14, "Layer %d", ylayer );

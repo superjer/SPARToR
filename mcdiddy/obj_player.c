@@ -173,7 +173,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( newme->cooldown && newme->cooldown <= FLAIL_COOLDOWN ) {
     if( newme->vel.x < 0 )
       newme->vel.x = -MAX_WALK;
-    else
+    else if( newme->vel.x > 0 )
       newme->vel.x =  MAX_WALK;
   }
 

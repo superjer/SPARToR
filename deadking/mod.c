@@ -14,6 +14,7 @@
 #include "mod.h"
 #include "saveload.h"
 #include "sjglob.h"
+#include "sprite.h"
 
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
@@ -81,9 +82,13 @@ static struct {
   char  _pad;
 }            *binds;
 static int    editmode = 0;
-static int    mytile   = 0;
-static size_t mytex    = 2;
+static int    myspr    = 0;
+static int    mytex    = 0;
 static FCMD_t magic_c;      // magical storage for an extra command, triggered from console
+
+
+static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
+static int sprite_at(int texnum, int x, int y);
 
 
 void mod_setup(Uint32 setupfr)
@@ -144,9 +149,8 @@ void mod_setup(Uint32 setupfr)
   memset( co->dmap, 0, (sizeof *co->dmap) * volume );
   int i;
   for( i=0; i<volume; i++ ) {
-    co->map[ i].data[0] = 255;
-    co->map[ i].data[1] = (char)TEX_WORLD;
-    co->dmap[i].flags   = CBF_NULL;
+    co->map[ i].spr   = 0;
+    co->dmap[i].flags = CBF_NULL;
   }
   load_context("dirtfarm",1,setupfr); //load a default map
 
@@ -232,9 +236,6 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
   short hash = press<<15 | device<<8 | sym;
   CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
 
-  if( !editmode )
-    return -1;
-
   // apply magic command?
   if( !sym ) {
     if( magic_c.datasz ) {
@@ -250,16 +251,21 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       memset( c, 0, sizeof *c );
       c->cmd = binds[i].cmd;
 
+      if( !editmode )
+        return 0;
+
       if( c->cmd==CMDT_0EPREV || c->cmd==CMDT_0ENEXT ) //these shouldn't really happen and wouldn't mean anything
         return -1;
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
-        mytile = (mytile + TILEX*TILEY - 1) % (TILEX*TILEY);
+        myspr = (myspr + spr_count - 1) % spr_count;
+        mytex = sprites[myspr].texnum;
         return -1;
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
-        mytile = (mytile + 1) % (TILEX*TILEY);
+        myspr = (myspr + 1) % spr_count;
+        mytex = sprites[myspr].texnum;
         return -1;
       }
 
@@ -267,12 +273,16 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPGUP ) { //prev texture file
-        mytex = (mytex + tex_count - 1) % tex_count;
+        if( textures[mytex].filename ) do {
+          mytex = (mytex + tex_count - 1) % tex_count;
+        } while( !textures[mytex].filename );
         return -1;
       }
 
       if( c->cmd==CMDT_1EPGDN ) { //next texture file
-        mytex = (mytex + 1) % tex_count;
+        if( textures[mytex].filename ) do {
+          mytex = (mytex + 1) % tex_count;
+        } while( !textures[mytex].filename );
         return -1;
       }
 
@@ -292,12 +302,14 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         if( c->cmd==CMDT_0EPANT ) //always clear mousedown pos on mouseup
           downx = downy = downz = -1;
 
-        if( !editmode || !i_hasmouse )
+        if( !i_hasmouse )
           return -1;
 
         if( i_mousex >= v_w-NATIVE_TEX_SZ && i_mousey < NATIVE_TEX_SZ ) { //click in texture selector
-          if( c->cmd==CMDT_1EPANT )
-            mytile = (i_mousex-(v_w-NATIVE_TEX_SZ))/co->tilew + (i_mousey/co->tileh)*co->tilex;
+          if( c->cmd==CMDT_1EPANT ) {
+            int tmp = sprite_at(mytex, i_mousex-(v_w-NATIVE_TEX_SZ), i_mousey);
+            if( tmp>=0 ) myspr = tmp;
+          }
           return -1;
         }
 
@@ -323,15 +335,14 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
           return -1; //no mousedown? no cmd
 
         size_t n = 0;
-        packbytes(c->data,   'p',&n,1);
-        packbytes(c->data,   dnx,&n,4);
-        packbytes(c->data,   dny,&n,4);
-        packbytes(c->data,   dnz,&n,4);
-        packbytes(c->data, tilex,&n,4);
-        packbytes(c->data, tiley,&n,4);
-        packbytes(c->data, tilez,&n,4);
-        packbytes(c->data,mytile,&n,1);
-        packbytes(c->data, mytex,&n,1);
+        packbytes(c->data,  'p',&n,1);
+        packbytes(c->data,  dnx,&n,4);
+        packbytes(c->data,  dny,&n,4);
+        packbytes(c->data,  dnz,&n,4);
+        packbytes(c->data,tilex,&n,4);
+        packbytes(c->data,tiley,&n,4);
+        packbytes(c->data,tilez,&n,4);
+        packbytes(c->data,myspr,&n,4);
         c->datasz = n;
         c->flags |= CMDF_DATA; //indicate presence of extra cmd data
       }
@@ -350,40 +361,39 @@ int safe_atoi(const char *s)
 
 int mod_command(char *q)
 {
-  TRY
-    if( q==NULL ){
-      ;
-    }else if( strcmp(q,"edit")==0 ){
-      editmode = editmode ? 0 : 1;
-      v_center = editmode ? 0 : 1;
-      return 0;
-    }else if( strcmp(q,"model")==0 ){
-      setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
-      return 0;
-    }else if( strcmp(q,"bounds")==0 ){
-      size_t n = 0;
-      int x = safe_atoi(strtok(NULL," "));
-      int y = safe_atoi(strtok(NULL," "));
-      int z = safe_atoi(strtok(NULL," "));
+  if( q==NULL ){
+    ;
+  }else if( strcmp(q,"edit")==0 ){
+    editmode = editmode ? 0 : 1;
+    v_center = editmode ? 0 : 1;
+    return 0;
+  }else if( strcmp(q,"model")==0 ){
+    setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
+    return 0;
+  }else if( strcmp(q,"bounds")==0 ){
+    size_t n = 0;
+    int x = safe_atoi(strtok(NULL," "));
+    int y = safe_atoi(strtok(NULL," "));
+    int z = safe_atoi(strtok(NULL," "));
 
-      if( !x || !y || !z ) {
-        CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
-        SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
-        return 0;
-      }
-
-      memset(&magic_c,0,sizeof magic_c);
-      packbytes(magic_c.data,'b',&n,1);
-      packbytes(magic_c.data,  x,&n,4);
-      packbytes(magic_c.data,  y,&n,4);
-      packbytes(magic_c.data,  z,&n,4);
-      magic_c.datasz = n;
-      magic_c.flags |= CMDF_DATA;
-      magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
-      putcmd(0,0,0);
+    if( !x || !y || !z ) {
+      CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
+      SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
       return 0;
     }
-  HARDER
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,'b',&n,1);
+    packbytes(magic_c.data,  x,&n,4);
+    packbytes(magic_c.data,  y,&n,4);
+    packbytes(magic_c.data,  z,&n,4);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    putcmd(0,0,0);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -421,8 +431,7 @@ void mod_predraw(Uint32 vidfr)
 
   for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ ) {
     int pos = co->x*co->y*k + co->x*j + i;
-    int tile;
-    size_t ntex;
+    SPRITE_T *spr;
 
     if( showlayer && ylayer!=j )
       continue;
@@ -430,26 +439,14 @@ void mod_predraw(Uint32 vidfr)
     if( co->dmap[ pos ].flags & CBF_NULL ) {
       if( !(co->map[ pos ].flags & CBF_VIS) )
         continue;
-      tile = co->map[ pos ].data[0];
-      ntex = co->map[ pos ].data[1];
+      spr = sprites + co->map[ pos ].spr;
     } else {
       if( !(co->dmap[ pos ].flags & CBF_VIS) )
         continue;
-      tile = co->dmap[ pos ].data[0]; 
-      ntex = co->dmap[ pos ].data[1];
+      spr = sprites + co->dmap[ pos ].spr;
     }
 
-    int height = (co->y-1) * co->bsy;
-
-    SJGL_SetTex( ntex );
-    SJGL_Blit( &(REC){(tile%co->tilex)*co->tilew,
-                      (tile/co->tilex)*co->tileh,
-                      co->tilew,
-                      co->tileh
-                     },
-               TILE2NATIVE_X(co,i,height,k) - co->tileuw/2,
-               TILE2NATIVE_Y(co,i,height,k) + co->bsy,      // right now, drawing tiles at the bottom of the block
-               0 );
+    draw_sprite_on_tile( spr, co, i, 0, k );
   }
 }
 
@@ -536,22 +533,16 @@ void mod_postdraw(Uint32 vidfr)
   glColor4f(1.0f,1.0f,1.0f,fabsf((float)(vidfr%30)-15.0f)/15.0f);
   SJGL_SetTex( mytex );
 
-  int tile = mytile;
+  SPRITE_T *spr = sprites + myspr;
 
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
-    if( mytile==TOOL_PSTE && gh && gh->clipboard_data && (upy-dny||upx-dnx) )
-      tile = gh->clipboard_data[  ((k-dnz)%gh->clipboard_z)*gh->clipboard_y*gh->clipboard_x
-                                + ((j-dny)%gh->clipboard_y)*gh->clipboard_x
-                                + ((i-dnx)%gh->clipboard_x)
-                               ].data[0];
-    SJGL_Blit( &(REC){(tile%co->tilex)*co->tilew,
-                      (tile/co->tilex)*co->tileh,
-                      co->tilew,
-                      co->tileh
-                     },
-               TILE2NATIVE_X(co,i,j,k) - co->tileuw/2,
-               TILE2NATIVE_Y(co,i,j,k) + co->bsy,      // right now, drawing tiles at the bottom of the cube
-               NATIVEH );
+    if( (spr->flags & TOOL_MASK) == TOOL_PSTE && gh && gh->clipboard_data && (upy-dny||upx-dnx) )
+      spr = sprites + gh->clipboard_data[   ((k-dnz)%gh->clipboard_z)*gh->clipboard_y*gh->clipboard_x
+                                          + ((j-dny)%gh->clipboard_y)*gh->clipboard_x
+                                          + ((i-dnx)%gh->clipboard_x)
+                                        ].spr;
+                 
+    draw_sprite_on_tile( spr, co, i, 0, k );
   }
 
   glPopAttrib();
@@ -574,19 +565,50 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   glColor4f(1,1,1,1);
   SJGL_Blit( &(REC){0,0,sz,sz}, w-sz, 0, 0 );
 
-  CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
+  size_t i;
 
   glBindTexture(GL_TEXTURE_2D,0);
-  glColor4f(1,1,0,0.8f);
-  int x = w-sz+(mytile%co->tilex)*co->tilew;
-  int y =      (mytile/co->tilex)*co->tileh;
-  SJGL_Blit( &(REC){0,0,co->tilew+4,        2}, x-        2, y-        2, 0 );
-  SJGL_Blit( &(REC){0,0,co->tilew+4,        2}, x-        2, y+co->tileh, 0 );
-  SJGL_Blit( &(REC){0,0,          2,co->tileh}, x-        2, y          , 0 );
-  SJGL_Blit( &(REC){0,0,          2,co->tileh}, x+co->tilew, y          , 0 );
 
-  SJF_DrawText( w-sz, sz+4, mytex < tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, "Layer %d", ylayer );
+  // draw sprite boxes
+  for( i=0; i<spr_count; i++ ) {
+    if( sprites[i].texnum != mytex )
+      continue;
+
+    int b1,b2;
+    if( myspr==(int)i ) { glColor4f(1,1,0,1.0f); b1 = 4; }
+    else                { glColor4f(1,1,1,0.6f); b1 = 1; }
+    b2 = b1*2;
+
+    REC rec = sprites[i].rec; 
+    int x = w-sz+rec.x;
+    int y =      rec.y;
+
+    SJGL_Blit( &(REC){0,0,rec.w+b2,   b1}, x-   b1, y-   b1, 0 );
+    SJGL_Blit( &(REC){0,0,rec.w+b2,   b1}, x-   b1, y+rec.h, 0 );
+    SJGL_Blit( &(REC){0,0,      b1,rec.h}, x-   b1, y      , 0 );
+    SJGL_Blit( &(REC){0,0,      b1,rec.h}, x+rec.w, y      , 0 );
+  }
+
+  // draw anchor points
+  glColor4f(1,0,0,0.8f);
+  for( i=0; i<spr_count; i++ ) {
+    if( sprites[i].texnum != mytex )
+      continue;
+
+    REC rec = sprites[i].rec; 
+    int x = w-sz+rec.x;
+    int y =      rec.y;
+
+    if( myspr==(int)i )
+      SJGL_Blit( &(REC){0,0,4,4}, x+sprites[i].ancx-2, y+sprites[i].ancy-2, 0 );
+    else
+      SJGL_Blit( &(REC){0,0,2,2}, x+sprites[i].ancx-1, y+sprites[i].ancy-1, 0 );
+  }
+
+  glColor4f(1,1,1,1);
+  SJF_DrawText( w-sz, sz+ 4, "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+  SJF_DrawText( w-sz, sz+14, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+  SJF_DrawText( w-sz, sz+24, "Layer %d", ylayer );
 
   glPopAttrib();
 }
@@ -635,4 +657,36 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
   } //end switch ob->type
 }
 
+
+static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
+{
+  y = (co->y-1) * co->bsy; // FIXME : silly hack for layers all being at the bottom of the context
+
+  SJGL_SetTex( spr->texnum );
+
+  // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
+  // which always in the southernmost corner
+  SJGL_Blit( &spr->rec,
+             TILE2NATIVE_X(co,x,y,z) + 0          - spr->ancx,
+             TILE2NATIVE_Y(co,x,y,z) + co->tileuh - spr->ancy,
+             0 );
+}
+
+
+static int sprite_at(int texnum, int x, int y)
+{
+  size_t i;
+
+  for( i=0; i<spr_count; i++ ) {
+    if( sprites[i].texnum != texnum )
+      continue;
+
+    REC rec = sprites[i].rec; 
+    if( x >= rec.x && x < rec.x+rec.w &&
+        y >= rec.y && y < rec.y+rec.h    )
+      return i;
+  }
+
+  return -1; 
+}
 

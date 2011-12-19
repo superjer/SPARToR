@@ -2,6 +2,7 @@
 *.[oa]
 *.swp
 *.sh
+cscope.*
 tags
 spartor_linux
 spartor_win32.exe
@@ -12,3 +13,5 @@ stderr.txt
 .DS_Store
 deadking/maps/backup
 deadking/maps/autosave
+mcdiddy/
+console.log

@@ -64,7 +64,8 @@ int eng_realtime = 0;
 static const Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
 
 
-int main(int argc,char **argv) {
+int main(int argc,char **argv)
+{
   SDL_Event event;
   int i;
   Uint32 idle_start = 0;
@@ -127,7 +128,8 @@ int main(int argc,char **argv) {
 }
 
 
-void toggleconsole() {
+void toggleconsole()
+{
   if( console_open ) {
     console_open = 0;
     SDL_EnableUNICODE(0);
@@ -140,7 +142,8 @@ void toggleconsole() {
 }
 
 
-void advance() {
+void advance()
+{
   int i,j,r;
   char recheck[2][maxobjs]; // for collision rechecking
   findfreeslot(-1); // reset slot finder
@@ -326,16 +329,20 @@ void advance() {
 }
 
 
-void cleanup() {
+void cleanup()
+{
   int i;
+
   IMG_Quit();
   SDLNet_Quit();
   SDL_Quit();
   clearframebuffer();
+
   for(i=0;i<maxframes;i++) {
     free(fr[i].cmds);
     free(fr[i].objs);
   }
+
   free(fr);
   exit(0);
 }
@@ -345,31 +352,39 @@ void cleanup() {
 // frame is "free" as long as it was empty in the previous frame
 // staticly remembers which frames have already been given out this way
 // if a slot in the current frame is filled by other code it may be CORRUPTED BY USING THIS
-int findfreeslot(int frame1) {
+int findfreeslot(int frame1)
+{
   static int last_slot = 0;
   static int last_frame = 0;
   int frame0 = (frame1>0)?(frame1-1):(maxframes-1);
+
   if( last_frame!=frame1 ) {
     last_frame = frame1;
     last_slot = 1;
   }
+
   if( frame1==-1 ) //exit early
     return -1;
+
   while(last_slot<maxobjs) {
     if( fr[frame0].objs[last_slot].type==0 &&
         fr[frame1].objs[last_slot].type==0 ) //empty
       return last_slot++;
     last_slot++;
   }
+
   return -1; //FIXME increase maxobjs instead -- other code will fail until then
 }
 
 // clears all objects and commands out of frame buffer
-void clearframebuffer() {
+void clearframebuffer()
+{
   int i,j;
+
   for(i=0;i<maxframes;i++) {
     fr[i].dirty = 0;
     memset(fr[i].cmds,0,sizeof(FCMD_t)*maxclients);
+
     for(j=0;j<maxobjs;j++) {
       if( fr[i].objs[j].data )
         free( fr[i].objs[j].data );
@@ -381,11 +396,14 @@ void clearframebuffer() {
 
 //get a pointer to a member in 'flexible' mod object -- whee fake polymorphism!
 //FIXME: find a more portable way to do this
-void *flex(OBJ_t *o,Uint32 part) {
+void *flex(OBJ_t *o,Uint32 part)
+{
   size_t offset = 0;
+
   if(!(o->flags & part))
     return NULL;
-  TRY
+
+  do {
     if(    part == OBJF_POS  ) break;
     if( o->flags & OBJF_POS  ) offset += sizeof(V);
     if(    part == OBJF_VEL  ) break;
@@ -395,7 +413,8 @@ void *flex(OBJ_t *o,Uint32 part) {
     if(    part == OBJF_PVEL ) break;
     if( o->flags & OBJF_PVEL ) offset += sizeof(V);
     return NULL;
-  HARDER
+  } while(0);
+
   return (V*)((char *)o->data+offset);
 }
 

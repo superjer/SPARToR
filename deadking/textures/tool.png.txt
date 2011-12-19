@@ -1,0 +1,17 @@
+.default  size 46 24  anchor mid bot
+
+# this is a comment!
+
+.grid  cols 11  pos 0 0
+  tool-null     tool nul
+  tool-solid    tool sol
+  tool-platform tool plat
+  tool-open     tool opn
+  tool-copy     tool copy
+  tool-paste    tool pste
+  tool-object   tool obj
+  tool-erase    tool eras
+  tool-visible  tool vis
+  tool-10
+  tool-11
+.end

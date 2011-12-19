@@ -12,6 +12,7 @@
 
 #include "obj_.h"
 #include "saveload.h"
+#include "sprite.h"
 
 
 static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
@@ -84,14 +85,13 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
   int  upx    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  upy    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  upz    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-  int  value  = (int) unpackbytes(c->data,MAXCMDDATA,&n,1);
-  int  ntex   = (int) unpackbytes(c->data,MAXCMDDATA,&n,1);
+  int  sprnum = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
 
 SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill me!
 
   if( letter!='p' ) { SJC_Write("Unknown edit command!"); return; }
 
-  int is_tool = (ntex == sys_tex[TEX_TOOL].num);
+  int tool_num = (sprites[sprnum].flags & TOOL_MASK);
 
   if( dnx > upx )  { int tmp = upx; upx = dnx; dnx = tmp; } //make so dn is less than up
   if( dny > upy )  { int tmp = upy; upy = dny; dny = tmp; }
@@ -102,48 +102,47 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
     return;
   }
 
-  if( is_tool && value == TOOL_COPY ) { //COPY tool texture
+  if( tool_num == TOOL_COPY ) { //COPY tool texture
     gh->clipboard_x = upx - dnx + 1;
     gh->clipboard_y = upy - dny + 1;
     gh->clipboard_z = upz - dnz + 1;
     gh->clipboard_data = malloc( gh->clipboard_x*gh->clipboard_y*gh->clipboard_z*(sizeof *gh->clipboard_data) ); //FIXME: mem leak
   }
 
-  if( is_tool && value == TOOL_PSTE && !gh->clipboard_data ) { SJC_Write("Clipboard is empty"); return; }
+  if( tool_num == TOOL_PSTE && !gh->clipboard_data ) { SJC_Write("Clipboard is empty"); return; }
 
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
     int pos = k*co->y*co->x + j*co->x + i;
 
-    if( !is_tool ) { // regular tile painting
+    if( !tool_num ) { // regular tile painting
       if( co->dmap[pos].flags & CBF_NULL )
         co->dmap[pos].flags = co->map[pos].flags;
       co->dmap[pos].flags   &= ~CBF_NULL;
       co->dmap[pos].flags   |= CBF_VIS;
-      co->dmap[pos].data[0]  = (char)value;
-      co->dmap[pos].data[1]  = (char)ntex;
+      co->dmap[pos].spr      = sprnum;
       continue;
     }
 
-    // FIXME: WARNING: ALERT: LAME HACK for tool textures
-    switch( value ) {
+    // copy map data to dmap if setting sol, plat or opn
+    if( (tool_num == TOOL_SOL || tool_num == TOOL_PLAT || tool_num == TOOL_OPN) && co->dmap[pos].flags & CBF_NULL )
+      memcpy( co->dmap+pos, co->map+pos, sizeof co->map[0] );
+
+    switch( tool_num ) {
     case TOOL_NUL:
-      co->dmap[pos].flags |=  CBF_NULL;
+      co->dmap[pos].flags |= CBF_NULL;
       break;
 
     case TOOL_SOL:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_PLAT);
-      co->dmap[pos].flags |=  CBF_SOLID;
+      co->dmap[pos].flags |= CBF_SOLID;
       break;
 
     case TOOL_PLAT:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID);
-      co->dmap[pos].flags |=  CBF_PLAT;
+      co->dmap[pos].flags |= CBF_PLAT;
       break;
 
     case TOOL_OPN:
-      if( co->dmap[pos].flags & CBF_NULL ) memcpy( co->dmap[pos].data, co->map[pos].data, 2 );
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID|CBF_PLAT);
       break;
 
@@ -169,15 +168,14 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
       break;
 
     case TOOL_ERAS:
-      co->dmap[pos].flags &= ~CBF_VIS;
+      co->dmap[pos].flags &= ~(CBF_VIS|CBF_NULL);
       break;
 
     case TOOL_VIS:
-      co->map[pos].flags |= CBF_VIS;
+      co->map[pos].flags |= CBF_VIS; // hack for making a loaded-from-file tile visible (format change mess)
       break;
 
     }
-    // END LAME HACK
   }
 }
 

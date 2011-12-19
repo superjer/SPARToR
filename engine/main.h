@@ -15,6 +15,7 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define TRY do{
 #define HARDER }while(0);
+#define SWAP(a,b,T) TRY T SWAP_tmp__ = (a); (a) = (b); (b) = SWAP_tmp__; HARDER
 #define HAS(v,flags) (((v)&(flags)) == (flags))
 
 #define assert(expr) { if(!(expr)) SJC_Write( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
@@ -80,6 +81,7 @@ typedef struct{
 // map structures //
 typedef struct{
   short     flags;
+  int       spr;
   Uint8     data[CBDATASIZE];
 } CB;
 

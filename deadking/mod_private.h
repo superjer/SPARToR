@@ -18,17 +18,6 @@
                                 assert( fr[b].objs[(n)].type == OBJT_ ## t )  ;
 #define FOBJ( n )               fr[b].objs[(n)]
 
-//tool textures
-enum { TOOL_NUL = 0,
-       TOOL_SOL,
-       TOOL_PLAT,
-       TOOL_OPN,
-       TOOL_COPY,
-       TOOL_PSTE,
-       TOOL_OBJ,
-       TOOL_ERAS,
-       TOOL_VIS };
-
 
 //cmd types
 enum { CMDT_NONE = 0,

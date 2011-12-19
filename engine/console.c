@@ -16,7 +16,11 @@
 SJC_t SJC = {{0},{0}};
 
 
-void SJC_Put(char c) {
+static void SJC_Log(const char *prefix,const char *s);
+
+
+void SJC_Put(char c)
+{
   int n;
   if( SJC.buf[0]==NULL || strlen(SJC.buf[0])>=SJC.size[0]-1 ) {
     SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0]+32 );
@@ -30,7 +34,8 @@ void SJC_Put(char c) {
 }
 
 
-void SJC_Write(const char *s,...) {
+void SJC_Write(const char *s,...)
+{
   static char buf[256];
   free(SJC.buf[199]);
   memmove(SJC.buf+2,SJC.buf+1,sizeof(char*)*198);
@@ -46,10 +51,13 @@ void SJC_Write(const char *s,...) {
   SJC.buf[1][0] = (char)1;
   SJC.buf[1][1] = (char)32;
   strcpy(SJC.buf[1]+2,buf);
+
+  SJC_Log("",buf);
 }
 
 
-void SJC_Rub() {
+void SJC_Rub()
+{
   int n;
   if( SJC.buf[0]!=NULL ) {
     n = strlen(SJC.buf[0]);
@@ -59,7 +67,8 @@ void SJC_Rub() {
 }
 
 
-int SJC_Submit() {
+int SJC_Submit()
+{
   if(!SJC.buf[0] || !SJC.size[0])
     return 0;
   free(SJC.buf[199]);
@@ -67,7 +76,18 @@ int SJC_Submit() {
   memmove(SJC.size+1,SJC.size,sizeof(int)*199);
   SJC.size[0] = 0;
   SJC.buf[0] = NULL;
+
+  SJC_Log("> ",SJC.buf[1]);
+
   return 1;
 }
 
+
+static void SJC_Log(const char *prefix,const char *s)
+{
+  static FILE *f = NULL;
+
+  if( !f ) f = fopen("console.log","w");
+  if( f ) fprintf(f,"%s%s\n",prefix,s);
+}
 

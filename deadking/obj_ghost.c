@@ -93,9 +93,18 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
 
   int tool_num = (sprites[sprnum].flags & TOOL_MASK);
 
-  if( dnx > upx )  { int tmp = upx; upx = dnx; dnx = tmp; } //make so dn is less than up
-  if( dny > upy )  { int tmp = upy; upy = dny; dny = tmp; }
-  if( dnz > upz )  { int tmp = upz; upz = dnz; dnz = tmp; }
+  int shx = 0;
+  int shy = 0;
+  int shz = 0;
+
+  int clipx = MAX(gh->clipboard_x,1);
+  int clipy = MAX(gh->clipboard_y,1);
+  int clipz = MAX(gh->clipboard_z,1);
+
+  //make so dn is less than up... also adjust clipboard shift
+  if( dnx > upx )  { SWAP(upx,dnx,int); shx = clipx-(upx-dnx+1)%clipx; }
+  if( dny > upy )  { SWAP(upy,dny,int); shy = clipy-(upy-dny+1)%clipy; }
+  if( dnz > upz )  { SWAP(upz,dnz,int); shz = clipz-(upz-dnz+1)%clipz; }
 
   if( dnx<0 || dny<0 || dnz<0 || upx>=co->x || upy>=co->y || upz>=co->z ) {
     SJC_Write("Paint command out of bounds!");
@@ -103,10 +112,10 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
   }
 
   if( tool_num == TOOL_COPY ) { //COPY tool texture
-    gh->clipboard_x = upx - dnx + 1;
-    gh->clipboard_y = upy - dny + 1;
-    gh->clipboard_z = upz - dnz + 1;
-    gh->clipboard_data = malloc( gh->clipboard_x*gh->clipboard_y*gh->clipboard_z*(sizeof *gh->clipboard_data) ); //FIXME: mem leak
+    gh->clipboard_x = clipx = upx - dnx + 1;
+    gh->clipboard_y = clipy = upy - dny + 1;
+    gh->clipboard_z = clipz = upz - dnz + 1;
+    gh->clipboard_data = malloc( clipx*clipy*clipz*(sizeof *gh->clipboard_data) ); //FIXME: mem leak
   }
 
   if( tool_num == TOOL_PSTE && !gh->clipboard_data ) { SJC_Write("Clipboard is empty"); return; }
@@ -117,9 +126,9 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
     if( !tool_num ) { // regular tile painting
       if( co->dmap[pos].flags & CBF_NULL )
         co->dmap[pos].flags = co->map[pos].flags;
-      co->dmap[pos].flags   &= ~CBF_NULL;
-      co->dmap[pos].flags   |= CBF_VIS;
-      co->dmap[pos].spr      = sprnum;
+      co->dmap[pos].flags &= ~CBF_NULL;
+      co->dmap[pos].flags |= CBF_VIS;
+      co->dmap[pos].spr    = sprnum;
       continue;
     }
 
@@ -148,18 +157,15 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
 
     case TOOL_COPY: {
       CB *cb = ( (co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap ) + pos;
-      gh->clipboard_data[   (k-dnz)*gh->clipboard_y*gh->clipboard_x
-                          + (j-dny)*gh->clipboard_x
-                          + (i-dnx)
-                        ] = *cb;
+      gh->clipboard_data[ (k-dnz)*clipy*clipx + (j-dny)*clipx + (i-dnx) ] = *cb;
       break; }
 
-    case TOOL_PSTE:
-      co->dmap[pos] = gh->clipboard_data[   ((k-dnz)%gh->clipboard_z)*gh->clipboard_y*gh->clipboard_x
-                                          + ((j-dny)%gh->clipboard_y)*gh->clipboard_x
-                                          + ((i-dnx)%gh->clipboard_x)
-                                        ];
-      break;
+    case TOOL_PSTE: {
+      int x = (i-dnx+shx) % clipx;
+      int y = (j-dny+shy) % clipy;
+      int z = (k-dnz+shz) % clipz;
+      co->dmap[pos] =gh->clipboard_data[ x + y*clipx + z*clipy*clipx ];
+      break; }
 
     case TOOL_OBJ:
       pl->pos.x = i*co->bsx;

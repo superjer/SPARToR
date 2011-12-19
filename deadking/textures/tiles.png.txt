@@ -21,4 +21,6 @@
 .end
 
 flower  pos 0 96  size 18 28
-same-flower 0 96 18 28
+dirt1-column1 230 0 46 72 mid bot
+dirt1-column2 230 0 46 72 mid 36
+

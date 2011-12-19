@@ -81,6 +81,7 @@ typedef struct{
 // map structures //
 typedef struct{
   short     flags;
+  int       spr;
   Uint8     data[CBDATASIZE];
 } CB;
 

@@ -75,7 +75,6 @@ int main(int argc,char **argv)
     fr[i].cmds = calloc(sizeof(FCMD_t),maxclients);
     fr[i].objs = calloc(sizeof(OBJ_t),maxobjs);
   }
-  mod_setup(0);
 
   if( SDL_Init(sdlflags)<0 || !SDL_GetVideoInfo() ) { fprintf(stderr,"SDL_Init: %s\n",SDL_GetError());     exit(-1); }
   if( SDLNet_Init()<0 )                             { fprintf(stderr,"SDLNet_Init: %s\n",SDL_GetError());  exit(-2); }
@@ -95,6 +94,8 @@ int main(int argc,char **argv)
   toggleconsole();
   videoinit();
   inputinit();
+
+  mod_setup(0);
 
   //main loop
   for(;;) {

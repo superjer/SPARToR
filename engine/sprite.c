@@ -60,7 +60,7 @@ int load_sprites(int texnum)
   enum { READY, DEFAULT, GRID, GRIDITEM, NOMORE } mode = READY;
   int gridcols = 1; // just to avoid compiler warning
   int gridoffs = 0; // "
-  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32};
+  SPRITE_T defs = {0, NULL, 0, {0, 0, 32, 32}, 16, 32};
   SPRITE_T gdefs;
 
   line_num = 0;
@@ -121,9 +121,12 @@ int load_sprites(int texnum)
       mode = NOMORE;
     } else if( !strcmp(tokens[i],".") ) {
       if( count > 2 )
-        return fail("load_sprites too many tokens after . command");
+        return fail("load_sprites: too many tokens after . command");
       i++;
       gridoffs += (count == 2 ? atoi(tokens[i]) : 1);
+    } else {
+      SJC_Write("Unknown command: %s",tokens[i]);
+      return fail("load_sprites: unknown command");
     }
 
     while( ++i < count ) {
@@ -149,6 +152,7 @@ int load_sprites(int texnum)
         if( count-i < 3 )
           return fail("Expecting 2 args for 'size'");
 
+
         targ->rec.w = atoi(tokens[++i]);
         targ->rec.h = atoi(tokens[++i]);
 
@@ -160,9 +164,28 @@ int load_sprites(int texnum)
 
       } else if( !strcmp(tokens[i],"cols") ) {
         if( count-i < 2 )
-          return fail("Expecting 1 arg for 'cols'");
+          return fail("Expecting column count after 'cols'");
 
         gridcols    = atoi(tokens[++i]);
+
+        if( gridcols < 1 )
+          return fail("Column count must be a number greater than zero");
+
+      } else if( !strcmp(tokens[i],"tool") ) {
+        if( count-i < 2 )
+          return fail("Expecting tool name after 'tool'");
+
+        i++;
+        if(      !strncmp(tokens[i],"nu",2) ) { targ->flags |= TOOL_NUL ; } // undefined behavior if multiple tools are specified for a sprite!
+        else if( !strncmp(tokens[i],"so",2) ) { targ->flags |= TOOL_SOL ; }
+        else if( !strncmp(tokens[i],"pl",2) ) { targ->flags |= TOOL_PLAT; }
+        else if( !strncmp(tokens[i],"op",2) ) { targ->flags |= TOOL_OPN ; }
+        else if( !strncmp(tokens[i],"co",2) ) { targ->flags |= TOOL_COPY; }
+        else if( !strncmp(tokens[i],"ps",2) ) { targ->flags |= TOOL_PSTE; }
+        else if( !strncmp(tokens[i],"ob",2) ) { targ->flags |= TOOL_OBJ ; }
+        else if( !strncmp(tokens[i],"er",2) ) { targ->flags |= TOOL_ERAS; }
+        else if( !strncmp(tokens[i],"vi",2) ) { targ->flags |= TOOL_VIS ; }
+        else return fail("Unknown tool name");
 
       } else {
         SJC_Write("tokens %d: %s",i,tokens[i]);
@@ -191,6 +214,18 @@ void unload_sprites()
 {
 }
 
+
+int find_sprite_by_name(const char *name)
+{
+  // TODO: index this later!
+  size_t i;
+  for( i=0; i<spr_count; i++ )
+    if( !strcmp(name,sprites[i].name) )
+      return (int)i;
+  return 0;
+}
+
+
 static SPRITE_T *new_sprite(int texnum,const char *name)
 {
   if( spr_count == spr_alloc ) {
@@ -203,6 +238,7 @@ static SPRITE_T *new_sprite(int texnum,const char *name)
   sprites[spr_count].texnum = texnum;
   sprites[spr_count].name = malloc(strlen(name)+1);
   strcpy( sprites[spr_count].name, name );
+  sprites[spr_count].flags = 0;
   return sprites + spr_count++;
 }
 

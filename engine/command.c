@@ -147,7 +147,7 @@ void command(const char *s)
         SJC_Write("Invalid sprite number #%d (max %d)",n,spr_count-1);
         break;
       }
-      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\"",n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename);
+      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\" flags %d",n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
       SJC_Write("  pos %d %d  size %d %d  anchor %d %d",sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
     }else if( mod_command(q) ) {
       SJC_Write("Huh?");

@@ -11,6 +11,7 @@
 #include "mod.h"
 #include "main.h"
 #include "saveload.h"
+#include "sprite.h"
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -102,28 +103,28 @@ int save_context(const char *name,int context,int savefr)
 
   // find textures in use
   int i;
-  int in_use[ tex_count ];
-  memset( in_use, 0, tex_count * sizeof *in_use );
+  int in_use[ spr_count ];
+  memset( in_use, -1, sizeof in_use[0] * spr_count );
   for( i=0; i<co->x*co->y*co->z; i++ ) {
-    size_t texn = (co->dmap[i].flags & CBF_NULL) ? co->map[i].data[1] : co->dmap[i].data[1];
+    size_t n = (co->dmap[i].flags & CBF_NULL) ? co->map[i].spr : co->dmap[i].spr;
 
-    if( texn < tex_count )
-      in_use[texn] = 1;
+    if( n < spr_count )
+      in_use[n] = 0; // zero means used, -1 means unusued
     else
-      SJC_Write("Warning: texture %d is in use but is out of bounds (tex_count=%d)",texn,tex_count);
+      SJC_Write("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)",n,spr_count);
   }
 
-  // get count of used textures, and number each one sequentially in in_use[]
+  // get count of used sprites, and number each one sequentially in in_use[]
   int use_count = 0;
-  for( i=0; i<(int)tex_count; i++ )
-    if( in_use[i] )
-      in_use[i] = ++use_count; // inflates in_use values by 1
+  for( i=0; i<(int)spr_count; i++ )
+    if( in_use[i] != -1 )
+      in_use[i] = use_count++;
 
   // start writing the file
   if(0>fprintf( f, "%s %i %i\n", MODNAME, MAPVERSION, use_count )) goto fail;
 
-  for( i=0; i<(int)tex_count; i++ )
-    if( in_use[i] && 0>fprintf( f, "%s\n", textures[i].filename ) ) goto fail;
+  for( i=0; i<(int)spr_count; i++ )
+    if( in_use[i]!=-1 && 0>fprintf( f, "%s\n", sprites[i].name ) ) goto fail;
 
   if(0>fprintf( f, "%i %i %i\n", co->bsx, co->bsy, co->bsz )) goto fail;
 
@@ -132,24 +133,14 @@ int save_context(const char *name,int context,int savefr)
   for( z=0; z<co->z; z++ ) {
     for( y=0; y<co->y; y++ ) {
       for( x=0; x<co->x; x++ ) {
-        int    pos = co->x*co->y*z + co->x*y + x;
-        Uint8 *data;
-        int    flags;
+        int pos = co->x*co->y*z + co->x*y + x;
+        CB *cb = (co->dmap[pos].flags & CBF_NULL) ? co->map+pos : co->dmap+pos;
+        size_t val = in_use[cb->spr];
 
-        if( co->dmap[ pos ].flags & CBF_NULL ) {
-          data  = co->map[  pos ].data;
-          flags = co->map[  pos ].flags;
+        if( cb->flags ) {
+          if(0>fprintf( f, " %c%c%c%c~%.2x", B85_4(val), B85_3(val), B85_2(val), B85_1(val), cb->flags )) goto fail;
         } else {
-          data  = co->dmap[ pos ].data;
-          flags = co->dmap[ pos ].flags;
-        }
-        //                                         v--- in_use values were inflated by 1
-        size_t val = data[0] + ((in_use[data[1]] - 1)<<8);
-
-        if( flags ) {
-          if(0>fprintf( f, " %c%c%c%c~%.2x", B85_4(val), B85_3(val), B85_2(val), B85_1(val), flags )) goto fail;
-        } else {
-          if(0>fprintf( f, " %c%c%c%c   "  , B85_4(val), B85_3(val), B85_2(val), B85_1(val)        )) goto fail;
+          if(0>fprintf( f, " %c%c%c%c   "  , B85_4(val), B85_3(val), B85_2(val), B85_1(val)            )) goto fail;
         }
       }
       if(0>fprintf( f, "\n" )) goto fail;
@@ -191,18 +182,18 @@ int load_context(const char *name,int context,int loadfr)
 
   char modname[256];
   int version = 0;
-  int ntex = 0;
-  if( 3 != fscanf(f,"%100s %d %d\n",modname,&version,&ntex) )     return fail(f,"failed to read line 1");
+  int nspr = 0;
+  if( 3 != fscanf(f,"%100s %d %d\n",modname,&version,&nspr) )     return fail(f,"failed to read line 1");
   if( 0 != strcmp(modname,MODNAME) )                              return fail(f,"MODNAME mismatch");
   if( version != MAPVERSION )                                     return fail(f,"MAPVERSION mismatch");
-  if( ntex<1 || ntex>255 )                                        return fail(f,"invalid texture count");
+  if( nspr<1 || nspr>65535 )                                      return fail(f,"invalid sprite count");
 
-  char texnames[ntex][100];
-  int texnumbers[ntex];
-  memset( texnumbers, 0, ntex * sizeof *texnumbers );
-  for( i=0; i<ntex; i++ ) {
-    if( 1 != fscanf(f,"%100s\n",texnames[i]) )                    return fail(f,"error reading texture name");
-    texnumbers[i] = make_sure_texture_is_loaded(texnames[i]);
+  char sprnames[nspr][100];
+  int sprnumbers[nspr];
+  memset( sprnumbers, 0, nspr * sizeof *sprnumbers );
+  for( i=0; i<nspr; i++ ) {
+    if( 1 != fscanf(f,"%100s\n",sprnames[i]) )                    return fail(f,"error reading sprite name");
+    sprnumbers[i] = find_sprite_by_name(sprnames[i]);
   }
 
   int bsx,bsy,bsz;
@@ -217,29 +208,25 @@ int load_context(const char *name,int context,int loadfr)
   const char *error = NULL;
   CONTEXT_t tmp_co;
 
-  if( (error = create_context(&tmp_co,NULL,x,y,z)) )                return fail(f,error);
+  if( (error = create_context(&tmp_co,NULL,x,y,z)) )              return fail(f,error);
 
   CB *map  = tmp_co.map;
   CB *dmap = tmp_co.dmap;
   int volume = x*y*z;
 
   for( i=0; i<volume; i++ ) {
-    Uint32  tile, flags = 0;
-    int     tex;
-    Uint32  b85num;
+    Uint32  flags = 0;
+    int     n;
     char    b85str[6] = {0};
 
     if( 1 > fscanf(f," %5[^ vwxyz{|}~]~%x ",b85str,&flags) ) //   return fail(f,"failed to read block data");
-      b85num = 0;
+      n = 0;
     else
-      b85num = from_b85(b85str);
+      n = from_b85(b85str);
 
-    tile = (Uint8)b85num;
-    tex  = (Uint8)(b85num>>8);
-    if( tex >= ntex ) SJC_Write("tex is too high! (%d/%d)",tex,ntex);
+    if( n >= nspr ) SJC_Write("sprite number is too high! (%d/%d)",n,nspr);
 
-    map[ i].data[0] = tile;
-    map[ i].data[1] = (tex < ntex ? texnumbers[tex] : 0); // avoid overread if tex is too high
+    map[ i].spr     = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
     map[ i].flags   = flags;
     dmap[i].flags   = CBF_NULL;
   }

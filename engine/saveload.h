@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define MAPVERSION 1
+#define MAPVERSION 2
 
 
 int save_context(const char *name,int context,int savefr);

@@ -31,6 +31,7 @@ extern size_t     spr_count;
 
 int load_sprites(int texnum);
 void unload_sprites();
+int find_sprite_by_name(const char *name);
 
 
 #endif

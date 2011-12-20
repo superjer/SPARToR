@@ -525,24 +525,34 @@ void mod_postdraw(Uint32 vidfr)
   int dny = downy>=0 ? downy : upy;
   int dnz = downz>=0 ? downz : upz;
 
-  if( dnx > upx )  { int tmp = upx; upx = dnx; dnx = tmp; } //make so dn is less than up
-  if( dny > upy )  { int tmp = upy; upy = dny; dny = tmp; }
-  if( dnz > upz )  { int tmp = upz; upz = dnz; dnz = tmp; }
+  int shx = 0;
+  int shy = 0;
+  int shz = 0;
+
+  int clipx = MAX(gh->clipboard_x,1);
+  int clipy = MAX(gh->clipboard_y,1);
+  int clipz = MAX(gh->clipboard_z,1);
+
+  //make so dn is less than up... also adjust clipboard shift
+  if( dnx > upx )  { SWAP(upx,dnx,int); shx = clipx-(upx-dnx+1)%clipx; }
+  if( dny > upy )  { SWAP(upy,dny,int); shy = clipy-(upy-dny+1)%clipy; }
+  if( dnz > upz )  { SWAP(upz,dnz,int); shz = clipz-(upz-dnz+1)%clipz; }
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1.0f,1.0f,1.0f,fabsf((float)(vidfr%30)-15.0f)/15.0f);
-  SJGL_SetTex( mytex );
 
-  SPRITE_T *spr = sprites + myspr;
+  SPRITE_T *spr  = sprites + myspr;
+  SPRITE_T *dspr = spr;
 
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
-    if( (spr->flags & TOOL_MASK) == TOOL_PSTE && gh && gh->clipboard_data && (upy-dny||upx-dnx) )
-      spr = sprites + gh->clipboard_data[   ((k-dnz)%gh->clipboard_z)*gh->clipboard_y*gh->clipboard_x
-                                          + ((j-dny)%gh->clipboard_y)*gh->clipboard_x
-                                          + ((i-dnx)%gh->clipboard_x)
-                                        ].spr;
+    if( (spr->flags & TOOL_MASK) == TOOL_PSTE && gh && gh->clipboard_data && (upz-dnz||upy-dny||upx-dnx) ) {
+      int x = (i-dnx+shx) % clipx;
+      int y = (j-dny+shy) % clipy;
+      int z = (k-dnz+shz) % clipz;
+      dspr = sprites + gh->clipboard_data[ x + y*clipx + z*clipy*clipx ].spr;
+    }
                  
-    draw_sprite_on_tile( spr, co, i, 0, k );
+    draw_sprite_on_tile( dspr, co, i, 0, k );
   }
 
   glPopAttrib();

@@ -214,6 +214,18 @@ void unload_sprites()
 {
 }
 
+
+int find_sprite_by_name(const char *name)
+{
+  // TODO: index this later!
+  size_t i;
+  for( i=0; i<spr_count; i++ )
+    if( !strcmp(name,sprites[i].name) )
+      return (int)i;
+  return 0;
+}
+
+
 static SPRITE_T *new_sprite(int texnum,const char *name)
 {
   if( spr_count == spr_alloc ) {

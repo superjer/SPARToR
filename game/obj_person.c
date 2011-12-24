@@ -66,8 +66,6 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   int y = d - 43;
   int r = d + 12;
 
-  fprintf(stderr,"player: %d\n",r);
-
   if( flip ) {
     rect.x += rect.w;
     rect.w *= -1;

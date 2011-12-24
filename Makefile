@@ -5,7 +5,6 @@ UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Same for all platforms, probably
 CC = gcc
-MODNAME = deadking
 OBJS = engine/main.o \
        engine/font.o \
        engine/console.o \
@@ -22,15 +21,15 @@ OBJS = engine/main.o \
        engine/sjglob.o \
        engine/mt19937ar/mt19937ar.o
 FLAGS = --std=c99 -g -Wall -Wextra -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
-INC = -Iengine -I$(MODNAME)
+INC = -Iengine -Igame
 
 # Only useful on certain platforms
 OBJSRES =
 WINDRES =
 POSTCC =
 
-# Mod stuff
-include $(MODNAME)/Makefile-include
+# Game / Mod stuff
+include game/Makefile-include
 
 
 ifeq ($(UNAME),Linux)
@@ -58,7 +57,7 @@ ifeq ($(UNAME),Darwin)
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))
 	EXE_NAME = spartor_win32.exe
-	OBJSRES = $(MODNAME)/icon.o
+	OBJSRES = game/icon.o
 	WINDRES = windres
 	FLAGS += -mwindows
 	LIBS = -L/local/lib -Lplatforms/win/glew-1.5.8/lib \

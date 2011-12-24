@@ -5,7 +5,7 @@
 
 #define NATIVEW    480
 #define NATIVEH    300
-#define MODNAME    "deadking"
+#define GAMENAME   "deadking"
 #define CBDATASIZE 4     //context block (CB) payload size
 #define MAXCMDDATA 64    //maximum size of extra command data
 

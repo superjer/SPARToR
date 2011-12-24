@@ -1,8 +1,8 @@
 //
 // map header format:
-//  modname mapversion texturefilecount
-//  texturefilepath
-//  texturefilepath
+//  gamename mapversion spritecount
+//  spritename
+//  spritename
 //  ...
 //  blocksizeX blocksizeY blocksizeZ
 //  dimensionX dimensionY dimensionZ
@@ -69,8 +69,8 @@ int save_context(const char *name,int context,int savefr)
   char  bakdir[256];
   char *bakfile;
 
-  snprintf( path,   256, "%s/maps/%s.txt", MODNAME, name );
-  snprintf( bakdir, 256, "%s/maps/backup", MODNAME       );
+  snprintf( path,   256, "game/maps/%s.txt", name );
+  snprintf( bakdir, 256, "game/maps/backup" );
 
   // attempt to backup existing file by moving it to backup directory
   if( !(bakfile = sjtempnam(bakdir,name,".txt")) ) {
@@ -121,7 +121,7 @@ int save_context(const char *name,int context,int savefr)
       in_use[i] = use_count++;
 
   // start writing the file
-  if(0>fprintf( f, "%s %i %i\n", MODNAME, MAPVERSION, use_count )) goto fail;
+  if(0>fprintf( f, "%s %i %i\n", GAMENAME, MAPVERSION, use_count )) goto fail;
 
   for( i=0; i<(int)spr_count; i++ )
     if( in_use[i]!=-1 && 0>fprintf( f, "%s\n", sprites[i].name ) ) goto fail;
@@ -172,7 +172,7 @@ int load_context(const char *name,int context,int loadfr)
   char path[256];
   int i;
 
-  snprintf( path, 256, "%s/maps/%s.txt", MODNAME, name );
+  snprintf( path, 256, "game/maps/%s.txt", name );
 
   FILE *f = fopen( path, "r" );
   if( !f ) {
@@ -180,11 +180,11 @@ int load_context(const char *name,int context,int loadfr)
     return -1;
   }
 
-  char modname[256];
+  char gamename[256];
   int version = 0;
   int nspr = 0;
-  if( 3 != fscanf(f,"%100s %d %d\n",modname,&version,&nspr) )     return fail(f,"failed to read line 1");
-  if( 0 != strcmp(modname,MODNAME) )                              return fail(f,"MODNAME mismatch");
+  if( 3 != fscanf(f,"%100s %d %d\n",gamename,&version,&nspr) )    return fail(f,"failed to read line 1");
+  if( 0 != strcmp(gamename,GAMENAME) )                            return fail(f,"GAMENAME mismatch");
   if( version != MAPVERSION )                                     return fail(f,"MAPVERSION mismatch");
   if( nspr<1 || nspr>65535 )                                      return fail(f,"invalid sprite count");
 

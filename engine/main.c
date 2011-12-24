@@ -81,7 +81,7 @@ int main(int argc,char **argv)
   if( IMG_Init(IMG_INIT_PNG)!=IMG_INIT_PNG )        { fprintf(stderr,"IMG_Init: %s\n",SDL_GetError());     exit(-3); }
 
   SDL_WM_SetCaption("SPARToR " VERSION,NULL);
-  SDL_Surface *iconsurf = IMG_Load(MODNAME "/images/icon.png");
+  SDL_Surface *iconsurf = IMG_Load("game/images/icon.png");
   SDL_WM_SetIcon(iconsurf,NULL);
   SDL_FreeSurface(iconsurf);
 

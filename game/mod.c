@@ -412,7 +412,7 @@ void mod_loadsurfs(int quit)
 
   if( quit ) return;
 
-  SJGLOB_T *files = SJglob( MODNAME "/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
+  SJGLOB_T *files = SJglob( "game/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
 
   for( i=0; i<files->gl_pathc; i++ )
     make_sure_texture_is_loaded( files->gl_pathv[i] );
@@ -672,9 +672,6 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   int c = TILE2NATIVE_X(co,x,y,z);
   int d = TILE2NATIVE_Y(co,x,y,z);
   int r = d + co->tileuh / 2;
-
-  if( x==10 && z==3 )
-    fprintf(stderr,"tile: %d\n",r);
 
   // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
   // which always in the southernmost corner

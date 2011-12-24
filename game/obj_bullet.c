@@ -15,8 +15,8 @@
 void obj_bullet_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   BULLET_t *bu = o->data;
-  int g = POINT2NATIVE_X(bu->pos);
-  int h = POINT2NATIVE_Y(bu->pos);
+  int g = POINT2NATIVE_X(&bu->pos);
+  int h = POINT2NATIVE_Y(&bu->pos);
   SJGL_SetTex( sys_tex[TEX_PLAYER].num );
   SJGL_Blit( &(REC){144,150,4,4}, g-2, h-2, NATIVEH );
 }

@@ -360,13 +360,16 @@ int mod_command(char *q)
 {
   if( q==NULL ){
     ;
+
   }else if( strcmp(q,"edit")==0 ){
     editmode = editmode ? 0 : 1;
     v_center = editmode ? 0 : 1;
     return 0;
+
   }else if( strcmp(q,"model")==0 ){
     setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
     return 0;
+
   }else if( strcmp(q,"bounds")==0 ){
     size_t n = 0;
     int x = safe_atoi(strtok(NULL," "));
@@ -387,6 +390,17 @@ int mod_command(char *q)
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
     magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    putcmd(0,0,0);
+    return 0;
+
+  }else if( strcmp(q,"orthographic")==0 || strcmp(q,"dimetric")==0 ){
+    size_t n = 0;
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,q[0],&n,1);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON;
     putcmd(0,0,0);
     return 0;
   }
@@ -425,6 +439,11 @@ void mod_predraw(Uint32 vidfr)
 
   //draw context
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data; // FIXME: is mycontext always set here?
+
+  if( co->projection == ORTHOGRAPHIC )
+    PROJECTION_MODE(ORTHO);
+  else
+    PROJECTION_MODE(DIMETRIC);
 
   for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ ) {
     int pos = co->x*co->y*k + co->x*j + i;

@@ -15,8 +15,8 @@
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PERSON_t *pe = o->data;
-  int c = POINT2NATIVE_X(pe->pos);
-  int d = POINT2NATIVE_Y(pe->pos);
+  int c = POINT2NATIVE_X(&pe->pos);
+  int d = POINT2NATIVE_Y(&pe->pos);
   SJGL_SetTex( sys_tex[TEX_PERSON].num );
   REC rect;
   int flip = 0;

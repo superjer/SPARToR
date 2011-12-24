@@ -44,33 +44,49 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   FCMD_t *c = fr[b].cmds + gh->client;
-  switch( c->cmd ) {
-    case CMDT_0CON: { //FIXME: edit rights!
-      size_t n = 0;
-      char letter = (char)unpackbytes(c->data,MAXCMDDATA,&n,1);
-      int  x      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-      int  y      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-      int  z      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
 
-      if( letter!='b' ) { SJC_Write("Unknown edit command!"); break; }
+  switch( c->cmd ) {
+  case CMDT_0CON: { //FIXME: edit rights!
+    size_t n = 0;
+    char letter = (char)unpackbytes(c->data,MAXCMDDATA,&n,1);
+
+    switch( letter ) {
+    case 'o': // orthographic
+      co->projection = ORTHOGRAPHIC;
+      SJC_Write("Setting context projection to ORTHOGRAPHIC");
+      break;
+
+    case 'd': // dimetric
+      co->projection = DIMETRIC;
+      SJC_Write("Setting context projection to DIMETRIC");
+      break;
+
+    case 'b': { // bounds
+      int x = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      int y = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      int z = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
 
       CONTEXT_t tmp;
-
       const char *error = create_context(&tmp, co, x, y, z);
 
-      if( error ) {
+      if( error )
         SJC_Write("%s", error);
-        break;
-      }
+      else
+        memcpy(co, &tmp, sizeof tmp);
 
-      memcpy(co, &tmp, sizeof tmp);
+      break; }
 
-      // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
+    default:
+      SJC_Write("Unknown edit command!");
       break;
     }
-    case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
-      ghost_paint( c, gh, pl, co );
-      break;
+
+    // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
+    break; }
+
+  case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
+    ghost_paint( c, gh, pl, co );
+    break;
   }
 }
 

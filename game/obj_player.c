@@ -21,8 +21,8 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   PLAYER_t *pl = o->data;
   int gunshift = pl->goingu ? 96 : pl->goingd ? 48 : 0;
   if( pl->goingu==pl->goingd ) gunshift = 0;
-  int c = POINT2NATIVE_X(pl->pos) - 10;
-  int d = POINT2NATIVE_Y(pl->pos) - 15;
+  int c = POINT2NATIVE_X(&pl->pos) - 10;
+  int d = POINT2NATIVE_Y(&pl->pos) - 15;
   int r = d + 30;
   int ushift = (pl->goingd>0 ? 40 : 0) + (pl->turning ? 80 : (pl->facingr ? 0 : 20 ));
 
@@ -51,8 +51,8 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
   // draw shadow
   V shadow = (V){pl->pos.x, co->bsy*co->y, pl->pos.z};
-  int sc = POINT2NATIVE_X(shadow) - 10;
-  int sd = POINT2NATIVE_Y(shadow) - 5;
+  int sc = POINT2NATIVE_X(&shadow) - 10;
+  int sd = POINT2NATIVE_Y(&shadow) - 5;
   SJGL_SetTex( sys_tex[TEX_PERSON].num );
   SJGL_Blit( &(REC){0,246,20,10}, sc, sd, r-1 );
 }
@@ -93,8 +93,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   gh->vel.z = newme->pos.z - gh->pos.z;
 
   if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) { //local client match
-    v_camx = POINT2NATIVE_X(gh->pos);
-    v_camy = POINT2NATIVE_Y(gh->pos);
+    v_camx = POINT2NATIVE_X(&gh->pos);
+    v_camy = POINT2NATIVE_Y(&gh->pos);
     if( setmodel>-1 ) { //FIXME -- just for fun, will not sync!
       newme->model = setmodel;
       setmodel = -1;

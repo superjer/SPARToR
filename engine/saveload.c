@@ -202,8 +202,8 @@ int load_context(const char *name,int context,int loadfr)
   int proj;
   int tileuw,tileuh;
   if( 3 != fscanf(f,"%80s %d %d\n",buf,&tileuw,&tileuh) )         return fail(f,"failed to read context projection");
-  if(      !strcmp(buf,"ORTHOGRAPHIC") ) proj = DIMETRIC;
-  else if( !strcmp(buf,"DIMETRIC")     ) proj = ORTHOGRAPHIC;
+  if(      !strcmp(buf,"ORTHOGRAPHIC") ) proj = ORTHOGRAPHIC;
+  else if( !strcmp(buf,"DIMETRIC")     ) proj = DIMETRIC;
   else                                                            return fail(f,"unknown projection mode");
   if( tileuw<1 || tileuw>1024 )                                   return fail(f,"tileuw is out of range");
   if( tileuh<1 || tileuh>1024 )                                   return fail(f,"tileuh is out of range");

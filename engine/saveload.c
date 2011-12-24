@@ -126,6 +126,9 @@ int save_context(const char *name,int context,int savefr)
   for( i=0; i<(int)spr_count; i++ )
     if( in_use[i]!=-1 && 0>fprintf( f, "%s\n", sprites[i].name ) ) goto fail;
 
+  const char *proj = (co->projection == DIMETRIC ? "DIMETRIC" : "ORTHOGRAPHIC");
+  if(0>fprintf( f, "%s %i %i\n", proj, co->tileuw, co->tileuh )) goto fail;
+
   if(0>fprintf( f, "%i %i %i\n", co->bsx, co->bsy, co->bsz )) goto fail;
 
   if(0>fprintf( f, "%i %i %i\n", co->x,   co->y,   co->z   )) goto fail;
@@ -180,11 +183,11 @@ int load_context(const char *name,int context,int loadfr)
     return -1;
   }
 
-  char gamename[256];
+  char buf[256];
   int version = 0;
   int nspr = 0;
-  if( 3 != fscanf(f,"%100s %d %d\n",gamename,&version,&nspr) )    return fail(f,"failed to read line 1");
-  if( 0 != strcmp(gamename,GAMENAME) )                            return fail(f,"GAMENAME mismatch");
+  if( 3 != fscanf(f,"%100s %d %d\n",buf,&version,&nspr) )         return fail(f,"failed to read line 1");
+  if( 0 != strcmp(buf,GAMENAME) )                                 return fail(f,"GAMENAME mismatch");
   if( version != MAPVERSION )                                     return fail(f,"MAPVERSION mismatch");
   if( nspr<1 || nspr>65535 )                                      return fail(f,"invalid sprite count");
 
@@ -195,6 +198,15 @@ int load_context(const char *name,int context,int loadfr)
     if( 1 != fscanf(f,"%100s\n",sprnames[i]) )                    return fail(f,"error reading sprite name");
     sprnumbers[i] = find_sprite_by_name(sprnames[i]);
   }
+
+  int proj;
+  int tileuw,tileuh;
+  if( 3 != fscanf(f,"%80s %d %d\n",buf,&tileuw,&tileuh) )         return fail(f,"failed to read context projection");
+  if(      !strcmp(buf,"ORTHOGRAPHIC") ) proj = DIMETRIC;
+  else if( !strcmp(buf,"DIMETRIC")     ) proj = ORTHOGRAPHIC;
+  else                                                            return fail(f,"unknown projection mode");
+  if( tileuw<1 || tileuw>1024 )                                   return fail(f,"tileuw is out of range");
+  if( tileuh<1 || tileuh>1024 )                                   return fail(f,"tileuh is out of range");
 
   int bsx,bsy,bsz;
   if( 3 != fscanf(f,"%d %d %d\n",&bsx,&bsy,&bsz) )                return fail(f,"failed to read context size"); 
@@ -234,6 +246,9 @@ int load_context(const char *name,int context,int loadfr)
   // everything ok? swap it in
   loadfr = loadfr%maxframes;
   CONTEXT_t *co = fr[loadfr].objs[context].data;
+  co->projection = proj;
+  co->tileuw = tileuw;
+  co->tileuh = tileuh;
   co->bsx = bsx;
   co->bsy = bsy;
   co->bsz = bsz;

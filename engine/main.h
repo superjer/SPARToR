@@ -45,6 +45,10 @@
 #define CBF_NULL  (1<< 2) //(dmap only) delta data not present
 #define CBF_VIS   (1<< 3) //is visible
 
+//Projection mode for contexts
+#define ORTHOGRAPHIC 1
+#define DIMETRIC     2
+
 
 typedef struct{
   float     x,y,z;
@@ -88,10 +92,8 @@ typedef struct{
 typedef struct{
   int       bsx,bsy,bsz;   // block size
   int       x,y,z;         // context dimensions
-  int       tilex,tiley;   // tile textures' pitch
-  int       tilew,tileh;   // tile graphics width/height
   int       tileuw,tileuh; // tile graphics "used" width/height; includes spacing or overlap
-  int       isometric;     // whether to be displayed isometric
+  int       projection;    // whether to be displayed ORTHOGRAPHIC or DIMETRIC
   CB       *map;           // block data
   CB       *dmap;          // delta block data
 } CONTEXT_t;

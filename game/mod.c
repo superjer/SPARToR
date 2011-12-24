@@ -135,13 +135,9 @@ void mod_setup(Uint32 setupfr)
   CONTEXT_t *co = fr[setupfr].objs[1].data;
   co->bsx = co->bsy = co->bsz = 16;
   co->x   = co->y   = co->z   = 15;
-  co->tilex = TILEX;
-  co->tiley = TILEY;
-  co->tilew = 46;
-  co->tileh = 24;
   co->tileuw = 48;
   co->tileuh = 24;
-  co->isometric = 1;
+  co->projection = DIMETRIC;
   int volume = co->x * co->y * co->z;
   co->map  = hack_map  = malloc( (sizeof *co->map ) * volume ); //FIXME remove hack
   co->dmap = hack_dmap = malloc( (sizeof *co->dmap) * volume );

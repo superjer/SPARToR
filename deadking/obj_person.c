@@ -64,16 +64,19 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
   int x = c - rect.w/2;
   int y = d - 43;
+  int r = d + 12;
+
+  fprintf(stderr,"player: %d\n",r);
 
   if( flip ) {
     rect.x += rect.w;
     rect.w *= -1;
   }
 
-  SJGL_Blit( &rect, x, y, d );
+  SJGL_Blit( &rect, x, y, r );
 
   // draw shadow
-  SJGL_Blit( &(REC){0 ,502,20,10}, c-10, d-5 , d-1 );
+  SJGL_Blit( &(REC){0 ,502,20,10}, c-10, d-5 , r-1 );
 }
 
 void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

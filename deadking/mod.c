@@ -199,6 +199,7 @@ void mod_recvobj(OBJ_t *o)
   }
 }
 
+
 void mod_setvideo(int w,int h)
 {
   mod_loadsurfs(0);
@@ -431,21 +432,15 @@ void mod_predraw(Uint32 vidfr)
 
   for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ ) {
     int pos = co->x*co->y*k + co->x*j + i;
-    SPRITE_T *spr;
 
     if( showlayer && ylayer!=j )
       continue;
 
-    if( co->dmap[ pos ].flags & CBF_NULL ) {
-      if( !(co->map[ pos ].flags & CBF_VIS) )
-        continue;
-      spr = sprites + co->map[ pos ].spr;
-    } else {
-      if( !(co->dmap[ pos ].flags & CBF_VIS) )
-        continue;
-      spr = sprites + co->dmap[ pos ].spr;
-    }
+    CB *cb = (co->dmap[ pos ].flags & CBF_NULL) ? co->map + pos : co->dmap + pos;
+    if( !(cb->flags & CBF_VIS) )
+      continue;
 
+    SPRITE_T *spr = sprites + cb->spr;
     draw_sprite_on_tile( spr, co, i, 0, k );
   }
 }
@@ -674,12 +669,16 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
 
   SJGL_SetTex( spr->texnum );
 
+  int c = TILE2NATIVE_X(co,x,y,z);
+  int d = TILE2NATIVE_Y(co,x,y,z);
+  int r = d + co->tileuh / 2;
+
+  if( x==10 && z==3 )
+    fprintf(stderr,"tile: %d\n",r);
+
   // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
   // which always in the southernmost corner
-  SJGL_Blit( &spr->rec,
-             TILE2NATIVE_X(co,x,y,z) + 0          - spr->ancx,
-             TILE2NATIVE_Y(co,x,y,z) + co->tileuh - spr->ancy,
-             0 );
+  SJGL_Blit( &spr->rec, c - spr->ancx, d + co->tileuh - spr->ancy, r );
 }
 
 

@@ -191,8 +191,8 @@ void render()
     glColor4f(1,1,1,1);
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,OBJF_POS);
-      V *hull = flex(o,OBJF_HULL);
+      V *pos  = flex(o,pos );
+      V *hull = flex(o,hull);
       if( pos && hull ) {
         REC rect = (REC){0, 0, hull[1].x-hull[0].x, hull[1].y-hull[0].y};
         SJGL_Blit( &rect, pos->x+hull[0].x, pos->y+hull[0].y, 0 );
@@ -203,7 +203,7 @@ void render()
 
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,OBJF_POS);
+      V *pos  = flex(o,pos);
       if( pos ) {
         sprintf(buf,"%d",i);
         SJF_DrawText(pos->x, pos->y, buf);

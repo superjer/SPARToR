@@ -3,16 +3,10 @@
 #define DEADKING_MOD_H_
 
 
-#define NATIVEW    480
-#define NATIVEH    300
-#define GAMENAME   "deadking"
-#define CBDATASIZE 4     //context block (CB) payload size
-#define MAXCMDDATA 64    //maximum size of extra command data
-
-
 #include <GL/glew.h>
 #include "SDL.h"
 #include "SDL_net.h"
+#include "mod_constants.h"
 #include "main.h"
 #include "console.h"
 #include "net.h"
@@ -23,17 +17,6 @@
 #include "mod_private.h"
 #include "obj_.h"
 #include <math.h>
-
-
-#define COUNTOF(ident) ((sizeof (ident)) / (sizeof *(ident)))
-
-
-#define TEX_TOOL   0
-#define TEX_PLAYER 1
-#define TEX_WORLD  2
-#define TEX_AMIGO  3
-#define TEX_PERSON 4
-#define TEX_HUD    5
 
 
 extern SYS_TEX_T  sys_tex[];

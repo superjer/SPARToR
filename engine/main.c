@@ -64,11 +64,35 @@ int eng_realtime = 0;
 static const Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
 
 
+static void init_flexers()
+{
+  memset(flexer,0,sizeof flexer);
+#define EXPOSE(T,N,A) flexer[TOKEN_PASTE(OBJT_,TYPE)].N=(ptrdiff_t)&((TOKEN_PASTE(TYPE,_t) *)0)->N;
+#define HIDE(X)
+#define STRUCT() flexer[TOKEN_PASTE(OBJT_,TYPE)].name = STRINGIFY(TYPE);
+#define ENDSTRUCT(TYPE)
+#include "engine_structs.h"
+#include "game_structs.h"
+#undef EXPOSE
+#undef HIDE
+#undef STRUCT
+#undef ENDSTRUCT
+}
+
+
 int main(int argc,char **argv)
 {
   SDL_Event event;
   int i;
   Uint32 idle_start = 0;
+
+  init_flexers();
+
+  // FIXME: remove this, it is just for debugging
+  for( i=0; i<OBJT_MAX; i++ )
+    fprintf(stderr,"flexer %d \"%s\":  pos %d  vel %d  hull %d  pvel %d  model %d\n", i, flexer[i].name,
+                   flexer[i].pos, flexer[i].vel, flexer[i].hull, flexer[i].pvel, flexer[i].model);
+  // ENDFIXME
 
   fr = calloc(sizeof(FRAME_t),maxframes);
   for(i=0;i<maxframes;i++) {
@@ -163,20 +187,20 @@ void advance()
       OBJ_t *oa = fr[a].objs+i;
       OBJ_t *ob = fr[b].objs+i;
       free(ob->data);
-      memset(ob,0,sizeof(*ob));
+      memset(ob,0,sizeof *ob);
 
       if(oa->type && !(oa->flags&OBJF_DEL)) {
-        memcpy(ob,oa,sizeof(*ob));
+        memcpy(ob,oa,sizeof *ob);
         ob->data = malloc(oa->size);
         memcpy(ob->data,oa->data,oa->size);
       }
 
       if( HAS(ob->flags,OBJF_POS|OBJF_VEL) && ob->context ) {
         CONTEXT_t *co = fr[b].objs[ob->context].data;
-        V *pos  = flex(ob,OBJF_POS);
-        V *vel  = flex(ob,OBJF_VEL);
-        V *pvel = (ob->flags & OBJF_PVEL) ? flex(ob,OBJF_PVEL) : &(V[2]){{0,0,0},{0,0,0}};
-        V *hull = (ob->flags & OBJF_HULL) ? flex(ob,OBJF_HULL) : &(V[2]){{0,0,0},{0,0,0}};
+        V *pos  = flex(ob,pos);
+        V *vel  = flex(ob,vel);
+        V *pvel = (ob->flags & OBJF_PVEL) ? flex(ob,pvel) : &(V[2]){{0,0,0},{0,0,0}};
+        V *hull = (ob->flags & OBJF_HULL) ? flex(ob,hull) : &(V[2]){{0,0,0},{0,0,0}};
 
         pos->x += vel->x + pvel->x;  //apply velocity
         pos->y += vel->y + pvel->y;
@@ -223,12 +247,12 @@ void advance()
           continue;
 
         OBJ_t *oldme = fr[a].objs+i, *newme = fr[b].objs+i;
-        V *oldmepos  = flex(oldme,OBJF_POS );
-        V *newmepos  = flex(newme,OBJF_POS );
-        V *oldmevel  = flex(oldme,OBJF_VEL );
-        V *newmevel  = flex(newme,OBJF_VEL );
-        V *oldmehull = flex(oldme,OBJF_HULL);
-        V *newmehull = flex(newme,OBJF_HULL);
+        V *oldmepos  = flex(oldme,pos );
+        V *newmepos  = flex(newme,pos );
+        V *oldmevel  = flex(oldme,vel );
+        V *newmevel  = flex(newme,vel );
+        V *oldmehull = flex(oldme,hull);
+        V *newmehull = flex(newme,hull);
 
         if( newme->context && (newme->flags & OBJF_CLIP) ) { //check CBs (context blocks (map tiles))
           CONTEXT_t *co = fr[b].objs[newme->context].data;
@@ -289,11 +313,11 @@ void advance()
             continue;
 
           OBJ_t *oldyou = fr[a].objs+j, *newyou = fr[b].objs+j;
-          V *oldyoupos  = flex(oldyou,OBJF_POS );
-          V *newyoupos  = flex(newyou,OBJF_POS );
-          V *newyouvel  = flex(newyou,OBJF_VEL );
-          V *oldyouhull = flex(oldyou,OBJF_HULL);
-          V *newyouhull = flex(newyou,OBJF_HULL);
+          V *oldyoupos  = flex(oldyou,pos );
+          V *newyoupos  = flex(newyou,pos );
+          V *newyouvel  = flex(newyou,vel );
+          V *oldyouhull = flex(oldyou,hull);
+          V *newyouhull = flex(newyou,hull);
 
           if( newmepos->x+newmehull[0].x >= newyoupos->x+newyouhull[1].x ||   //we dont collide NOW
               newmepos->x+newmehull[1].x <= newyoupos->x+newyouhull[0].x ||
@@ -393,32 +417,6 @@ void clearframebuffer()
     }
   }
 }
-
-
-//get a pointer to a member in 'flexible' mod object -- whee fake polymorphism!
-//FIXME: find a more portable way to do this
-void *flex(OBJ_t *o,Uint32 part)
-{
-  size_t offset = 0;
-
-  if(!(o->flags & part))
-    return NULL;
-
-  do {
-    if(    part == OBJF_POS  ) break;
-    if( o->flags & OBJF_POS  ) offset += sizeof(V);
-    if(    part == OBJF_VEL  ) break;
-    if( o->flags & OBJF_VEL  ) offset += sizeof(V);
-    if(    part == OBJF_HULL ) break;
-    if( o->flags & OBJF_HULL ) offset += sizeof(V[2]);
-    if(    part == OBJF_PVEL ) break;
-    if( o->flags & OBJF_PVEL ) offset += sizeof(V);
-    return NULL;
-  } while(0);
-
-  return (V*)((char *)o->data+offset);
-}
-
 
 
 //frame setters

@@ -48,20 +48,6 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
 int numinputnames = COUNTOF(inputnames);
 
 
-char objectnames[][16] =
-     { "empty",
-       "context",
-       "mother",
-       "ghost",
-       "dummy",
-       "player",
-       "person",
-       "bullet",
-       "slug",
-       "amigo",
-       "amigosword" };
-
-
 int    myghost;     //obj number of local player ghost
 int    mycontext;
 int    downx = -1; //position of mousedown at beginning of edit cmd

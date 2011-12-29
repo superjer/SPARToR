@@ -26,9 +26,6 @@ extern INPUTNAME_t inputnames[];
 extern int numinputnames;
 
 
-extern char objectnames[][16];
-
-
 extern CB *hack_map; //FIXME REMOVE SOMEDAY
 extern CB *hack_dmap;
 

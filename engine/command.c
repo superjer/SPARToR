@@ -120,7 +120,7 @@ void command(const char *s)
       for( i=0; i<maxobjs; i++ ) {
         OBJ_t *o = fr[surefr%maxframes].objs+i;
         if( o->type )
-          SJC_Write( "#%i %s C:%i F:%x", i, objectnames[o->type], o->context, o->flags );
+          SJC_Write( "#%i %s C:%i F:%x", i, flexer[o->type].name, o->context, o->flags );
       }
     }else if( strcmp(q,"save")==0 ) {
       char *name = strtok(NULL," ");

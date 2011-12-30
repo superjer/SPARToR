@@ -47,5 +47,8 @@ FUNC_N2T NATIVE2TILE_Z;
                                   NATIVE2TILE_Y  = NATIVE2TILE_Y_  ## MODE; \
                                   NATIVE2TILE_Z  = NATIVE2TILE_Z_  ## MODE; }while(0)
 
+#define XYZ2NATIVE_X(x,y,z) POINT2NATIVE_X(&(V){(x),(y),(z)})
+#define XYZ2NATIVE_Y(x,y,z) POINT2NATIVE_Y(&(V){(x),(y),(z)})
+
 #endif
 

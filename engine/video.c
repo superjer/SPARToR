@@ -188,14 +188,32 @@ void render()
           }
     }
 
-    glColor4f(1,1,1,1);
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,pos );
-      V *hull = flex(o,hull);
-      if( pos && hull ) {
-        REC rect = (REC){0, 0, hull[1].x-hull[0].x, hull[1].y-hull[0].y};
-        SJGL_Blit( &rect, pos->x+hull[0].x, pos->y+hull[0].y, 0 );
+
+      if( (o->flags & OBJF_POS) && (o->flags & OBJF_HULL) ) {
+        V *pos  = flex(o,pos );
+        V *hull = flex(o,hull);
+        int x  = pos->x + hull[0].x;
+        int y  = pos->y + hull[0].y;
+        int z  = pos->z + hull[0].z;
+        int x2 = pos->x + hull[1].x;
+        int y2 = pos->y + hull[1].y;
+        int z2 = pos->z + hull[1].z;
+
+        glBegin(GL_LINE_STRIP);
+        #define HULL_VERTEX(x,y,z) glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 )
+        #define HULL_RR glColor4f(1,0,0,1); HULL_VERTEX(x , y , z );
+        #define HULL_RG glColor4f(1,1,0,1); HULL_VERTEX(x , y , z2);
+        #define HULL_WW glColor4f(1,1,1,1); HULL_VERTEX(x2, y , z2);
+        #define HULL_RB glColor4f(1,0,1,1); HULL_VERTEX(x2, y , z );
+        #define HULL_KK glColor4f(0,0,0,1); HULL_VERTEX(x , y2, z );
+        #define HULL_GG glColor4f(0,1,0,1); HULL_VERTEX(x , y2, z2);
+        #define HULL_GB glColor4f(0,1,1,1); HULL_VERTEX(x2, y2, z2);
+        #define HULL_BB glColor4f(0,0,1,1); HULL_VERTEX(x2, y2, z );
+        HULL_GB HULL_BB HULL_KK HULL_RR HULL_KK HULL_GG HULL_GB HULL_WW
+        HULL_RB HULL_BB HULL_RB HULL_RR HULL_RG HULL_GG HULL_RG HULL_WW
+        glEnd();
       }
     }
 
@@ -206,9 +224,11 @@ void render()
       V *pos  = flex(o,pos);
       if( pos ) {
         sprintf(buf,"%d",i);
-        SJF_DrawText(pos->x, pos->y, buf);
+        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos), buf);
       }
     }
+
+    glColor4f(1,1,1,1);
   }
 
   // translate back for HUD

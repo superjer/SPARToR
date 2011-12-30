@@ -87,7 +87,6 @@ void render()
   const SDL_VideoInfo *vidinfo;
   int x,y,w,h;
   int i;
-  char buf[1000];
   Uint32 vidfr = (metafr-1);
   Uint32 vidfrmod = vidfr%maxframes;
 
@@ -201,18 +200,18 @@ void render()
         int y2 = pos->y + hull[1].y;
         int z2 = pos->z + hull[1].z;
 
-        glBegin(GL_LINE_STRIP);
         #define HULL_VERTEX(x,y,z) glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 )
-        #define HULL_RR glColor4f(1,0,0,1); HULL_VERTEX(x , y , z );
+        #define HULL_R  glColor4f(1,0,0,1); HULL_VERTEX(x , y , z );
         #define HULL_RG glColor4f(1,1,0,1); HULL_VERTEX(x , y , z2);
-        #define HULL_WW glColor4f(1,1,1,1); HULL_VERTEX(x2, y , z2);
+        #define HULL_W  glColor4f(1,1,1,1); HULL_VERTEX(x2, y , z2);
         #define HULL_RB glColor4f(1,0,1,1); HULL_VERTEX(x2, y , z );
-        #define HULL_KK glColor4f(0,0,0,1); HULL_VERTEX(x , y2, z );
-        #define HULL_GG glColor4f(0,1,0,1); HULL_VERTEX(x , y2, z2);
+        #define HULL_K  glColor4f(0,0,0,1); HULL_VERTEX(x , y2, z );
+        #define HULL_G  glColor4f(0,1,0,1); HULL_VERTEX(x , y2, z2);
         #define HULL_GB glColor4f(0,1,1,1); HULL_VERTEX(x2, y2, z2);
-        #define HULL_BB glColor4f(0,0,1,1); HULL_VERTEX(x2, y2, z );
-        HULL_GB HULL_BB HULL_KK HULL_RR HULL_KK HULL_GG HULL_GB HULL_WW
-        HULL_RB HULL_BB HULL_RB HULL_RR HULL_RG HULL_GG HULL_RG HULL_WW
+        #define HULL_B  glColor4f(0,0,1,1); HULL_VERTEX(x2, y2, z );
+        glBegin(GL_LINE_STRIP);
+        HULL_GB HULL_B  HULL_RB HULL_B  HULL_K  HULL_R  HULL_K  HULL_G
+        HULL_GB HULL_W  HULL_RB HULL_R  HULL_RG HULL_G  HULL_RG HULL_W
         glEnd();
       }
     }
@@ -221,10 +220,9 @@ void render()
 
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,pos);
-      if( pos ) {
-        sprintf(buf,"%d",i);
-        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos), buf);
+      if( o->flags & OBJF_POS ) {
+        V *pos  = flex(o,pos);
+        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-6, "%d", i);
       }
     }
 
@@ -308,22 +306,14 @@ void render()
   Uint32 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
   if( v_showstats ) {
     Uint32 denom = vidfrmod+1;
-    sprintf(buf,"idle_time %4d"       ,       idle_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),10,buf);
-    sprintf(buf,"render_time %4d"     ,     render_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),20,buf);
-    sprintf(buf,"adv_move_time %4d"   ,   adv_move_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),30,buf);
-    sprintf(buf,"adv_collide_time %4d",adv_collide_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),40,buf);
-    sprintf(buf,"adv_game_time %4d"   ,   adv_game_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),50,buf);
-    sprintf(buf,"unaccounted_time %4d",unaccounted_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),60,buf);
-    sprintf(buf,"adv_frames  %2.2f"   ,(float)adv_frames/(float)denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),70,buf);
-    sprintf(buf,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),80,buf);
+    SJF_DrawTextR(w-20,10,"idle_time %4d"       ,        idle_time/denom);
+    SJF_DrawTextR(w-20,20,"render_time %4d"     ,      render_time/denom);
+    SJF_DrawTextR(w-20,30,"adv_move_time %4d"   ,    adv_move_time/denom);
+    SJF_DrawTextR(w-20,40,"adv_collide_time %4d", adv_collide_time/denom);
+    SJF_DrawTextR(w-20,50,"adv_game_time %4d"   ,    adv_game_time/denom);
+    SJF_DrawTextR(w-20,60,"unaccounted_time %4d", unaccounted_time/denom);
+    SJF_DrawTextR(w-20,70,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
+    SJF_DrawTextR(w-20,80,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
   }
 
   SDL_GL_SwapBuffers();

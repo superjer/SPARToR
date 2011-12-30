@@ -186,9 +186,16 @@ void SJF_DrawChar(int x, int y, char ch)
   glEnd();
 }
 
+void SJF_DrawTextR(int x, int y, const char *str, ...)
+{
+  va_list args;
+  va_start(args, str);
+  vsnprintf(buf, 800, str, args);
+  va_end(args);
+}
 
 //draws a message in system text at location in GL
-void SJF_DrawText(int x, int y, const char *str, ...)
+void SJF_DrawText(int x, int y, int align, const char *str, ...)
 {
   SDL_Rect s = (SDL_Rect){ 0, 0, 0, 12 };
   SDL_Rect d = (SDL_Rect){ x, y, 0, 12 };

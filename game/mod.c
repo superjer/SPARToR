@@ -612,9 +612,10 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glColor4f(1,1,1,1);
-  SJF_DrawText( w-sz, sz+ 4, "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-  SJF_DrawText( w-sz, sz+24, "Layer %d", ylayer );
+  SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+                "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+  SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+  SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
 
   glPopAttrib();
 }

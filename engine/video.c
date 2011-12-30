@@ -165,26 +165,20 @@ void render()
     if( mycontext ) {
       CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
       int x,y,z;
-      for( z=0; z<co->z; z++ )
-        for( y=0; y<co->y; y++ )
-          for( x=0; x<co->x; x++ ) {
-            int pos = co->x*co->y*z + co->x*y + x;
-            int flags;
 
-            if( co->dmap[ pos ].flags & CBF_NULL )
-              flags = co->map[  pos ].flags;
-            else
-              flags = co->dmap[ pos ].flags;
+      for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ ) {
+        int pos = co->x*co->y*z + co->x*y + x;
+        int flags = ((co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap )[pos].flags;
 
-            if( flags & CBF_SOLID ) {
-              glColor4f(1,0,0,1);
-              SJGL_Blit( &(REC){0,0,16,16}, x*16,   y*16,   z );
-              SJGL_Blit( &(REC){0,0,12,12}, x*16+2, y*16+2, z );
-            } else if( flags & CBF_PLAT ) {
-              glColor4f(0,1,0,1);
-              SJGL_Blit( &(REC){0,0,16, 2}, x*16,   y*16,   z );
-            }
-          }
+        if( flags & CBF_SOLID ) {
+          glColor4f(1,0,0,1);
+          SJGL_Blit( &(REC){0,0,16,16}, x*16,   y*16,   z );
+          SJGL_Blit( &(REC){0,0,12,12}, x*16+2, y*16+2, z );
+        } else if( flags & CBF_PLAT ) {
+          glColor4f(0,1,0,1);
+          SJGL_Blit( &(REC){0,0,16, 2}, x*16,   y*16,   z );
+        }
+      }
     }
 
     for(i=0;i<maxobjs;i++) {
@@ -200,15 +194,15 @@ void render()
         int y2 = pos->y + hull[1].y;
         int z2 = pos->z + hull[1].z;
 
-        #define HULL_VERTEX(x,y,z) glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 )
-        #define HULL_R  glColor4f(1,0,0,1); HULL_VERTEX(x , y , z );
-        #define HULL_RG glColor4f(1,1,0,1); HULL_VERTEX(x , y , z2);
-        #define HULL_W  glColor4f(1,1,1,1); HULL_VERTEX(x2, y , z2);
-        #define HULL_RB glColor4f(1,0,1,1); HULL_VERTEX(x2, y , z );
-        #define HULL_K  glColor4f(0,0,0,1); HULL_VERTEX(x , y2, z );
-        #define HULL_G  glColor4f(0,1,0,1); HULL_VERTEX(x , y2, z2);
-        #define HULL_GB glColor4f(0,1,1,1); HULL_VERTEX(x2, y2, z2);
-        #define HULL_B  glColor4f(0,0,1,1); HULL_VERTEX(x2, y2, z );
+        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define HULL_R  HULL_VERTEX(1,0,0,x , y , z );
+        #define HULL_RG HULL_VERTEX(1,1,0,x , y , z2);
+        #define HULL_W  HULL_VERTEX(1,1,1,x2, y , z2);
+        #define HULL_RB HULL_VERTEX(1,0,1,x2, y , z );
+        #define HULL_K  HULL_VERTEX(0,0,0,x , y2, z );
+        #define HULL_G  HULL_VERTEX(0,1,0,x , y2, z2);
+        #define HULL_GB HULL_VERTEX(0,1,1,x2, y2, z2);
+        #define HULL_B  HULL_VERTEX(0,0,1,x2, y2, z );
         glBegin(GL_LINE_STRIP);
         HULL_GB HULL_B  HULL_RB HULL_B  HULL_K  HULL_R  HULL_K  HULL_G
         HULL_GB HULL_W  HULL_RB HULL_R  HULL_RG HULL_G  HULL_RG HULL_W
@@ -220,9 +214,10 @@ void render()
 
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
+
       if( o->flags & OBJF_POS ) {
         V *pos  = flex(o,pos);
-        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-6, "%d", i);
+        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_LEFT, "%d", i);
       }
     }
 
@@ -289,13 +284,11 @@ void render()
       SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '_');
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
-        SJF_DrawText(x,y,SJC.buf[i]);
+        SJF_DrawText(x, y, SJF_LEFT, SJC.buf[i]);
       y -= 10;
     }
     if( SJC.buf[0] && SJC.buf[0][0] ) {
-      char s[10];
-      sprintf(s,"%d",SJC.buf[0][strlen(SJC.buf[0])-1]);
-      SJF_DrawText(w-20,conh-20,s);
+      SJF_DrawText(w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);
     }
   }
 
@@ -306,14 +299,14 @@ void render()
   Uint32 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
   if( v_showstats ) {
     Uint32 denom = vidfrmod+1;
-    SJF_DrawTextR(w-20,10,"idle_time %4d"       ,        idle_time/denom);
-    SJF_DrawTextR(w-20,20,"render_time %4d"     ,      render_time/denom);
-    SJF_DrawTextR(w-20,30,"adv_move_time %4d"   ,    adv_move_time/denom);
-    SJF_DrawTextR(w-20,40,"adv_collide_time %4d", adv_collide_time/denom);
-    SJF_DrawTextR(w-20,50,"adv_game_time %4d"   ,    adv_game_time/denom);
-    SJF_DrawTextR(w-20,60,"unaccounted_time %4d", unaccounted_time/denom);
-    SJF_DrawTextR(w-20,70,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
-    SJF_DrawTextR(w-20,80,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
+    SJF_DrawText(w-20,10,SJF_RIGHT,"idle_time %4d"       ,        idle_time/denom);
+    SJF_DrawText(w-20,20,SJF_RIGHT,"render_time %4d"     ,      render_time/denom);
+    SJF_DrawText(w-20,30,SJF_RIGHT,"adv_move_time %4d"   ,    adv_move_time/denom);
+    SJF_DrawText(w-20,40,SJF_RIGHT,"adv_collide_time %4d", adv_collide_time/denom);
+    SJF_DrawText(w-20,50,SJF_RIGHT,"adv_game_time %4d"   ,    adv_game_time/denom);
+    SJF_DrawText(w-20,60,SJF_RIGHT,"unaccounted_time %4d", unaccounted_time/denom);
+    SJF_DrawText(w-20,70,SJF_RIGHT,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
+    SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
   }
 
   SDL_GL_SwapBuffers();

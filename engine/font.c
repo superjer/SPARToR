@@ -14,6 +14,10 @@
 #include "SDL.h"
 #include "font.h"
 
+#define ISCOLORCODE(s) ((s)[0]=='\\' && (s)[1]=='#' && isxdigit((s)[2]) && isxdigit((s)[3]) && isxdigit((s)[4]))
+#define UNHEX(x) (unsigned char)(17*((x)>'9' ? ((x)&~('a'^'A'))-'A'+10 : (x)-'0'))
+
+
 SJF_t SJF = {0,8,12,128,
   { 0, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   //non-printable
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   //non-printable
@@ -125,7 +129,7 @@ SJF_t SJF = {0,8,12,128,
 " O   O   O   O    O          O    O      O   O    O O    O O O    O O     O O     O        O       O       O             O  O   "
 " OOOO     OOOO    O      OOOO      OOO    OOOO     O      O O    O   O     O     OOOOO     O       O       O             OOOO   "
 " O           O                                                             O                OO     O     OO                     "
-" O           O                                                            O                        O                            "
+" O           O                                                           OO                        O                            "
 "                                                                                                                                "
 // -------------------------------------------------------------------------------------------------------------------------------
 "                                                                                                                                "
@@ -172,16 +176,18 @@ void SJF_Init()
 //draws a single character with GL
 void SJF_DrawChar(int x, int y, char ch)
 {
-  SDL_Rect s = (SDL_Rect){ (ch%16)*SJF.w, (ch/16)*SJF.h, 8, 12 };
-  SDL_Rect d = (SDL_Rect){             x,             y, 8, 12 };
+  int sx = (ch%16)*SJF.w;
+  int sy = (ch/16)*SJF.h;
+  int w  = 8;
+  int h  = 12;
 
   glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win
   glBindTexture(GL_TEXTURE_2D,SJF.tex);
   glBegin(GL_QUADS);
-  glTexCoord2i(s.x    ,s.y    ); glVertex2i(d.x    ,d.y    );
-  glTexCoord2i(s.x+s.w,s.y    ); glVertex2i(d.x+d.w,d.y    );
-  glTexCoord2i(s.x+s.w,s.y+s.h); glVertex2i(d.x+d.w,d.y+d.h);
-  glTexCoord2i(s.x    ,s.y+s.h); glVertex2i(d.x    ,d.y+d.h);
+  glTexCoord2i(sx  ,sy  ); glVertex2i(x  ,y  );
+  glTexCoord2i(sx+w,sy  ); glVertex2i(x+w,y  );
+  glTexCoord2i(sx+w,sy+h); glVertex2i(x+w,y+h);
+  glTexCoord2i(sx  ,sy+h); glVertex2i(x  ,y+h);
   glEnd();
 }
 
@@ -210,8 +216,18 @@ void SJF_DrawText(int x, int y, int align, const char *str, ...)
   glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win
   glBindTexture(GL_TEXTURE_2D,SJF.tex);
   glBegin(GL_QUADS);
+  glColor4f(1,1,1,1);
   while( *str )
   {
+    // colors?
+    if( ISCOLORCODE(str) ) {
+      glColor3ub( UNHEX(str[2]), UNHEX(str[3]), UNHEX(str[4]) );
+      if( str[5] ) {
+        str += 5;
+        continue;
+      }
+    }
+
     sx = (*str%16)*SJF.w;
     sy = (*str/16)*SJF.h;
     w = SJF.space[(Uint8)*str];
@@ -232,8 +248,13 @@ int SJF_TextExtents(const char *str)
   int n = 0;
   if( str==NULL )
     return 0;
-  while(*str)
+  while(*str) {
+    if( ISCOLORCODE(str) && str[5] ) {
+      str += 5;
+      continue;
+    }
     n += SJF.space[(Uint8)*str++];
+  }
   return n;
 }
 

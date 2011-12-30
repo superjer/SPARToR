@@ -284,7 +284,7 @@ void render()
       SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '\2');
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
-        SJF_DrawText(x, y, SJF_LEFT, SJC.buf[i]);
+        SJF_DrawText(x, y, SJF_LEFT, "%s", SJC.buf[i]);
       y -= 12;
     }
     if( SJC.buf[0] && SJC.buf[0][0] ) {

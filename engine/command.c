@@ -109,18 +109,19 @@ void command(const char *s)
       jogframebuffer(metafr,surefr);
     }else if( strcmp(q,"help")==0 ) {
       SJC_Write("Press your ~ key to open and close this console. Commands you can type:");
-      SJC_Write("     listen -- start a server");
-      SJC_Write("     connect -- connect to a server");
-      SJC_Write("     fullscreen 1024 768 -- go fullscreen at 1024x768");
-      SJC_Write("     window 3x -- go windowed at 3x up-scale");
-      SJC_Write("     bind -- choose input keys");
+      SJC_Write("     \\#36Flisten               \\#FFFstart a server");
+      SJC_Write("     \\#36Fconnect              \\#FFFconnect to a server");
+      SJC_Write("     \\#36Ffullscreen           \\#FFFgo fullscreen");
+      SJC_Write("     \\#36Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
+      SJC_Write("     \\#36Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
+      SJC_Write("     \\#36Fbind                 \\#FFFchoose input keys");
       SJC_Write("Default controls: Z, X, ARROWS, F11");
     }else if( strcmp(q,"report")==0 ) {
       int i;
       for( i=0; i<maxobjs; i++ ) {
         OBJ_t *o = fr[surefr%maxframes].objs+i;
         if( o->type )
-          SJC_Write( "#%i %s C:%i F:%x", i, flexer[o->type].name, o->context, o->flags );
+          SJC_Write( "#%-3i %-20s C:%-3i F:%-5x", i, flexer[o->type].name, o->context, o->flags );
       }
     }else if( strcmp(q,"save")==0 ) {
       char *name = strtok(NULL," ");

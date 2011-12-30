@@ -41,12 +41,6 @@ void command(const char *s)
     }else if( strcmp(q,"watch")==0 ) {
       i_watch = i_watch ? 0 : 1;
       SJC_Write("Input watch %s",i_watch?"on":"off");
-    }else if( strcmp(q,"alpha")==0 ) {
-      char *val = strtok(NULL," ");
-      if( val ) v_usealpha = atoi(val);
-    }else if( strcmp(q,"oob")==0 ) {
-      char *val = strtok(NULL," ");
-      if( val ) v_oob = atoi(val);
     }else if( strcmp(q,"exit")==0 || strcmp(q,"quit")==0 ) {
       cleanup();
     }else if( strcmp(q,"listen")==0 ) {
@@ -109,13 +103,13 @@ void command(const char *s)
       jogframebuffer(metafr,surefr);
     }else if( strcmp(q,"help")==0 ) {
       SJC_Write("Press your ~ key to open and close this console. Commands you can type:");
-      SJC_Write("     \\#36Flisten               \\#FFFstart a server");
-      SJC_Write("     \\#36Fconnect              \\#FFFconnect to a server");
-      SJC_Write("     \\#36Ffullscreen           \\#FFFgo fullscreen");
-      SJC_Write("     \\#36Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
-      SJC_Write("     \\#36Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
-      SJC_Write("     \\#36Fbind                 \\#FFFchoose input keys");
-      SJC_Write("Default controls: Z, X, ARROWS, F11");
+      SJC_Write("     \\#08Flisten               \\#FFFstart a server");
+      SJC_Write("     \\#08Fconnect              \\#FFFconnect to a server");
+      SJC_Write("     \\#08Ffullscreen           \\#FFFgo fullscreen");
+      SJC_Write("     \\#08Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
+      SJC_Write("     \\#08Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
+      SJC_Write("     \\#08Fbind                 \\#FFFchoose input keys");
+      SJC_Write("See commands.txt for more commands");
     }else if( strcmp(q,"report")==0 ) {
       int i;
       for( i=0; i<maxobjs; i++ ) {

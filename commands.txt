@@ -1,0 +1,139 @@
+
+CONSOLE COMMANDS
+****************
+
+bind            bind <action>
+
+                Bind a key to an action. E.g. bind jump
+
+
+bounds          bounds
+                bounds <X> <Y> <Z>
+
+                Without arguments, show the boundary size of the current
+                context. With X, Y, Z, resize the context.
+
+
+connect         connect <host> [[:]port]
+
+                Connect to a server. E.g. connect 127.0.0.1:31103
+
+
+dimetric        dimetric
+
+                Switch the current context to render mode dimetric. See also
+                `orthographic'.
+
+
+disconnect      disconnect
+
+                Disconnect from the currently connected server.
+
+
+edit            edit
+
+                Start edit mode, in which you can edit the levels, etc.
+
+
+exit            exit
+
+                Exit the game. Same as `quit'.
+
+
+fast            fast
+
+                Run the game at the "fast" speed. This is the default. See also
+                `slow'.
+
+
+fullscreen      fullscreen
+                fullscreen <scale>
+                fullscreen <width> <height>
+
+                Switch to fullscreen at the specified resolution or scale
+                factor. With none specified, use the desktop resolution. See
+                also `window'. E.g. fullscreen 1024 768
+
+help            help
+
+                Show a short help text.
+
+
+hulls           hulls
+
+                Display hulls around all game objects.
+
+
+listen          listen
+                listen <port>
+
+                Start a server listening on the specified port, or the default
+                31103.
+
+
+load            load <mapname>
+
+                Loads mapname.txt
+
+
+orthographic    orthographic
+
+                Switch the current context to render mode orthographic. See also
+                `dimetric'.
+
+
+quit            quit
+
+                Same as `exit'.
+
+
+realtime        realtime
+
+                Run the game in realtime mode. Do not forfeit any CPU cycles.
+                Waste as many as possible.
+
+
+reconnect       reconnect
+
+                Not implemented.
+
+
+report          report
+
+                Show a report of all the game objects.
+
+
+save            save <mapname>
+
+                Saves the current context to mapname.txt. If it already exists,
+                make a backup at maps/backup/mapnameN.txt.
+
+
+slow            slow
+
+                Run the game at the "slow" speed. Useful for debugging or
+                checking animations closely. See also `fast'.
+
+
+spr             spr <sprite_number>
+
+                Show information about a sprite.
+
+
+stats           stats
+
+                Show timing stats in the upper right corner of the screen.
+
+
+watch           watch
+
+                Turn on "input watch" to watch what keys and buttons are being
+                pressed.
+
+
+window          window
+                window <scale>
+                window <width> <height>
+
+                Switch to windowed mode at the specified scale or resolution.
+

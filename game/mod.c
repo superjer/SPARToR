@@ -164,6 +164,8 @@ void mod_setup(Uint32 setupfr)
   #undef MAYBE_A_DUMMY
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client
+
+  SJC_Write("Default controls: \\#F80A, S, Numpad Arrows, F11");
 }
 
 

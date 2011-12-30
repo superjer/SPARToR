@@ -27,9 +27,7 @@ size_t tex_count;
 
 int v_drawhulls  = 0;
 int v_showstats  = 0;
-int v_usealpha   = 1;
 int v_fullscreen = 0;
-int v_oob        = 0; // show objects out-of-bounds fading away
 int v_center     = 1; // whether to center the scaled game rendering
 
 int v_camx       = 0;
@@ -118,10 +116,7 @@ void render()
 
   glColor4f(1.0f,1.0f,1.0f,1.0f);
   glEnable(GL_TEXTURE_2D);
-  if( v_usealpha )
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  else
-    glBlendFunc(GL_ONE, GL_ZERO);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
   glAlphaFunc(GL_GREATER,0.01);
@@ -236,7 +231,7 @@ void render()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  //paint black over the border areas, subtractively with v_oob
+  //paint black over the border areas
   {
     int outerl = 0;   int innerl = pad_left;
     int outert = 0;   int innert = pad_top;
@@ -244,14 +239,7 @@ void render()
     int outerb = h;   int innerb = pad_top  + NATIVEH*scale;
     glDisable(GL_TEXTURE_2D);
     glPushAttrib(GL_COLOR_BUFFER_BIT);
-    if( v_oob ) {
-      glColor4f(0.02,0.02,0.02,0.02);
-      glBlendFunc(GL_ONE,GL_ONE);
-      if( GLEW_EXT_blend_equation_separate )
-        glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
-    }
-    else
-      glColor4f(0,0,0,1.0f);
+    glColor4f(0,0,0,1.0f);
     glBegin(GL_QUADS);
     glVertex2i(outerl,outert); glVertex2i(outerr,outert); glVertex2i(outerr,innert); glVertex2i(outerl,innert); //top
     glVertex2i(outerl,innerb); glVertex2i(outerr,innerb); glVertex2i(outerr,outerb); glVertex2i(outerl,outerb); //bottom

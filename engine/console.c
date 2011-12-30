@@ -13,7 +13,7 @@
 #include "console.h"
 
 
-SJC_t SJC = {{0},{0}};
+SJC_t SJC = {{0},{0},{0},0,0};
 
 
 static void SJC_Log(const char *prefix,const char *s);
@@ -67,10 +67,54 @@ void SJC_Rub()
 }
 
 
+void recall()
+{
+  if( SJC.remempos == SJC.rememend ) { // current position
+    SJC.buf[0][0] = '\0';
+    return;
+  }
+
+  free(SJC.buf[0]);
+  SJC.size[0] = strlen(SJC.rememory[SJC.remempos])+1;
+  SJC.buf[0] = malloc(SJC.size[0]);
+  strcpy(SJC.buf[0],SJC.rememory[SJC.remempos]);
+}
+
+
+void SJC_Up()
+{
+  if( (SJC.rememend+1)%200 == SJC.remempos )
+    return; // already at oldest
+
+  int pos = (SJC.remempos+199) % 200;
+  if( !SJC.rememory[pos] )
+    return; // older entry is NULL
+
+  SJC.remempos = pos;
+  recall();
+}
+
+
+void SJC_Down()
+{
+  if( SJC.remempos == SJC.rememend )
+    return; // already at newest
+
+  SJC.remempos = (SJC.remempos+1) % 200;
+  recall();
+}
+
+
 int SJC_Submit()
 {
-  if(!SJC.buf[0] || !SJC.size[0])
+  if(!SJC.buf[0] || !strlen(SJC.buf[0]))
     return 0;
+
+  free(SJC.rememory[SJC.rememend]);
+  SJC.rememory[SJC.rememend] = malloc(strlen(SJC.buf[0])+1);
+  strcpy(SJC.rememory[SJC.rememend],SJC.buf[0]);
+  SJC.remempos = SJC.rememend = (SJC.rememend+1) % 200;
+
   free(SJC.buf[199]);
   memmove(SJC.buf+1,SJC.buf,sizeof(char*)*199);
   memmove(SJC.size+1,SJC.size,sizeof(int)*199);

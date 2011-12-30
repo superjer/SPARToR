@@ -121,6 +121,10 @@ void kbinput(int press,SDL_keysym keysym)
     }
     else if(sym==SDLK_BACKSPACE || sym==SDLK_DELETE)
       SJC_Rub();
+    else if(sym==SDLK_UP)
+      SJC_Up();
+    else if(sym==SDLK_DOWN)
+      SJC_Down();
     else if(sym==SDLK_ESCAPE && console_open)
       toggleconsole();
   } else

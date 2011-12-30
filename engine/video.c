@@ -281,11 +281,11 @@ void render()
     x = 10;
     y = conh-20;
     if((ticks/200)%2)
-      SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '_');
+      SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '\2');
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
         SJF_DrawText(x, y, SJF_LEFT, SJC.buf[i]);
-      y -= 10;
+      y -= 12;
     }
     if( SJC.buf[0] && SJC.buf[0][0] ) {
       SJF_DrawText(w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);

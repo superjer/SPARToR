@@ -18,19 +18,12 @@ int    setmodel = -1;
 //
 
 
-void sprblit( SPRITE_T *spr, int x, int y, int z )
-{
-  SJGL_SetTex( spr->texnum );
-  SJGL_Blit( &spr->rec, x-spr->ancx, y-spr->ancy, z );
-}
-
-
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
   int c = POINT2NATIVE_X(&pl->pos);
   int d = POINT2NATIVE_Y(&pl->pos);
-  int r = d + 30;
+  int r = d;
 
   //girl hair
   if     ( pl->model!=4 ) ;

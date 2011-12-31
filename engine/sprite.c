@@ -27,9 +27,6 @@ char      *spr_names[] = { SPRITE_ENUM(STRINGIFY) };
 int        spr_map[sprite_enum_max] = { 0 };
 
 
-enum spr_pos { TOP=-1, MID=-2, BOT=-3 };
-
-
 static size_t spr_alloc;
 static char   filename[100];
 static int    line_num;
@@ -43,6 +40,13 @@ static SPRITE_T *new_sprite(int texnum,const char *name);
 static int fail(const char *msg);
 static int tokenize(char *s);
 static int read_anchor(int i,SPRITE_T *arg);
+
+
+void sprblit( SPRITE_T *spr, int x, int y, int z )
+{
+  SJGL_SetTex( spr->texnum );
+  SJGL_Blit( &spr->rec, x-spr->ancx, y-spr->ancy, z );
+}
 
 
 int load_sprites(int texnum)
@@ -62,7 +66,7 @@ int load_sprites(int texnum)
   enum { READY, DEFAULT, GRID, GRIDITEM, NOMORE } mode = READY;
   int gridcols = 1; // just to avoid compiler warning
   int gridoffs = 0; // "
-  SPRITE_T defs = {0, NULL, 0, {0, 0, 32, 32}, 16, 32};
+  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32, 0};
   SPRITE_T gdefs;
 
   line_num = 0;
@@ -132,7 +136,7 @@ int load_sprites(int texnum)
     }
 
     while( ++i < count ) {
-      if( isdigit(tokens[i][0]) ) {
+      if( isdigit(tokens[i][0]) || tokens[i][0]=='-' ) {
         if( count-i != 2 && count-i != 4 && count-i != 6 )
           return fail("Expecting 2, 4 or 6 numeric args, when no name found");
 
@@ -153,7 +157,6 @@ int load_sprites(int texnum)
       } else if( !strcmp(tokens[i],"size") ) {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'size'");
-
 
         targ->rec.w = atoi(tokens[++i]);
         targ->rec.h = atoi(tokens[++i]);
@@ -197,13 +200,14 @@ int load_sprites(int texnum)
     }
 
     if( spr ) {
-      if(      spr->ancx == TOP ) spr->ancx = 0;
-      else if( spr->ancx == MID ) spr->ancx = spr->rec.w / 2;
-      else if( spr->ancx == BOT ) spr->ancx = spr->rec.w;
+      fprintf(stderr,"%s: %x   %d,%d\n",spr->name,spr->flags,spr->ancx,spr->ancy);
+      if(      spr->flags & SPRF_LFT ) spr->ancx += 0;
+      else if( spr->flags & SPRF_CEN ) spr->ancx += spr->rec.w / 2;
+      else if( spr->flags & SPRF_RGT ) spr->ancx += spr->rec.w;
 
-      if(      spr->ancy == TOP ) spr->ancy = 0;
-      else if( spr->ancy == MID ) spr->ancy = spr->rec.h / 2;
-      else if( spr->ancy == BOT ) spr->ancy = spr->rec.h;
+      if(      spr->flags & SPRF_TOP ) spr->ancy += 0;
+      else if( spr->flags & SPRF_MID ) spr->ancy += spr->rec.h / 2;
+      else if( spr->flags & SPRF_BOT ) spr->ancy += spr->rec.h;
 
       int i;
       for( i=0; i<sprite_enum_max; i++ )
@@ -284,20 +288,35 @@ static int read_anchor(int i,SPRITE_T *targ)
 {
   int flipme = 0;
 
-  if(       isdigit(tokens[i][0])     ) { targ->ancx = atoi(tokens[i]); }
-  else if( !strncmp(tokens[i],"to",2) ) { targ->ancx = TOP; flipme = 1; }
-  else if( !strncmp(tokens[i],"le",2) ) { targ->ancx = TOP;             }
-  else if( !strncmp(tokens[i],"mi",2) ) { targ->ancx = MID;             }
-  else if( !strncmp(tokens[i],"bo",2) ) { targ->ancx = BOT; flipme = 1; }
-  else if( !strncmp(tokens[i],"ri",2) ) { targ->ancx = BOT;             }
+  targ->ancx = 0;
+  targ->ancy = 0;
+  targ->flags &= ~SPRF_ALIGNMASK;
 
-  ++i;
-  if(       isdigit(tokens[i][0])     ) { targ->ancy = atoi(tokens[i]); }
-  else if( !strncmp(tokens[i],"to",2) ) { targ->ancy = TOP;             }
-  else if( !strncmp(tokens[i],"le",2) ) { targ->ancy = TOP; flipme = 1; }
-  else if( !strncmp(tokens[i],"mi",2) ) { targ->ancy = MID;             }
-  else if( !strncmp(tokens[i],"bo",2) ) { targ->ancy = BOT;             }
-  else if( !strncmp(tokens[i],"ri",2) ) { targ->ancy = BOT; flipme = 1; }
+  char *p = tokens[i];
+  if( isdigit(*p) || *p=='-'  ) { targ->ancx = atoi(p);                }
+  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP; flipme = 1; }
+  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT;             }
+  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID; flipme = 1; }
+  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN;             }
+  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT; flipme = 1; }
+  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT;             }
+
+  while( *p && *p!='-' && *p!='+' )
+    p++;
+  if( *p ) targ->ancx = atoi(p);
+
+  p = tokens[++i];
+  if( isdigit(*p) || *p=='-'  ) { targ->ancy = atoi(p);                }
+  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP;             }
+  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT; flipme = 1; }
+  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID;             }
+  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN; flipme = 1; }
+  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT;             }
+  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT; flipme = 1; }
+
+  while( *p && *p!='-' && *p!='+' )
+    p++;
+  if( *p ) targ->ancy = atoi(p);
   
   if( flipme ) SWAP( targ->ancx, targ->ancy, int );
 

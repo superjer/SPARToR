@@ -10,7 +10,7 @@
 enum { SPRITE_ENUM(SPR_IDENTIFIER), sprite_enum_max };
 
 
-//tool textures
+//tool textures and sprite flags
 enum { TOOL_NUL = 1,
        TOOL_SOL,
        TOOL_PLAT,
@@ -20,17 +20,22 @@ enum { TOOL_NUL = 1,
        TOOL_OBJ,
        TOOL_ERAS,
        TOOL_VIS,
-       TOOL_MASK = 255 };
-
+       TOOL_MASK = 0xFF,
+       SPRF_TOP = 0x100,
+       SPRF_MID = 0x200,
+       SPRF_BOT = 0x400,
+       SPRF_LFT = 0x800,
+       SPRF_CEN = 0x1000,
+       SPRF_RGT = 0x2000,
+       SPRF_ALIGNMASK = 0x3F00 };
 
 typedef struct {
   int    texnum;
   char  *name;
-  short  flags;
   REC    rec;
   int    ancx,ancy; // anchor position
+  unsigned flags;
 } SPRITE_T;
-
 
 
 extern SPRITE_T  *sprites;
@@ -39,6 +44,7 @@ extern char      *spr_names[];
 extern int        spr_map[];
 
 
+void sprblit( SPRITE_T *spr, int x, int y, int z );
 int load_sprites(int texnum);
 void unload_sprites();
 int find_sprite_by_name(const char *name);

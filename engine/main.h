@@ -194,5 +194,6 @@ void sethotfr(  Uint32 to);
 void setcmdfr(  Uint32 to);
 void jogframebuffer(Uint32 newmetafr,Uint32 newsurefr);
 
+
 #endif
 

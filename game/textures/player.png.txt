@@ -1,4 +1,4 @@
-.default  size 20 30  anchor mid bot
+.default  size 20 30  anchor cen bot
 
 .grid  cols 7  pos 0 0
   ctblue_r
@@ -47,11 +47,11 @@
   mp5_up_l    anchor 2  top
 .end
 
-bullet 144 150 4 4 mid mid
-knife_down 148 150 5 27 bot mid
-knife_up   153 150 5 27 top mid
+bullet 144 150 4 4 mid cen
+knife_down 148 150 5 27 bot cen
+knife_up   153 150 5 27 top cen
 
-.grid  pos 0 177  size 20 16  anchor mid bot
+.grid  pos 0 177  size 20 16  anchor bot cen
   slug_r
   slug_l
   slug_ouch_r
@@ -59,6 +59,6 @@ knife_up   153 150 5 27 top mid
 .end
 
 ghost 80 177 15 16 left top
-girlhair_r 95 177 12 14 top right
-girlhair_l 107 177 12 14 top left
+girlhair_r 95 177 12 14 top right+4
+girlhair_l 107 177 12 14 top left-4
 

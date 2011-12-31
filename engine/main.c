@@ -23,6 +23,7 @@
 #include "client.h"
 #include "input.h"
 #include "video.h"
+#include "sprite.h"
 #include <math.h>
 
 #if (SDL_IMAGE_MAJOR_VERSION*1000000 + SDL_IMAGE_MINOR_VERSION*1000 + SDL_IMAGE_PATCHLEVEL)<1002008 //support SDL_image pre 1.2.8
@@ -87,12 +88,6 @@ int main(int argc,char **argv)
   Uint32 idle_start = 0;
 
   init_flexers();
-
-  // FIXME: remove this, it is just for debugging
-  for( i=0; i<OBJT_MAX; i++ )
-    fprintf(stderr,"flexer %d \"%s\":  pos %d  vel %d  hull %d  pvel %d  model %d\n", i, flexer[i].name,
-                   flexer[i].pos, flexer[i].vel, flexer[i].hull, flexer[i].pvel, flexer[i].model);
-  // ENDFIXME
 
   fr = calloc(sizeof(FRAME_t),maxframes);
   for(i=0;i<maxframes;i++) {

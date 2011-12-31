@@ -1,0 +1,6 @@
+.grid  cols 5  pos 0 0  size 50 50  anchor bot mid
+  amigo1
+  amigo2
+  amigo3
+  amigo4
+.end

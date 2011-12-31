@@ -669,7 +669,7 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
-  y = (co->y-1) * co->bsy; // FIXME : silly hack for layers all being at the bottom of the context
+  y = co->y * co->bsy; // FIXME : silly hack for layers all being at the bottom of the context
 
   SJGL_SetTex( spr->texnum );
 

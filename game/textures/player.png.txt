@@ -1,0 +1,64 @@
+.default  size 20 30  anchor mid bot
+
+.grid  cols 7  pos 0 0
+  ctblue_r
+  ctblue_l
+  ctblue_duck_r
+  ctblue_duck_l
+  ctblue_f
+  .
+  ctblue_duck_f
+  ctgreen_r
+  ctgreen_l
+  ctgreen_duck_r
+  ctgreen_duck_l
+  ctgreen_f
+  .
+  ctgreen_duck_f
+  ctblack_r
+  ctblack_l
+  ctblack_duck_r
+  ctblack_duck_l
+  ctblack_f
+  .
+  ctblack_duck_f
+  ctcamo_r
+  ctcamo_l
+  ctcamo_duck_r
+  ctcamo_duck_l
+  ctcamo_f
+  .
+  ctcamo_duck_f
+  ctgirl_r
+  ctgirl_l
+  ctgirl_duck_r
+  ctgirl_duck_l
+  ctgirl_f
+  .
+  ctgirl_duck_f
+.end
+
+.grid  cols 6  pos 0 150  size 24 25
+  mp5_r       anchor right  7
+  mp5_l       anchor left   7
+  mp5_down_r  anchor right 23
+  mp5_down_l  anchor left  23
+  mp5_up_r    anchor 22 top
+  mp5_up_l    anchor 2  top
+.end
+
+bullet 144 150 4 4 mid mid
+knife_down 148 150 5 27 bot mid
+knife_up   153 150 5 27 top mid
+
+.grid  pos 0 177  size 20 16  anchor mid bot
+  slug_r
+  slug_l
+  slug_ouch_r
+  slug_ouch_l
+.end
+
+ghost 80 177 15 16 left top
+girlhair_r 95 177 12 14 top right
+girlhair_l 107 177 12 14 top left
+

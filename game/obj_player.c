@@ -11,43 +11,57 @@
  **/
 
 #include "obj_.h"
+#include "sprite.h"
 
 //FIXME REMOVE! change local player model
 int    setmodel = -1;
 //
 
+
+void sprblit( SPRITE_T *spr, int x, int y, int z )
+{
+  SJGL_SetTex( spr->texnum );
+  SJGL_Blit( &spr->rec, x-spr->ancx, y-spr->ancy, z );
+}
+
+
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
-  int gunshift = pl->goingu ? 96 : pl->goingd ? 48 : 0;
-  if( pl->goingu==pl->goingd ) gunshift = 0;
-  int c = POINT2NATIVE_X(&pl->pos) - 10;
-  int d = POINT2NATIVE_Y(&pl->pos) - 15;
+  int c = POINT2NATIVE_X(&pl->pos);
+  int d = POINT2NATIVE_Y(&pl->pos);
   int r = d + 30;
-  int ushift = (pl->goingd>0 ? 40 : 0) + (pl->turning ? 80 : (pl->facingr ? 0 : 20 ));
 
-  SJGL_SetTex( sys_tex[TEX_PLAYER].num );
+  //girl hair
+  if     ( pl->model!=4 ) ;
+  else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7, r );
+  else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7, r );
 
-  if( pl->facingr ) {
-    if( pl->model==4 ) //girl hair
-      SJGL_Blit( &(REC){80,120,20,15}, c-4, d+(pl->goingd?4:0)+pl->gundown/7, r );
-
-    SJGL_Blit( &(REC){ushift,pl->model*30,20,30}, c, d, r);
-
-    if( !pl->stabbing ) //gun
-      SJGL_Blit( &(REC){ 0+gunshift,150,24,27}, c+5-pl->gunback, d+5+pl->gundown/5, r );
+  //player sprite
+  if( pl->goingd ) {
+    if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d, r);
+    else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d, r);
+    else                   sprblit( &SM(ctblue_duck_l), c, d, r);
   } else {
-    if( pl->model==4 ) //girl hair
-      SJGL_Blit( &(REC){100,120,20,15}, c+4, d+(pl->goingd?4:0)+pl->gundown/7, r );
-
-    SJGL_Blit( &(REC){ushift,pl->model*30,20,30}, c, d, r);
-
-    if( !pl->stabbing ) //gun
-      SJGL_Blit( &(REC){24+gunshift,150,24,27}, c-9+pl->gunback, d+5+pl->gundown/5, r );
+    if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d, r);
+    else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d, r);
+    else                   sprblit( &SM(ctblue_l),      c, d, r);
   }
 
-  if( pl->stabbing ) //up/down stabbing
-    SJGL_Blit( &(REC){148+(pl->stabbing<0?5:0),150,5,27}, c+8, d-(pl->stabbing<0?15:-15), r );
+  // knife or gun
+  if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44, r );
+  else if( pl->stabbing>0 ) sprblit( &SM(knife_down), c, d+10, r );
+  else {
+    int gb = pl->gunback;
+    int gd = pl->gundown/5;
+
+    if     ( pl->goingu && pl->facingr ) sprblit( &SM(mp5_up_r),   c+20-gb, d-25+gd, r );
+    else if( pl->goingu                ) sprblit( &SM(mp5_up_l),   c-20+gb, d-25+gd, r );
+    else if( pl->goingd && pl->facingr ) sprblit( &SM(mp5_down_r), c+20-gb, d-10+gd, r );
+    else if( pl->goingd                ) sprblit( &SM(mp5_down_l), c-20+gb, d-10+gd, r );
+    else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd, r );
+    else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd, r );
+  }
 
   // draw shadow
   V shadow = (V){pl->pos.x, co->bsy*co->y, pl->pos.z};
@@ -118,14 +132,14 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->stabbing += (newme->stabbing>0 ? -1 : 1);
   }
   if(        newme->stabbing && newme->goingu ) {          //expand hull for stabbing
-    newme->hull[0].y = -29;
-    newme->hull[1].y =  15;
+    newme->hull[0].y = -44;
+    newme->hull[1].y =   0;
   } else if( newme->stabbing && newme->goingd ) {
-    newme->hull[0].y = -15;
-    newme->hull[1].y =  25;
+    newme->hull[0].y = -30;
+    newme->hull[1].y =  10;
   } else {
-    newme->hull[0].y = -15;
-    newme->hull[1].y =  15;
+    newme->hull[0].y = -30;
+    newme->hull[1].y =   0;
   }
 
   newme->gunback = 0; //reset gun position
@@ -183,20 +197,19 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( newme->firing && newme->cooldown==0 && newme->projectiles<5 ) { // create bullet
     MKOBJ( bu, BULLET, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
     if( newme->facingr ) {
-      bu->pos = (V){newme->pos.x+19,newme->pos.y-3,newme->pos.z};
+      bu->pos = (V){newme->pos.x+19,newme->pos.y-19,newme->pos.z};
       bu->vel = (V){ 6,0,-6};
     } else {
-      bu->pos = (V){newme->pos.x-19,newme->pos.y-3,newme->pos.z};
+      bu->pos = (V){newme->pos.x-19,newme->pos.y-19,newme->pos.z};
       bu->vel = (V){-6,0, 6};
     }
     if( newme->goingu ) { // aiming
       bu->vel.y += -8;
-      bu->pos.x += -2;
-      bu->pos.y += -7;
+      bu->pos.y += -6;
     }
     if( newme->goingd ) {
       bu->vel.y +=  8;
-      bu->pos.y += 16;
+      bu->pos.y += 10;
     }
     bu->model       = 1;
     bu->owner       = objid;

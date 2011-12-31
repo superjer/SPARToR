@@ -212,7 +212,7 @@ void render()
 
       if( o->flags & OBJF_POS ) {
         V *pos  = flex(o,pos);
-        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_LEFT, "%d", i);
+        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_CENTER, "%d", i);
       }
     }
 

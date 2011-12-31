@@ -21,8 +21,10 @@
 #include "sprite.h"
 
 
-SPRITE_T *sprites;
-size_t    spr_count;
+SPRITE_T  *sprites;
+size_t     spr_count;
+char      *spr_names[] = { SPRITE_ENUM(STRINGIFY) };
+int        spr_map[sprite_enum_max] = { 0 };
 
 
 enum spr_pos { TOP=-1, MID=-2, BOT=-3 };
@@ -202,6 +204,11 @@ int load_sprites(int texnum)
       if(      spr->ancy == TOP ) spr->ancy = 0;
       else if( spr->ancy == MID ) spr->ancy = spr->rec.h / 2;
       else if( spr->ancy == BOT ) spr->ancy = spr->rec.h;
+
+      int i;
+      for( i=0; i<sprite_enum_max; i++ )
+        if( 0==strcmp(spr->name,spr_names[i]) )
+          spr_map[i] = spr_count-1;
     }
   }
 

@@ -165,14 +165,31 @@ void render()
         int pos = co->x*co->y*z + co->x*y + x;
         int flags = ((co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap )[pos].flags;
 
-        if( flags & CBF_SOLID ) {
-          glColor4f(1,0,0,1);
-          SJGL_Blit( &(REC){0,0,16,16}, x*16,   y*16,   z );
-          SJGL_Blit( &(REC){0,0,12,12}, x*16+2, y*16+2, z );
-        } else if( flags & CBF_PLAT ) {
-          glColor4f(0,1,0,1);
-          SJGL_Blit( &(REC){0,0,16, 2}, x*16,   y*16,   z );
-        }
+        int x1 = (x  )*co->bsx;
+        int x2 = (x+1)*co->bsx;
+        int y1 = (y  )*co->bsy;
+        int y2 = (y+1)*co->bsy;
+        int z1 = (z  )*co->bsz;
+        int z2 = (z+1)*co->bsz;
+
+        if     ( flags & CBF_SOLID ) ;
+        else if( flags & CBF_PLAT  ) { y2 = y1 + 4; }
+        else continue;
+
+        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define SOL_R  SOL_VERTEX(1,0  ,0  ,x1, y1, z1);
+        #define SOL_RG SOL_VERTEX(1,0.2,0  ,x1, y1, z2);
+        #define SOL_W  SOL_VERTEX(1,0.2,0.2,x2, y1, z2);
+        #define SOL_RB SOL_VERTEX(1,0  ,0.2,x2, y1, z1);
+        #define SOL_K  SOL_VERTEX(0,0  ,0  ,x1, y2, z1);
+        #define SOL_G  SOL_VERTEX(0,0.2,0  ,x1, y2, z2);
+        #define SOL_GB SOL_VERTEX(0,0.2,0.2,x2, y2, z2);
+        #define SOL_B  SOL_VERTEX(0,0  ,0.2,x2, y2, z1);
+
+        glBegin(GL_LINE_STRIP);
+        SOL_GB SOL_B  SOL_RB SOL_B  SOL_K  SOL_R  SOL_K  SOL_G
+        SOL_GB SOL_W  SOL_RB SOL_R  SOL_RG SOL_G  SOL_RG SOL_W
+        glEnd();
       }
     }
 

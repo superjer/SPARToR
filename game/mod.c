@@ -669,13 +669,17 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
-  y = co->y * co->bsy; // FIXME : silly hack for layers all being at the bottom of the context
+  if( co->projection == DIMETRIC )
+    y = co->y * co->bsy; // layers are all anchored at the bottom of the context
 
   SJGL_SetTex( spr->texnum );
 
   int c = TILE2NATIVE_X(co,x,y,z);
   int d = TILE2NATIVE_Y(co,x,y,z);
-  int r = d + co->tileuh / 2;
+  int r = d;
+
+  if( spr->ancy > co->tileuh ) // for sprites that pop out of the flat plane
+    r += co->tileuh / 2;
 
   // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
   // which always in the southernmost corner

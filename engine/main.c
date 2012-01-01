@@ -68,16 +68,12 @@ static const Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_
 static void init_flexers()
 {
   memset(flexer,0,sizeof flexer);
-#define EXPOSE(T,N,A) flexer[TOKEN_PASTE(OBJT_,TYPE)].N=(ptrdiff_t)&((TOKEN_PASTE(TYPE,_t) *)0)->N;
-#define HIDE(X)
-#define STRUCT() flexer[TOKEN_PASTE(OBJT_,TYPE)].name = STRINGIFY(TYPE);
-#define ENDSTRUCT(TYPE)
-#include "engine_structs.h"
-#include "game_structs.h"
-#undef EXPOSE
-#undef HIDE
-#undef STRUCT
-#undef ENDSTRUCT
+  #define EXPOSE(T,N,A) flexer[TOKEN_PASTE(OBJT_,TYPE)].N=(ptrdiff_t)&((TOKEN_PASTE(TYPE,_t) *)0)->N;
+  #define HIDE(X)
+  #define STRUCT() flexer[TOKEN_PASTE(OBJT_,TYPE)].name = STRINGIFY(TYPE);
+  #define ENDSTRUCT(TYPE)
+  #include "engine_structs.h"
+  #include "game_structs.h"
 }
 
 
@@ -251,54 +247,60 @@ void advance()
 
         if( newme->context && (newme->flags & OBJF_CLIP) ) { //check CBs (context blocks (map tiles))
           CONTEXT_t *co = fr[b].objs[newme->context].data;
-          int dnx = ((int)(newmepos->x+newmehull[0].x)/16); //FIXME: 16 assumed
-          int dny = ((int)(newmepos->y+newmehull[0].y)/16);
-          int upx = ((int)(newmepos->x+newmehull[1].x)/16);
-          int upy = ((int)(newmepos->y+newmehull[1].y)/16);
-          int iterx,itery;
+          int dnx = ((int)(newmepos->x + newmehull[0].x) / co->bsx);
+          int dny = ((int)(newmepos->y + newmehull[0].y) / co->bsy);
+          int dnz = ((int)(newmepos->z + newmehull[0].z) / co->bsz);
+          int upx = ((int)(newmepos->x + newmehull[1].x) / co->bsx);
+          int upy = ((int)(newmepos->y + newmehull[1].y) / co->bsy);
+          int upz = ((int)(newmepos->z + newmehull[1].z) / co->bsz);
+          int ix,iy,iz;
 
-          for( itery=0; itery<=upy-dny; itery++ )
-            for( iterx=0; iterx<=upx-dnx; iterx++ ) {
-              int x = oldmevel->x>0 ? dnx+iterx : upx-iterx; //iterate in an order matching direction of movement
-              int y = oldmevel->y>0 ? dny+itery : upy-itery;
+          for( iy=0; iy<=upy-dny; iy++ ) for( ix=0; ix<=upx-dnx; ix++ ) for( iz=0; iz<=upz-dnz; iz++ ) {
+            int x = oldmevel->x>0 ? dnx+ix : upx-ix; //iteriate in an order matching direction of movement
+            int y = oldmevel->y>0 ? dny+iy : upy-iy;
+            int z = oldmevel->z>0 ? dnz+iz : upz-iz;
 
-              if( x<0 || x>=co->x || y<0 || y>=co->y ) continue; //out of bounds?
+            if( x<0 || x>=co->x || y<0 || y>=co->y || z<0 || z>=co->z ) continue; //out of bounds?
 
-              int pos = y*co->x + x;
-              short flags = (co->dmap[pos].flags & CBF_NULL) ? co->map[pos].flags : co->dmap[pos].flags;
+            #define MAPPOS(X,Y,Z) ((Z)*co->y*co->x + (Y)*co->x + (X))
+            int pos = MAPPOS(x,y,z);
+            short flags = (co->dmap[pos].flags & CBF_NULL) ? co->map[pos].flags : co->dmap[pos].flags;
 
-              if( !(flags & (CBF_SOLID|CBF_PLAT)) ) continue;
+            if( !(flags & (CBF_SOLID|CBF_PLAT)) ) continue;
 
-              V *cbpos  = &(V){x*16,y*16,0};
-              V *cbhull = (V[2]){{0,0,0},{16,16,0}};
+            V *cbpos  = &(V){x*co->bsx,y*co->bsy,z*co->bsz};
+            V *cbhull = (V[2]){{0,0,0},{co->bsx,co->bsy,co->bsz}};
 
-              #define IS_SOLID(X,Y) (    (X)>=0 && (Y)>=0 && (X)<co->x && (Y)<co->y       \
-                                      &&                                                  \
-                                         HAS(                                             \
-                                               (co->dmap[(Y)*co->x+(X)].flags & CBF_NULL) \
-                                              ? co->map[ (Y)*co->x+(X)].flags             \
-                                              : co->dmap[(Y)*co->x+(X)].flags             \
-                                            ,                                             \
-                                              CBF_SOLID                                   \
-                                            )                                             \
-                                    )
-              #define ELSE_IF_HIT_THEN_MOVE_STOP(outX,outY,hullL,hullR,axis,LTGT)                                                 \
-                      else if( !IS_SOLID(outX,outY) && cbpos->axis+cbhull[hullL].axis LTGT oldmepos->axis+oldmehull[hullR].axis ) \
-                        { newmepos->axis = cbpos->axis+cbhull[hullL].axis-newmehull[hullR].axis; newmevel->axis = 0; }
+            #define IS_SOLID(X,Y,Z)                                                                        \
+            (                                                                                              \
+              (X)>=0 && (Y)>=0 && (Z)>=0 && (X)<co->x && (Y)<co->y && (Z)<co->z &&                         \
+              HAS(                                                                                         \
+                   ((co->dmap[MAPPOS(X,Y,Z)].flags & CBF_NULL) ? co->map : co->dmap)[MAPPOS(X,Y,Z)].flags  \
+                   , CBF_SOLID                                                                             \
+                 )                                                                                         \
+            )
 
-              if( 0 ) ;
-              ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y-1,0,1,y,>=)
-              else if( flags & CBF_PLAT ) ; // skip other sides for plat
-              ELSE_IF_HIT_THEN_MOVE_STOP(x-1,y  ,0,1,x,>=)
-              ELSE_IF_HIT_THEN_MOVE_STOP(x+1,y  ,1,0,x,<=)
-              ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y+1,1,0,y,<=)
-              else continue;
+            #define ELSE_IF_HIT_THEN_MOVE_STOP(outX,outY,outZ,hullL,hullR,axis,LTGT)                       \
+              else if( !IS_SOLID(outX,outY,outZ) &&                                                        \
+                       cbpos->axis+cbhull[hullL].axis LTGT oldmepos->axis+oldmehull[hullR].axis )          \
+              {                                                                                            \
+                  newmepos->axis = cbpos->axis+cbhull[hullL].axis-newmehull[hullR].axis;                   \
+                  newmevel->axis = 0;                                                                      \
+              }
 
-              recheck[r%2][i] = 1; //I've moved, so recheck me
+            if( 0 ) ;
+            ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y-1,z  ,0,1,y,>=)
+            else if( flags & CBF_PLAT ) ;
+            // skip other sides for plat
+            ELSE_IF_HIT_THEN_MOVE_STOP(x-1,y  ,z  ,0,1,x,>=)
+            ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y  ,z-1,0,1,z,>=)
+            ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y  ,z+1,1,0,z,<=)
+            ELSE_IF_HIT_THEN_MOVE_STOP(x+1,y  ,z  ,1,0,x,<=)
+            ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y+1,z  ,1,0,y,<=)
+            else continue;
 
-              #undef ELSE_IF_HIT_THEN_MOVE_STOP
-              #undef IS_SOLID
-            }
+            recheck[r%2][i] = 1; //I've moved, so recheck me
+          }
         }
 
         for(j=0;j<(r==0?i:maxobjs);j++) { //find other objs to interact with -- don't need to check all on 1st 2 passes
@@ -317,7 +319,9 @@ void advance()
           if( newmepos->x+newmehull[0].x >= newyoupos->x+newyouhull[1].x ||   //we dont collide NOW
               newmepos->x+newmehull[1].x <= newyoupos->x+newyouhull[0].x ||
               newmepos->y+newmehull[0].y >= newyoupos->y+newyouhull[1].y ||
-              newmepos->y+newmehull[1].y <= newyoupos->y+newyouhull[0].y    )
+              newmepos->y+newmehull[1].y <= newyoupos->y+newyouhull[0].y ||
+              newmepos->z+newmehull[0].z >= newyoupos->z+newyouhull[1].z ||
+              newmepos->z+newmehull[1].z <= newyoupos->z+newyouhull[0].z    )
             continue;
 
           if(        oldyoupos->y+oldyouhull[0].y >= oldmepos->y+oldmehull[1].y     //I was above BEFORE

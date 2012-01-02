@@ -21,9 +21,11 @@ int    setmodel = -1;
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
+  V shadow = pl->pos;
+  shadow.y = co->bsy*co->y;
   int c = POINT2NATIVE_X(&pl->pos);
   int d = POINT2NATIVE_Y(&pl->pos);
-  int r = d;
+  int r = POINT2NATIVE_Y(&shadow);
 
   //girl hair
   if     ( pl->model!=4 ) ;
@@ -57,11 +59,7 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   }
 
   // draw shadow
-  V shadow = (V){pl->pos.x, co->bsy*co->y, pl->pos.z};
-  int sc = POINT2NATIVE_X(&shadow) - 10;
-  int sd = POINT2NATIVE_Y(&shadow) - 5;
-  SJGL_SetTex( sys_tex[TEX_PERSON].num );
-  SJGL_Blit( &(REC){0,246,20,10}, sc, sd, r-1 );
+  sprblit( &SM(shadow), c, r, r-1 );
 }
 
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -97,6 +95,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   gh->vel.x = newme->pos.x - gh->pos.x; //put ghost in the right spot
+  gh->vel.y = newme->pos.y - gh->pos.y;
   gh->vel.z = newme->pos.z - gh->pos.z;
 
   if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) { //local client match

@@ -76,6 +76,13 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
       break; }
 
+    case 'z': { // blocksize
+      co->bsx = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->bsy = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->bsz = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+
+      break; }
+
     default:
       SJC_Write("Unknown edit command!");
       break;
@@ -102,8 +109,6 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
   int  upy    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  upz    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  sprnum = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-
-SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill me!
 
   if( letter!='p' ) { SJC_Write("Unknown edit command!"); return; }
 

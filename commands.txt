@@ -7,6 +7,14 @@ bind            bind <action>
                 Bind a key to an action. E.g. bind jump
 
 
+blocksize       blocksize
+                blocksize <X> <Y> <Z>
+
+                Without arguments, show the block size of the current
+                context, i.e. the size of each tile or cube. With X, Y, Z,
+                set the block size.
+
+
 bounds          bounds
                 bounds <X> <Y> <Z>
 

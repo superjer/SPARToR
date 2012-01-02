@@ -302,7 +302,7 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         int posy = screen2native_y(i_mousey);
 
         posx += co->tileuw/2; // tiles are centered in width
-        posy -= co->bsy;      // tiles are drawn at the bottom of the cube
+        posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
 
         //map to game coordinates
         int tilex = NATIVE2TILE_X(co,posx,posy);
@@ -358,20 +358,24 @@ int mod_command(char *q)
     setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
     return 0;
 
-  }else if( strcmp(q,"bounds")==0 ){
+  }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
     int x = safe_atoi(strtok(NULL," "));
     int y = safe_atoi(strtok(NULL," "));
     int z = safe_atoi(strtok(NULL," "));
+    char chr = strcmp(q,"bounds")==0 ? 'b' : 'z';
 
     if( !x || !y || !z ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
-      SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
+      if( chr == 'b' )
+        SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
+      else
+        SJC_Write("The current blocksize is (X,Y,Z): %d %d %d", co->bsx, co->bsy, co->bsz);
       return 0;
     }
 
     memset(&magic_c,0,sizeof magic_c);
-    packbytes(magic_c.data,'b',&n,1);
+    packbytes(magic_c.data,chr,&n,1);
     packbytes(magic_c.data,  x,&n,4);
     packbytes(magic_c.data,  y,&n,4);
     packbytes(magic_c.data,  z,&n,4);
@@ -512,7 +516,7 @@ void mod_postdraw(Uint32 vidfr)
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
 
   posx += co->tileuw/2; // tiles are centered in width
-  posy -= co->bsy;      // tiles are drawn at the bottom of the cube
+  posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
 
   //map to game coordinates
   int upx = NATIVE2TILE_X(co,posx,posy);

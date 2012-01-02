@@ -46,4 +46,5 @@ X(slug_ouch_l),\
 X(ghost),\
 X(girlhair_r),\
 X(girlhair_l),\
+X(shadow),\
 X(sprite_enum_unused)

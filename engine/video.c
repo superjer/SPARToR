@@ -177,14 +177,14 @@ void render()
         else continue;
 
         #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
-        #define SOL_R  SOL_VERTEX(1,0  ,0  ,x1, y1, z1);
-        #define SOL_RG SOL_VERTEX(1,0.2,0  ,x1, y1, z2);
-        #define SOL_W  SOL_VERTEX(1,0.2,0.2,x2, y1, z2);
-        #define SOL_RB SOL_VERTEX(1,0  ,0.2,x2, y1, z1);
-        #define SOL_K  SOL_VERTEX(0,0  ,0  ,x1, y2, z1);
-        #define SOL_G  SOL_VERTEX(0,0.2,0  ,x1, y2, z2);
-        #define SOL_GB SOL_VERTEX(0,0.2,0.2,x2, y2, z2);
-        #define SOL_B  SOL_VERTEX(0,0  ,0.2,x2, y2, z1);
+        #define SOL_R  SOL_VERTEX(1  ,0  ,0  ,x1, y1, z1);
+        #define SOL_RG SOL_VERTEX(1  ,0.2,0  ,x1, y1, z2);
+        #define SOL_W  SOL_VERTEX(1  ,0.2,0.2,x2, y1, z2);
+        #define SOL_RB SOL_VERTEX(1  ,0  ,0.2,x2, y1, z1);
+        #define SOL_K  SOL_VERTEX(0.5,0  ,0  ,x1, y2, z1);
+        #define SOL_G  SOL_VERTEX(0.5,0.2,0  ,x1, y2, z2);
+        #define SOL_GB SOL_VERTEX(0.5,0.2,0.2,x2, y2, z2);
+        #define SOL_B  SOL_VERTEX(0.5,0  ,0.2,x2, y2, z1);
 
         glBegin(GL_LINE_STRIP);
         SOL_GB SOL_B  SOL_RB SOL_B  SOL_K  SOL_R  SOL_K  SOL_G

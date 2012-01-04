@@ -27,7 +27,9 @@ enum { TOOL_NUL = 1,
        SPRF_LFT = 0x800,
        SPRF_CEN = 0x1000,
        SPRF_RGT = 0x2000,
-       SPRF_ALIGNMASK = 0x3F00 };
+       SPRF_ALIGNMASK = 0x3F00,
+       SPRF_FLIPX = 0x4000,
+       SPRF_FLIPY = 0x8000 };
 
 typedef struct {
   int    texnum;

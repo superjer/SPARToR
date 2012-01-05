@@ -43,6 +43,12 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     mycontext   = ob->context;
   }
 
+  if( co->projection == DIMETRIC     )
+    memcpy( gh->hull, (V[2]){{-64,-72,-64},{64,  0, 64}}, sizeof (V[2]) );
+  if( co->projection == ORTHOGRAPHIC )
+    memcpy( gh->hull, (V[2]){{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}}, sizeof (V[2]) );
+
+
   FCMD_t *c = fr[b].cmds + gh->client;
 
   switch( c->cmd ) {

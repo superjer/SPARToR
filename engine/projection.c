@@ -22,13 +22,13 @@ DECL_FUNC_N2T(NATIVE2TILE_X_DIMETRIC)  { return (DIME_SHIFTX(co,x)+DIME_SHIFTY(c
 DECL_FUNC_N2T(NATIVE2TILE_Y_DIMETRIC)  { return 0;                                                  }
 DECL_FUNC_N2T(NATIVE2TILE_Z_DIMETRIC)  { return (DIME_SHIFTY(co,y)-DIME_SHIFTX(co,x)/2)/co->tileuh; }
 
-DECL_FUNC_T2N(TILE2NATIVE_X_ORTHO)  { return x*co->tileuw + co->tileuw/2;   }
-DECL_FUNC_T2N(TILE2NATIVE_Y_ORTHO)  { return y*co->tileuh;                  }
-DECL_FUNC_P2N(POINT2NATIVE_X_ORTHO) { return o->x;                          }
-DECL_FUNC_P2N(POINT2NATIVE_Y_ORTHO) { return o->y;                          }
-DECL_FUNC_N2T(NATIVE2TILE_X_ORTHO)  { return (x - co->tileuw/2)/co->tileuw; }
-DECL_FUNC_N2T(NATIVE2TILE_Y_ORTHO)  { return y/co->tileuh;                  }
-DECL_FUNC_N2T(NATIVE2TILE_Z_ORTHO)  { return 0;                             }
+DECL_FUNC_T2N(TILE2NATIVE_X_ORTHO)  { return x*co->tileuw + co->tileuw/2; }
+DECL_FUNC_T2N(TILE2NATIVE_Y_ORTHO)  { return y*co->tileuh;                }
+DECL_FUNC_P2N(POINT2NATIVE_X_ORTHO) { return o->x;                        }
+DECL_FUNC_P2N(POINT2NATIVE_Y_ORTHO) { return o->y;                        }
+DECL_FUNC_N2T(NATIVE2TILE_X_ORTHO)  { return x/co->tileuw;                }
+DECL_FUNC_N2T(NATIVE2TILE_Y_ORTHO)  { return y/co->tileuh;                }
+DECL_FUNC_N2T(NATIVE2TILE_Z_ORTHO)  { return 0;                           }
 
 FUNC_T2N TILE2NATIVE_X  = TILE2NATIVE_X_ORTHO;
 FUNC_T2N TILE2NATIVE_Y  = TILE2NATIVE_Y_ORTHO;

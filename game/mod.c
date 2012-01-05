@@ -301,13 +301,18 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         int posx = screen2native_x(i_mousex);
         int posy = screen2native_y(i_mousey);
 
-        posx += co->tileuw/2; // tiles are centered in width
-        posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+        if( co->projection == DIMETRIC ) {
+          posx += co->tileuw/2; // tiles are centered in width
+          posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+        }
 
         //map to game coordinates
         int tilex = NATIVE2TILE_X(co,posx,posy);
-        int tiley = ylayer; //NATIVE2TILE_Y(co,posx,posy);
+        int tiley = NATIVE2TILE_Y(co,posx,posy);
         int tilez = NATIVE2TILE_Z(co,posx,posy);
+
+        if( co->projection == DIMETRIC     ) tiley = ylayer;
+        if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
 
         if( c->cmd==CMDT_1EPANT ) {
           downx = tilex;
@@ -448,7 +453,7 @@ void mod_predraw(Uint32 vidfr)
       continue;
 
     SPRITE_T *spr = sprites + cb->spr;
-    draw_sprite_on_tile( spr, co, i, 0, k );
+    draw_sprite_on_tile( spr, co, i, j, k );
   }
 }
 
@@ -515,8 +520,10 @@ void mod_postdraw(Uint32 vidfr)
   GHOST_t   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
 
-  posx += co->tileuw/2; // tiles are centered in width
-  posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+  if( co->projection == DIMETRIC ) {
+    posx += co->tileuw/2; // tiles are centered in width
+    posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+  }
 
   //map to game coordinates
   int upx = NATIVE2TILE_X(co,posx,posy);
@@ -554,7 +561,7 @@ void mod_postdraw(Uint32 vidfr)
       dspr = sprites + gh->clipboard_data[ x + y*clipx + z*clipy*clipx ].spr;
     }
                  
-    draw_sprite_on_tile( dspr, co, i, 0, k );
+    draw_sprite_on_tile( dspr, co, i, j, k );
   }
 
   glPopAttrib();

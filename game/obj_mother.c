@@ -37,8 +37,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     gh->pos            = (V){  0,  0,  0};
     gh->vel            = (V){  0,  0,  0};
-    gh->hull[0]        = (V){-64,-72,-64};
-    gh->hull[1]        = (V){ 64,  0, 64};
+    gh->hull[0]        = (V){  0,  0,  0};
+    gh->hull[1]        = (V){  0,  0,  0};
     gh->model          = 0;
     gh->client         = i;
     gh->avatar         = slot0;

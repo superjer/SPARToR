@@ -133,6 +133,13 @@ stats           stats
                 Show timing stats in the upper right corner of the screen.
 
 
+tilespacing     tilespacing
+                tilespacing <w> <h>
+
+                With no args, show the current context's tile spacing (tileuw
+                and tileuh). With args, set the spacing.
+
+
 watch           watch
 
                 Turn on "input watch" to watch what keys and buttons are being

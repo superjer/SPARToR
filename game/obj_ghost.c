@@ -89,6 +89,12 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
       break; }
 
+    case 't': { // tilespacing
+      co->tileuw = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->tileuh = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+
+      break; }
+
     default:
       SJC_Write("Unknown edit command!");
       break;

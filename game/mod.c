@@ -390,6 +390,27 @@ int mod_command(char *q)
     putcmd(0,0,0);
     return 0;
 
+  }else if( strcmp(q,"tilespacing")==0 ){
+    size_t n = 0;
+    int tileuw = safe_atoi(strtok(NULL," "));
+    int tileuh = safe_atoi(strtok(NULL," "));
+
+    if( !tileuw || !tileuh ) {
+      CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
+      SJC_Write("The current tilespacing is (W,H): %d %d", co->tileuw, co->tileuh);
+      return 0;
+    }
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,   't',&n,1);
+    packbytes(magic_c.data,tileuw,&n,4);
+    packbytes(magic_c.data,tileuh,&n,4);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON;
+    putcmd(0,0,0);
+    return 0;
+
   }else if( strcmp(q,"orthographic")==0 || strcmp(q,"dimetric")==0 ){
     size_t n = 0;
 

@@ -15,6 +15,7 @@
 #include "saveload.h"
 #include "sjglob.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
 
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
@@ -580,6 +581,8 @@ void mod_postdraw(Uint32 vidfr)
       int y = (j-dny+shy) % clipy;
       int z = (k-dnz+shz) % clipz;
       dspr = sprites + gh->clipboard_data[ x + y*clipx + z*clipy*clipx ].spr;
+    } else if( co->projection == ORTHOGRAPHIC ) {
+      dspr = sprite_grid_transform_xy(dspr, co, i, j, k, i-dnx, j-dny, upx-dnx, upy-dny);
     }
                  
     draw_sprite_on_tile( dspr, co, i, j, k );

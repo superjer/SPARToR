@@ -18,6 +18,7 @@ OBJS = engine/main.o \
        engine/patt.o \
        engine/saveload.o \
        engine/sprite.o \
+       engine/sprite_helpers.o \
        engine/projection.o \
        engine/sjglob.o \
        engine/mt19937ar/mt19937ar.o

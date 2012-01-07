@@ -24,6 +24,7 @@
 #include "input.h"
 #include "video.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
 #include <math.h>
 
 #if (SDL_IMAGE_MAJOR_VERSION*1000000 + SDL_IMAGE_MINOR_VERSION*1000 + SDL_IMAGE_PATCHLEVEL)<1002008 //support SDL_image pre 1.2.8

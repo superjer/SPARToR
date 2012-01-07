@@ -159,7 +159,6 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->grounded = 0;
 
   // -- DASH --
-  SJC_Write("cooldown: %d      dashing: %d",newme->cooldown,newme->dashing);
   if( !newme->cooldown && newme->dashing ) {
     newme->vel.x = newme->facingr ? 10 : -10;
     newme->vel.y = 0;

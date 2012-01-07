@@ -33,6 +33,8 @@ void command(const char *s){
   TRY
     if( q==NULL ){
       ;
+    }else if( strcmp(q,"redetect")==0 ){
+      inputinit();
     }else if( strcmp(q,"realtime")==0 ){
       eng_realtime = eng_realtime ? 0 : 1;
       SJC_Write("Realtime mode %s",eng_realtime?"on":"off");

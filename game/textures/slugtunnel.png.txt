@@ -71,7 +71,7 @@ tnl_weight_silver 48 48
   tnl-pipe-12-9
 .end
 
-.grid  cols 4  pos 176 0  pipe
+.grid  cols 4  pos 176 64  pipe
   tnlred-pipe-none
   tnlred-pipe-3
   tnlred-pipe-3-9
@@ -90,7 +90,7 @@ tnl_weight_silver 48 48
   tnlred-pipe-12-9
 .end
 
-.grid  cols 4  pos 176 0  pipe
+.grid  cols 4  pos 112 64  pipe
   tnlgray-pipe-none
   tnlgray-pipe-3
   tnlgray-pipe-3-9

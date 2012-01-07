@@ -37,6 +37,16 @@ typedef struct {
   REC    rec;
   int    ancx,ancy; // anchor position
   unsigned flags;
+  struct {
+    int gridpitch;
+    int gridlast;
+    int piping;
+    int stretch;
+    int stretch_t;
+    int stretch_r;
+    int stretch_b;
+    int stretch_l;
+  } *more;
 } SPRITE_T;
 
 

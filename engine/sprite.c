@@ -64,12 +64,19 @@ int load_sprites(int texnum)
 
   char line[1000];
   enum { READY, DEFAULT, GRID, GRIDITEM, NOMORE } mode = READY;
-  int gridcols = 1; // just to avoid compiler warning
-  int gridoffs = 0; // "
-  int also = 0;
-  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32, 0};
+  int gridcols  =  1; // just to avoid compiler warning
+  int gridoffs  = -1; // 0 indicates that a grid just started
+  int stretch   =  0;
+  int stretch_t =  0;
+  int stretch_r =  0;
+  int stretch_b =  0;
+  int stretch_l =  0;
+  int piping    =  0;
+  int also      =  0;
+  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
   SPRITE_T gdefs;
   SPRITE_T prev_spr = defs;
+  SPRITE_T *spr_gridstart = NULL;
 
   line_num = 0;
 
@@ -126,9 +133,29 @@ int load_sprites(int texnum)
     } else if( !strcmp(tokens[i],".end") ) {
       if( mode != GRIDITEM )
         return fail("load_sprites: .end command encountered without a .grid");
+
       if( count > 1 )
         return fail("unexpected tokens after .end command");
+
+      // set special properties of the first sprite in the grid, now that the grid is complete
+      if( spr_gridstart && spr_gridstart->more ) {
+        spr_gridstart->more->gridpitch = gridcols;
+        spr_gridstart->more->gridlast = spr_count-1;
+        spr_gridstart->more->stretch = stretch;
+        spr_gridstart->more->piping = piping;
+        if( stretch ) {
+          spr_gridstart->more->stretch_t = stretch_t;
+          spr_gridstart->more->stretch_r = stretch_r;
+          spr_gridstart->more->stretch_b = stretch_b;
+          spr_gridstart->more->stretch_l = stretch_l;
+        }
+      }
+
+      spr_gridstart = NULL;
       mode = NOMORE;
+      stretch = 0;
+      piping = 0;
+      gridoffs = -1;
 
     } else if( !strcmp(tokens[i],".") ) {
       if( count > 2 )
@@ -187,6 +214,19 @@ int load_sprites(int texnum)
         if( gridcols < 1 )
           return fail("Column count must be a number greater than zero");
 
+      } else if( !strcmp(tokens[i],"stretch") ) {
+        if( count-i < 5 )
+          return fail("Expecting top, right, bottom, left sizes after 'stretch'");
+
+        stretch = 1;
+        stretch_t = atoi(tokens[++i]);
+        stretch_r = atoi(tokens[++i]);
+        stretch_b = atoi(tokens[++i]);
+        stretch_l = atoi(tokens[++i]);
+
+      } else if( !strcmp(tokens[i],"pipe") ) {
+        piping = 1;
+
       } else if( !strcmp(tokens[i],"tool") ) {
         if( count-i < 2 )
           return fail("Expecting tool name after 'tool'");
@@ -216,6 +256,7 @@ int load_sprites(int texnum)
       }
     }
 
+    // finish the sprite if we were creating one this iteration
     if( spr ) {
       memcpy( &prev_spr, spr, sizeof *spr );
 
@@ -230,11 +271,17 @@ int load_sprites(int texnum)
       if( spr->flags & SPRF_FLIPX ) { spr->rec.x += spr->rec.w; spr->rec.w = -spr->rec.w; }
       if( spr->flags & SPRF_FLIPY ) { spr->rec.y += spr->rec.h; spr->rec.h = -spr->rec.h; }
 
+      // make the SM() macro (for accessing sprites FAST) work by filling in the spr_map
       int i;
       for( i=0; i<sprite_enum_max; i++ )
         if( 0==strcmp(spr->name,spr_names[i]) )
           spr_map[i] = spr_count-1;
 
+      // remember that this was the first sprite in the grid
+      if( gridoffs==0 ) {
+        spr->more = calloc( 1, sizeof *(spr->more) );
+        spr_gridstart = spr;
+      }
     }
   }
 

@@ -49,7 +49,7 @@ void inputinit()
   if( started ) {
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
     if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
-      cleanup();
+      SJC_Write("Error: could not restart the JOYSTICK SubSystem!");
   }
 
   int i, numjoysticks;

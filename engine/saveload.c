@@ -106,7 +106,7 @@ int save_context(const char *name,int context,int savefr)
   int in_use[ spr_count ];
   memset( in_use, -1, sizeof in_use[0] * spr_count );
   for( i=0; i<co->x*co->y*co->z; i++ ) {
-    size_t n = (co->dmap[i].flags & CBF_NULL) ? co->map[i].spr : co->dmap[i].spr;
+    size_t n = co->dmap[i].spr;
 
     if( n < spr_count )
       in_use[n] = 0; // zero means used, -1 means unusued
@@ -137,7 +137,7 @@ int save_context(const char *name,int context,int savefr)
     for( y=0; y<co->y; y++ ) {
       for( x=0; x<co->x; x++ ) {
         int pos = co->x*co->y*z + co->x*y + x;
-        CB *cb = (co->dmap[pos].flags & CBF_NULL) ? co->map+pos : co->dmap+pos;
+        CB *cb = co->dmap+pos;
         size_t val = in_use[cb->spr];
 
         if( cb->flags ) {
@@ -238,9 +238,9 @@ int load_context(const char *name,int context,int loadfr)
 
     if( n >= nspr ) SJC_Write("sprite number is too high! (%d/%d)",n,nspr);
 
-    map[ i].spr     = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
-    map[ i].flags   = flags;
-    dmap[i].flags   = CBF_NULL;
+    dmap[i].spr   = map[i].spr   = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
+    dmap[i].flags = map[i].flags = flags;
+    dmap[i].flags |= CBF_NULL;
   }
 
   // everything ok? swap it in

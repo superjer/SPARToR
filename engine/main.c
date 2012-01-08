@@ -265,7 +265,7 @@ void advance()
 
             #define MAPPOS(X,Y,Z) ((Z)*co->y*co->x + (Y)*co->x + (X))
             int pos = MAPPOS(x,y,z);
-            short flags = (co->dmap[pos].flags & CBF_NULL) ? co->map[pos].flags : co->dmap[pos].flags;
+            short flags = co->dmap[pos].flags;
 
             if( !(flags & (CBF_SOLID|CBF_PLAT)) ) continue;
 
@@ -275,10 +275,7 @@ void advance()
             #define IS_SOLID(X,Y,Z)                                                                        \
             (                                                                                              \
               (X)>=0 && (Y)>=0 && (Z)>=0 && (X)<co->x && (Y)<co->y && (Z)<co->z &&                         \
-              HAS(                                                                                         \
-                   ((co->dmap[MAPPOS(X,Y,Z)].flags & CBF_NULL) ? co->map : co->dmap)[MAPPOS(X,Y,Z)].flags  \
-                   , CBF_SOLID                                                                             \
-                 )                                                                                         \
+              HAS( co->dmap[MAPPOS(X,Y,Z)].flags, CBF_SOLID )                                              \
             )
 
             #define ELSE_IF_HIT_THEN_MOVE_STOP(outX,outY,outZ,hullL,hullR,axis,LTGT)                       \

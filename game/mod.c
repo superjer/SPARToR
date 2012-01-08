@@ -470,7 +470,7 @@ void mod_predraw(Uint32 vidfr)
     if( showlayer && ylayer!=j )
       continue;
 
-    CB *cb = (co->dmap[ pos ].flags & CBF_NULL) ? co->map + pos : co->dmap + pos;
+    CB *cb = co->dmap + pos;
     if( !(cb->flags & CBF_VIS) )
       continue;
 

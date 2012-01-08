@@ -163,7 +163,7 @@ void render()
 
       for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ ) {
         int pos = co->x*co->y*z + co->x*y + x;
-        int flags = ((co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap )[pos].flags;
+        int flags = co->dmap[pos].flags;
 
         int x1 = (x  )*co->bsx;
         int x2 = (x+1)*co->bsx;

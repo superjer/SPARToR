@@ -157,20 +157,15 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
     int pos = k*co->y*co->x + j*co->x + i;
 
     if( !tool_num ) { // regular tile painting
-      if( co->dmap[pos].flags & CBF_NULL )
-        co->dmap[pos].flags = co->map[pos].flags;
       co->dmap[pos].flags &= ~CBF_NULL;
       co->dmap[pos].flags |= CBF_VIS;
       co->dmap[pos].spr    = sprnum;
       continue;
     }
 
-    // copy map data to dmap if setting sol, plat or opn
-    if( (tool_num == TOOL_SOL || tool_num == TOOL_PLAT || tool_num == TOOL_OPN) && co->dmap[pos].flags & CBF_NULL )
-      memcpy( co->dmap+pos, co->map+pos, sizeof co->map[0] );
-
     switch( tool_num ) {
     case TOOL_NUL:
+      co->dmap[pos] = co->map[pos];
       co->dmap[pos].flags |= CBF_NULL;
       break;
 
@@ -188,10 +183,9 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID|CBF_PLAT);
       break;
 
-    case TOOL_COPY: {
-      CB *cb = ( (co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap ) + pos;
-      gh->clipboard_data[ (k-dnz)*clipy*clipx + (j-dny)*clipx + (i-dnx) ] = *cb;
-      break; }
+    case TOOL_COPY:
+      gh->clipboard_data[ (k-dnz)*clipy*clipx + (j-dny)*clipx + (i-dnx) ] = co->dmap[pos];
+      break;
 
     case TOOL_PSTE: {
       int x = (i-dnx+shx) % clipx;

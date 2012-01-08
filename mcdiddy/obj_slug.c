@@ -25,7 +25,6 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   SLUG_t    *sl = ob->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
   int kill = 0;
-  sl->vel.y += 0.6f;      //gravity
 
   if( sl->dead )          //decay
     sl->dead++;
@@ -46,6 +45,16 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     ob->flags &= ~OBJF_PLAT;
   }
 
+  float fric = sl->vel.y==0.0f ? 0.5f : 0.2f;
+
+  if( sl->vel.x > 0.5f ) {
+    if( sl->vel.x >  0.5f+fric ) sl->vel.x -=  fric;
+    else                         sl->vel.x  =  0.5f;
+  } else if( sl->vel.x < -0.5f ) {
+    if( sl->vel.x < -0.5f-fric ) sl->vel.x +=  fric;
+    else                         sl->vel.x  = -0.5f;
+  }
+
   if( sl->dead==5 )
     ob->flags &= ~(OBJF_CLIP|OBJF_BNDB);
 
@@ -53,5 +62,7 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       || sl->pos.x > co->x*co->blocksize+10.0f
       || sl->pos.y > co->y*co->blocksize+10.0f )
     ob->flags |= OBJF_DEL;
+
+  sl->vel.y += 0.50001f;      //gravity
 }
 

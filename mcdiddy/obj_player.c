@@ -239,8 +239,10 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
        || fr[b].objs[i].type==OBJT_DUMMY ) {
 
       V *youpos = flex(fr[b].objs+i, OBJF_POS);
+      V *youvel = flex(fr[b].objs+i, OBJF_VEL);
 
       if( youpos ) *youpos = clawpos;
+      if( youvel ) youvel->y = 0.0f; // cancel effect of gravity
     }
   }
 

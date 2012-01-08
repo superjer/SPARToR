@@ -24,27 +24,42 @@ void obj_slug_draw( int objid, OBJ_t *o )
 void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   int i;
-  SLUG_t    *sl = ob->data;
-  CONTEXT_t *co = fr[b].objs[ob->context].data;
-  int kill = 0;
+  SLUG_t    *sl    = ob->data;
+  SLUG_t    *oldsl = oa->data;
+  CONTEXT_t *co    = fr[b].objs[ob->context].data;
 
   if( sl->dead )          //decay
     sl->dead++;
-  else for(i=0;i<maxobjs;i++) { //find players, bullets to hit
-    if(fr[b].objs[i].type==OBJT_BULLET) {
-      BULLET_t *bu = fr[b].objs[i].data;
-      if( fabsf(sl->pos.x - bu->pos.x)>8.0f || fabsf(sl->pos.y - bu->pos.y)>8.0f )
-        continue; // no hit
-      bu->ttl = 0;
-      sl->vel.y = -3.0f;
-      kill = 1;
-    }
-  }
+  else for(i=0;i<maxobjs;i++) { //find other slugs to hit
+    if(fr[b].objs[i].type==OBJT_SLUG) {
 
-  if( kill ) {
-    sl->vel.x /= 100; //preserve direction while dead
-    sl->dead = 1;
-    ob->flags &= ~OBJF_PLAT;
+      SLUG_t *you    = fr[b].objs[i].data;
+      SLUG_t *oldyou = fr[a].objs[i].data;
+
+      if( !you || !oldyou )
+        continue;
+
+      if( fabsf( sl->pos.x - you->pos.x)>30.1f || fabsf( sl->pos.y - you->pos.y)>16.1f )
+        continue; // no hit
+
+      float diffvelx    =    sl->vel.x -    you->vel.x;
+      float diffvely    =    sl->vel.y -    you->vel.y;
+      float olddiffvelx = oldsl->vel.x - oldyou->vel.x;
+      float olddiffvely = oldsl->vel.y - oldyou->vel.y;
+      if(    (   diffvelx*   diffvelx +    diffvely*   diffvely < 25.0f)
+          && (olddiffvelx*olddiffvelx + olddiffvely*olddiffvely < 25.0f) )
+        continue; // low velocity
+
+      sl->vel.y = -3.0f;
+      sl->vel.x = sl->pos.x > you->pos.x ? 3.0f : -3.0f;
+      sl->dead = 1;
+      ob->flags &= ~OBJF_PLAT;
+
+      you->vel.y = -3.0f;
+      you->vel.x = you->pos.x > sl->pos.x ? 3.0f : -3.0f;
+      you->dead = 1;
+      fr[b].objs[i].flags &= ~OBJF_PLAT;
+    }
   }
 
   float fric = sl->vel.y==0.0f ? 0.5f : 0.0f;
@@ -62,8 +77,8 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   // maintain minimum movement speed
-  if( sl->vel.x >  0.0f && sl->vel.x <  SLUG_VEL ) sl->vel.x =  SLUG_VEL;
-  if( sl->vel.x <= 0.0f && sl->vel.x > -SLUG_VEL ) sl->vel.x = -SLUG_VEL;
+  if( sl->vel.x > 0.0f && sl->vel.x <  SLUG_VEL ) sl->vel.x =  SLUG_VEL;
+  if( sl->vel.x < 0.0f && sl->vel.x > -SLUG_VEL ) sl->vel.x = -SLUG_VEL;
 
   if( sl->dead==5 )
     ob->flags &= ~(OBJF_CLIP|OBJF_BNDB);

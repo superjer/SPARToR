@@ -12,6 +12,8 @@
 
 #include "obj_.h"
 
+#define SLUG_VEL 0.5f
+
 void obj_slug_draw( int objid, OBJ_t *o )
 {
   SLUG_t *sl = o->data;
@@ -45,15 +47,23 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     ob->flags &= ~OBJF_PLAT;
   }
 
-  float fric = sl->vel.y==0.0f ? 0.5f : 0.2f;
+  float fric = sl->vel.y==0.0f ? 0.5f : 0.0f;
 
-  if( sl->vel.x > 0.5f ) {
-    if( sl->vel.x >  0.5f+fric ) sl->vel.x -=  fric;
-    else                         sl->vel.x  =  0.5f;
-  } else if( sl->vel.x < -0.5f ) {
-    if( sl->vel.x < -0.5f-fric ) sl->vel.x +=  fric;
-    else                         sl->vel.x  = -0.5f;
+  if( !fric ) { // air
+    sl->vel.x *= 0.95f;
+  } else { // ground
+    if( sl->vel.x > 0.5f ) {
+      if( sl->vel.x >  0.5f+fric ) sl->vel.x -=  fric;
+      else                         sl->vel.x  =  0.5f;
+    } else if( sl->vel.x < -0.5f ) {
+      if( sl->vel.x < -0.5f-fric ) sl->vel.x +=  fric;
+      else                         sl->vel.x  = -0.5f;
+    }
   }
+
+  // maintain minimum movement speed
+  if( sl->vel.x >  0.0f && sl->vel.x <  SLUG_VEL ) sl->vel.x =  SLUG_VEL;
+  if( sl->vel.x <= 0.0f && sl->vel.x > -SLUG_VEL ) sl->vel.x = -SLUG_VEL;
 
   if( sl->dead==5 )
     ob->flags &= ~(OBJF_CLIP|OBJF_BNDB);
@@ -63,6 +73,6 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       || sl->pos.y > co->y*co->blocksize+10.0f )
     ob->flags |= OBJF_DEL;
 
-  sl->vel.y += 0.50001f;      //gravity
+  sl->vel.y += 0.50001f; //gravity
 }
 

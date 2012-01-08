@@ -126,14 +126,19 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   // throw things
   for( i = newme->beholden; i; ) {
     cantwalk = 1;
-    if( fr[b].objs[i].type == OBJT_SLUG ) {
-      SLUG_t *sl = fr[b].objs[i].data;
-      if(      newme->goingu && !oldme->goingu ) { sl->vel.y = -10.0f;                     }
-      else if( newme->goingr && !oldme->goingr ) { sl->vel.y =  -4.0f; sl->vel.x =  10.0f; }
-      else if( newme->goingd && !oldme->goingd ) { sl->vel.y =  10.0f;                     }
-      else if( newme->goingl && !oldme->goingl ) { sl->vel.y =  -4.0f; sl->vel.x = -10.0f; }
+    if(   fr[b].objs[i].type == OBJT_SLUG
+       || fr[b].objs[i].type == OBJT_DUMMY ) {
+
+      V *youvel = flex( fr[b].objs+i, OBJF_VEL );
+
+      if( !youvel ) break;
+      else if( newme->goingu && !oldme->goingu ) { youvel->y = -10.0f;                     }
+      else if( newme->goingr && !oldme->goingr ) { youvel->y =  -5.0f; youvel->x =  12.0f; }
+      else if( newme->goingd && !oldme->goingd ) { youvel->y =  10.0f;                     }
+      else if( newme->goingl && !oldme->goingl ) { youvel->y =  -5.0f; youvel->x = -12.0f; }
       else break;
-      sl->vel.y += newme->vel.y;
+
+      youvel->y += newme->vel.y;
     }
     newme->beholden = 0;
     break;
@@ -210,27 +215,32 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   // -- INTERACTION --
   for(i=0;i<maxobjs;i++)
-    if(fr[b].objs[i].type==OBJT_SLUG) {
-      SLUG_t *oldyou = fr[a].objs[i].data;
-      SLUG_t *newyou = fr[b].objs[i].data;
+    if(   fr[b].objs[i].type==OBJT_SLUG
+       || fr[b].objs[i].type==OBJT_DUMMY ) {
 
-      if(    !oldyou
+      V *youpos = flex(fr[b].objs+i, OBJF_POS);
+
+      if(    !fr[a].objs[i].data
+          || !youpos
           || newme->cooldown < FLAIL_COOLDOWN
-          || fabsf(clawpos.x - newyou->pos.x)>10.0f //we're not on top of each other
-          || fabsf(clawpos.y - newyou->pos.y)>15.0f )
+          || fabsf(clawpos.x - youpos->x)>10.0f //we're not on top of each other
+          || fabsf(clawpos.y - youpos->y)>15.0f )
         continue;
       newme->beholden = i;
       newme->cooldown = 0;
-      // slow down!
+      // slow player down!
       if( fabsf(newme->vel.x) > 2.0f ) newme->vel.x = (newme->vel.x>0.0 ? 2.0f : -2.0f);
     }
 
   // relocate beholden enemy to claw every frame
   i = newme->beholden;
   if( i ) {
-    if( fr[b].objs[i].type==OBJT_SLUG ) {
-      SLUG_t *newyou = fr[b].objs[i].data;
-      newyou->pos = clawpos;
+    if(   fr[b].objs[i].type==OBJT_SLUG
+       || fr[b].objs[i].type==OBJT_DUMMY ) {
+
+      V *youpos = flex(fr[b].objs+i, OBJF_POS);
+
+      if( youpos ) *youpos = clawpos;
     }
   }
 

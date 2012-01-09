@@ -278,7 +278,7 @@ int load_sprites(int texnum)
           spr_map[i] = spr_count-1;
 
       // remember that this was the first sprite in the grid
-      if( gridoffs==0 ) {
+      if( gridoffs==1 ) {
         spr->more = calloc( 1, sizeof *(spr->more) );
         spr_gridstart = spr;
       }

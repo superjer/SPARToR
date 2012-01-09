@@ -582,7 +582,7 @@ void mod_postdraw(Uint32 vidfr)
       int z = (k-dnz+shz) % clipz;
       dspr = sprites + gh->clipboard_data[ x + y*clipx + z*clipy*clipx ].spr;
     } else if( co->projection == ORTHOGRAPHIC ) {
-      dspr = sprite_grid_transform_xy(dspr, co, i, j, k, i-dnx, j-dny, upx-dnx, upy-dny);
+      dspr = sprite_grid_transform_xy(spr, co, i, j, k, i-dnx, j-dny, upx-dnx+1, upy-dny+1);
     }
                  
     draw_sprite_on_tile( dspr, co, i, j, k );

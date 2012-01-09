@@ -13,6 +13,7 @@
 #include "obj_.h"
 #include "saveload.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
 
 
 static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
@@ -157,9 +158,14 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
     int pos = k*co->y*co->x + j*co->x + i;
 
     if( !tool_num ) { // regular tile painting
+      int dsprnum = sprnum;
+
+      if( co->projection == ORTHOGRAPHIC )
+        dsprnum = sprite_grid_transform_xy(sprites + sprnum, co, i, j, k, i-dnx, j-dny, upx-dnx+1, upy-dny+1) - sprites;
+
       co->dmap[pos].flags &= ~CBF_NULL;
       co->dmap[pos].flags |= CBF_VIS;
-      co->dmap[pos].spr    = sprnum;
+      co->dmap[pos].spr    = dsprnum;
       continue;
     }
 

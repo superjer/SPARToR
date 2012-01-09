@@ -39,14 +39,22 @@ static FCMD_t cmdbuf[250];
 static int    cbwrite = 0;
 static int    cbread = 0;
 
-static SDL_Joystick **joysticks;
+static SDL_Joystick **joysticks = NULL;
+
+static int started = 0;
 
 
 void inputinit()
 {
+  if( started ) {
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+    if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
+      cleanup();
+  }
+
   int i, numjoysticks;
   if( (numjoysticks=SDL_NumJoysticks())>0 ) {
-    joysticks = malloc(sizeof(*joysticks)*numjoysticks);
+    joysticks = realloc(joysticks, sizeof(*joysticks)*numjoysticks);
     SDL_JoystickEventState(SDL_ENABLE);
     SJC_Write("%d controller/joystick%s detected:",numjoysticks,(numjoysticks>1?"s":""));
     for( i=0; i<numjoysticks; i++ ) {
@@ -54,6 +62,8 @@ void inputinit()
       SJC_Write("  #%i: %.20s",i,SDL_JoystickName(i));
     }
   }
+
+  started = 1;
 }
 
 

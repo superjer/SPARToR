@@ -147,8 +147,8 @@ void command(const char *s)
       SJC_Write("  pos %d %d  size %d %d  anchor %d %d",
                 sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
       if( sprites[n].more )
-        SJC_Write("  gridpitch %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
-                  sprites[n].more->gridpitch,sprites[n].more->gridlast,
+        SJC_Write("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
+                  sprites[n].more->gridwide,sprites[n].more->gridlast,
                   sprites[n].more->piping,sprites[n].more->stretch,
                   sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
     }else if( mod_command(q) ) {

@@ -4,13 +4,13 @@ tnl-redfloor-single 0 0
 tnl-weight-gold 16 0
 tnl-black 32 0
 
-.grid  cols 3  pos 0 16  stretch 1 1 1 1
+.grid  cols 3  pos 0 16  stretch 0 1 0 1
   tnl-spacer-x-1
   tnl-spacer-x-2
   tnl-spacer-x-3
 .end
 
-.grid  cols 1  pos 48 0  stretch 1 1 1 1
+.grid  cols 1  pos 48 0  stretch 1 0 1 0
   tnl-spacer-y-1
   tnl-spacer-y-2
   tnl-spacer-y-3
@@ -134,7 +134,7 @@ tnlred-pipe-12-6-shadow 64 128
 tnlgray-pipe-12-brick   80 112
 tnlgray-pipe-6-brick    96 112
 
-.grid  cols 5  pos 160 128  stretch 1 1 1 1
+.grid  cols 5  pos 160 128  stretch 1 2 1 1
   tnl-grate-00
   tnl-grate-01
   tnl-grate-02

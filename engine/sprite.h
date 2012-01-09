@@ -38,7 +38,7 @@ typedef struct {
   int    ancx,ancy; // anchor position
   unsigned flags;
   struct {
-    int gridpitch;
+    int gridwide;
     int gridlast;
     int piping;
     int stretch;

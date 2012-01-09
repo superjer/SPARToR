@@ -5,6 +5,7 @@
 #include "sjdl.h"
 #include "main.h"
 #include "sprite.h"
+#include <limits.h>
 
 
 SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z, int drawx, int drawy, int draww, int drawh)
@@ -15,11 +16,14 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
   if( x<0 || y<0 || z<0 || x>=co->x || y>=co->y || z>=co->z )
     return spr;
 
+  if( draww<2 && drawh<2 )
+    return spr;
+
   CB *cb = co->dmap + z*co->y*co->z + y*co->x + x;
   int spr_num = (int)(spr - sprites);
-  fprintf(stderr,"spr_num:%d  xyz:%d %d %d  draw:%d %d %d %d\n",spr_num,x,y,z,drawx,drawy,draww,drawh);
   int samegrid = cb->spr >= spr_num && cb->spr <= spr->more->gridlast;
   const char *sprname = samegrid ? sprites[cb->spr].name : "";
+
   if( spr->more->piping ) {
     // always make connections to parts of the same drawing area, never remove existing connections
     int conn_u = drawy>0       || strstr(sprname,"12");
@@ -39,7 +43,43 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
   }
 
   if( spr->more->stretch ) {
-    //SJC_Write("STREEEEEEEEEEEEEEEETCH!");
+    int stretch_t = spr->more->stretch_t;
+    int stretch_r = spr->more->stretch_r;
+    int stretch_b = spr->more->stretch_b;
+    int stretch_l = spr->more->stretch_l;
+
+    int gridwide = spr->more->gridwide;
+    int gridtall = (spr->more->gridlast - spr_num + 1) / gridwide;
+
+    // no sprites in the grid?
+    if( gridwide<1 || gridtall<1 )
+      return spr;
+
+    // do NOT allow <= 0 sized middle section
+    if( gridwide - stretch_l - stretch_r <= 0 ) stretch_l = stretch_r = 0;
+    if( gridtall - stretch_t - stretch_b <= 0 ) stretch_t = stretch_b = 0;
+
+    int t =       drawy  <stretch_t;
+    int r = draww-drawx-1<stretch_r;
+    int b = drawh-drawy-1<stretch_b;
+    int l =       drawx  <stretch_l;
+
+    int midw = l||r ? INT_MAX : MAX(1, gridwide - stretch_l - stretch_r);
+    int midh = t||b ? INT_MAX : MAX(1, gridtall - stretch_t - stretch_b);
+
+    int orig_x = l ? 0 : (r ? gridwide-stretch_r : stretch_l);
+    int orig_y = t ? 0 : (b ? gridtall-stretch_b : stretch_t);
+
+    // how far into the stretch region should we sample from?
+    if( !l ) drawx -= stretch_l;
+    if(  r ) drawx -= draww-stretch_r-1;
+    if( !t ) drawy -= stretch_t;
+    if(  b ) drawy -= drawh-stretch_b-1;
+
+    drawx = (drawx % midw) + orig_x;
+    drawy = (drawy % midh) + orig_y;
+
+    return spr + drawx + gridwide*drawy;
   }
 
   return spr;

@@ -11,8 +11,6 @@ spartor_mac.app
 stdout.txt
 stderr.txt
 .DS_Store
-mcdiddy/maps/backup
-mcdiddy/maps/autosave
-deadking
+game/maps/backup
+game/maps/autosave
 console.log
-game/

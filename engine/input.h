@@ -23,6 +23,7 @@ extern int i_minimized;
 extern int i_watch;
 
 void inputinit();
+void putcmd(int device,int sym,int press);
 void setactive(Uint8 gain,Uint8 state);
 void kbinput(int press,SDL_keysym keysym);
 void joyinput(int press,SDL_JoyButtonEvent jbutton);

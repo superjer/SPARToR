@@ -1,7 +1,0 @@
-DON'T FORGET TODO THESE THINGS
-
-garbage collect things like CONTEXT_t.map and CONTEXT_t.dmap when they roll off the end of the frame buffer
-
-add mod_pack() callback for packing custom objects like GHOST_t.clipboard_data
-
-autosave when editing maps

@@ -1,7 +1,7 @@
 /**
  **  SPARToR 
  **  Network Game Engine
- **  Copyright (C) 2010-2011  Jer Wilson
+ **  Copyright (C) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -69,10 +69,12 @@ void inputinit()
 
 void putcmd(int device,int sym,int press)
 {
-  if( cbread%250==(cbwrite+1)%250 )
+  if( cbread%250==(cbwrite+1)%250 ) // full
     return;
+
   if( mod_mkcmd( cmdbuf+cbwrite, device, sym, press ) )
     return;
+
   cbwrite = (cbwrite+1)%250;
 }
 
@@ -129,6 +131,10 @@ void kbinput(int press,SDL_keysym keysym)
     }
     else if(sym==SDLK_BACKSPACE || sym==SDLK_DELETE)
       SJC_Rub();
+    else if(sym==SDLK_UP)
+      SJC_Up();
+    else if(sym==SDLK_DOWN)
+      SJC_Down();
     else if(sym==SDLK_ESCAPE && console_open)
       toggleconsole();
   } else

@@ -1,12 +1,38 @@
+/**
+ **  SPARToR
+ **  Network Game Engine
+ **  Copyright (C) 2010-2012  Jer Wilson
+ **
+ **  See COPYING for details.
+ **
+ **  http://www.superjer.com/
+ **  http://www.spartor.com/
+ **  http://github.com/superjer/SPARToR
+ **/
 
+/**
+ **  map file header format:
+ **   gamename mapversion spritecount
+ **   spritename
+ **   spritename
+ **   ...
+ **   projection-mode tileUW tileUH
+ **   blocksizeX blocksizeY blocksizeZ
+ **   dimensionX dimensionY dimensionZ
+ **   [blockdata...]
+ **/
 
 #include "mod.h"
 #include "main.h"
 #include "saveload.h"
+#include "sprite.h"
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+
+
+const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, int z);
 
 
 #define B85_1(x) (b85alphabet[((x)              )%85])
@@ -57,8 +83,8 @@ int save_context(const char *name,int context,int savefr)
   char  bakdir[256];
   char *bakfile;
 
-  snprintf( path,   256, "%s/maps/%s.txt", MODNAME, name );
-  snprintf( bakdir, 256, "%s/maps/backup", MODNAME       );
+  snprintf( path,   256, "game/maps/%s.txt", name );
+  snprintf( bakdir, 256, "game/maps/backup" );
 
   // attempt to backup existing file by moving it to backup directory
   if( !(bakfile = sjtempnam(bakdir,name,".txt")) ) {
@@ -91,52 +117,47 @@ int save_context(const char *name,int context,int savefr)
 
   // find textures in use
   int i;
-  int in_use[ tex_count ];
-  memset( in_use, 0, tex_count * sizeof *in_use );
+  int in_use[ spr_count ];
+  memset( in_use, -1, sizeof in_use[0] * spr_count );
   for( i=0; i<co->x*co->y*co->z; i++ ) {
-    size_t texn = (co->dmap[i].flags & CBF_NULL) ? co->map[i].data[1] : co->dmap[i].data[1];
+    size_t n = co->dmap[i].spr;
 
-    if( texn < tex_count )
-      in_use[texn] = 1;
+    if( n < spr_count )
+      in_use[n] = 0; // zero means used, -1 means unusued
     else
-      SJC_Write("Warning: texture %d is in use but is out of bounds (tex_count=%d)",texn,tex_count);
+      SJC_Write("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)",n,spr_count);
   }
 
-  // get count of used textures, and number each one sequentially in in_use[]
+  // get count of used sprites, and number each one sequentially in in_use[]
   int use_count = 0;
-  for( i=0; i<(int)tex_count; i++ )
-    if( in_use[i] )
-      in_use[i] = ++use_count; // inflates in_use values by 1
+  for( i=0; i<(int)spr_count; i++ )
+    if( in_use[i] != -1 )
+      in_use[i] = use_count++;
 
   // start writing the file
-  if(0>fprintf( f, "%s %i %i\n", MODNAME, MAPVERSION, use_count )) goto fail;
+  if(0>fprintf( f, "%s %i %i\n", GAMENAME, MAPVERSION, use_count )) goto fail;
 
-  for( i=0; i<(int)tex_count; i++ )
-    if( in_use[i] && 0>fprintf( f, "%s\n", textures[i].filename ) ) goto fail;
+  for( i=0; i<(int)spr_count; i++ )
+    if( in_use[i]!=-1 && 0>fprintf( f, "%s\n", sprites[i].name ) ) goto fail;
 
-  if(0>fprintf( f, "%i %i %i %i\n", co->blocksize, co->x, co->y, co->z )) goto fail;
+  const char *proj = (co->projection == DIMETRIC ? "DIMETRIC" : "ORTHOGRAPHIC");
+  if(0>fprintf( f, "%s %i %i\n", proj, co->tileuw, co->tileuh )) goto fail;
+
+  if(0>fprintf( f, "%i %i %i\n", co->bsx, co->bsy, co->bsz )) goto fail;
+
+  if(0>fprintf( f, "%i %i %i\n", co->x,   co->y,   co->z   )) goto fail;
 
   for( z=0; z<co->z; z++ ) {
     for( y=0; y<co->y; y++ ) {
       for( x=0; x<co->x; x++ ) {
-        int    pos = co->x*co->y*z + co->x*y + x;
-        Uint8 *data;
-        int    flags;
+        int pos = co->x*co->y*z + co->x*y + x;
+        CB *cb = co->dmap+pos;
+        size_t val = in_use[cb->spr];
 
-        if( co->dmap[ pos ].flags & CBF_NULL ) {
-          data  = co->map[  pos ].data;
-          flags = co->map[  pos ].flags;
+        if( cb->flags ) {
+          if(0>fprintf( f, " %c%c%c%c~%.2x", B85_4(val), B85_3(val), B85_2(val), B85_1(val), cb->flags )) goto fail;
         } else {
-          data  = co->dmap[ pos ].data;
-          flags = co->dmap[ pos ].flags;
-        }
-        //                                         v--- in_use values were inflated by 1
-        size_t val = data[0] + ((in_use[data[1]] - 1)<<8);
-
-        if( flags ) {
-          if(0>fprintf( f, " %c%c%c%c~%.2x", B85_4(val), B85_3(val), B85_2(val), B85_1(val), flags )) goto fail;
-        } else {
-          if(0>fprintf( f, " %c%c%c%c   "  , B85_4(val), B85_3(val), B85_2(val), B85_1(val)        )) goto fail;
+          if(0>fprintf( f, " %c%c%c%c   "  , B85_4(val), B85_3(val), B85_2(val), B85_1(val)            )) goto fail;
         }
       }
       if(0>fprintf( f, "\n" )) goto fail;
@@ -168,7 +189,7 @@ int load_context(const char *name,int context,int loadfr)
   char path[256];
   int i;
 
-  snprintf( path, 256, "%s/maps/%s.txt", MODNAME, name );
+  snprintf( path, 256, "game/maps/%s.txt", name );
 
   FILE *f = fopen( path, "r" );
   if( !f ) {
@@ -176,57 +197,75 @@ int load_context(const char *name,int context,int loadfr)
     return -1;
   }
 
-  char modname[256];
+  char buf[256];
   int version = 0;
-  int ntex = 0;
-  if( 3 != fscanf(f,"%100s %d %d\n",modname,&version,&ntex) )     return fail(f,"failed to read line 1");
-  if( 0 != strcmp(modname,MODNAME) )                              return fail(f,"MODNAME mismatch");
+  int nspr = 0;
+  if( 3 != fscanf(f,"%100s %d %d\n",buf,&version,&nspr) )         return fail(f,"failed to read line 1");
+  if( 0 != strcmp(buf,GAMENAME) )                                 return fail(f,"GAMENAME mismatch");
   if( version != MAPVERSION )                                     return fail(f,"MAPVERSION mismatch");
-  if( ntex<1 || ntex>255 )                                        return fail(f,"invalid texture count");
+  if( nspr<1 || nspr>65535 )                                      return fail(f,"invalid sprite count");
 
-  char texnames[ntex][100];
-  int texnumbers[ntex];
-  memset( texnumbers, 0, ntex * sizeof *texnumbers );
-  for( i=0; i<ntex; i++ ) {
-    if( 1 != fscanf(f,"%100s\n",texnames[i]) )                    return fail(f,"error reading texture name");
-    texnumbers[i] = make_sure_texture_is_loaded(texnames[i]);
+  char sprnames[nspr][100];
+  int sprnumbers[nspr];
+  memset( sprnumbers, 0, nspr * sizeof *sprnumbers );
+  for( i=0; i<nspr; i++ ) {
+    if( 1 != fscanf(f,"%100s\n",sprnames[i]) )                    return fail(f,"error reading sprite name");
+    sprnumbers[i] = find_sprite_by_name(sprnames[i]);
   }
 
-  int blocksize,x,y,z;
-  if( 4 != fscanf(f,"%d %d %d %d\n",&blocksize,&x,&y,&z) )        return fail(f,"failed to read context size");
-  if( blocksize<1 || blocksize>1024 )                             return fail(f,"blocksize is out of range");
-  if( x<1 || x>9000 )                                             return fail(f,"x is out of range");
-  if( y<1 || y>9000 )                                             return fail(f,"y is out of range");
-  if( z<1 || z>9000 )                                             return fail(f,"z is out of range");
+  int proj;
+  int tileuw,tileuh;
+  if( 3 != fscanf(f,"%80s %d %d\n",buf,&tileuw,&tileuh) )         return fail(f,"failed to read context projection");
+  if(      !strcmp(buf,"ORTHOGRAPHIC") ) proj = ORTHOGRAPHIC;
+  else if( !strcmp(buf,"DIMETRIC")     ) proj = DIMETRIC;
+  else                                                            return fail(f,"unknown projection mode");
+  if( tileuw<1 || tileuw>1024 )                                   return fail(f,"tileuw is out of range");
+  if( tileuh<1 || tileuh>1024 )                                   return fail(f,"tileuh is out of range");
 
-  int volume = x * y * z;
-  CB *map  = malloc( (sizeof *map  ) * volume );
-  CB *dmap = malloc( (sizeof *dmap ) * volume );
+  int bsx,bsy,bsz;
+  if( 3 != fscanf(f,"%d %d %d\n",&bsx,&bsy,&bsz) )                return fail(f,"failed to read context size"); 
+  if( bsx<1 || bsx>1024 )                                         return fail(f,"bsx is out of range");
+  if( bsy<1 || bsy>1024 )                                         return fail(f,"bsy is out of range");
+  if( bsz<1 || bsz>1024 )                                         return fail(f,"bsz is out of range");
+
+  int x,y,z;
+  if( 3 != fscanf(f,"%d %d %d\n",&x,&y,&z) )                      return fail(f,"failed to read dimensions");
+
+  const char *error = NULL;
+  CONTEXT_t tmp_co;
+
+  if( (error = create_context(&tmp_co,NULL,x,y,z)) )              return fail(f,error);
+
+  CB *map  = tmp_co.map;
+  CB *dmap = tmp_co.dmap;
+  int volume = x*y*z;
 
   for( i=0; i<volume; i++ ) {
-    Uint32  tile, flags = 0;
-    int     tex;
-    Uint32  b85num;
+    Uint32  flags = 0;
+    int     n;
     char    b85str[6] = {0};
 
-    if( 1 > fscanf(f," %5[^ vwxyz{|}~]~%x ",b85str,&flags) )        return fail(f,"failed to read block data");
+    if( 1 > fscanf(f," %5[^ vwxyz{|}~]~%x ",b85str,&flags) ) //   return fail(f,"failed to read block data");
+      n = 0;
+    else
+      n = from_b85(b85str);
 
-    b85num = from_b85(b85str);
+    if( n >= nspr ) SJC_Write("sprite number is too high! (%d/%d)",n,nspr);
 
-    tile = (Uint8)b85num;
-    tex  = (Uint8)(b85num>>8);
-    if( tex >= ntex ) SJC_Write("tex is too high! (%d/%d)",tex,ntex);
-
-    map[ i].data[0] = tile;
-    map[ i].data[1] = (tex < ntex ? texnumbers[tex] : 0); // avoid overread if tex is too high
-    map[ i].flags   = flags;
-    dmap[i].flags   = CBF_NULL;
+    dmap[i].spr   = map[i].spr   = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
+    dmap[i].flags = map[i].flags = flags;
+    dmap[i].flags |= CBF_NULL;
   }
 
   // everything ok? swap it in
   loadfr = loadfr%maxframes;
   CONTEXT_t *co = fr[loadfr].objs[context].data;
-  co->blocksize = blocksize;
+  co->projection = proj;
+  co->tileuw = tileuw;
+  co->tileuh = tileuh;
+  co->bsx = bsx;
+  co->bsy = bsy;
+  co->bsz = bsz;
   co->x = x;
   co->y = y;
   co->z = z;
@@ -241,3 +280,42 @@ int load_context(const char *name,int context,int loadfr)
 }
 
 
+// allocate the map, dmap for a new context, copying data from a reference context if not NULL
+const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, int z)
+{
+  if( x<1 || x>9000 )  return "x is out of range";
+  if( y<1 || y>9000 )  return "y is out of range";
+  if( z<1 || z>9000 )  return "z is out of range";
+
+  if( ref )
+    *co = *ref;
+  else
+    memset( co, 0, sizeof *co );
+  co->x = x;
+  co->y = y;
+  co->z = z;
+
+  int volume = x * y * z;
+
+  co->map  = malloc( (sizeof *co->map ) * volume );
+  co->dmap = malloc( (sizeof *co->dmap) * volume );
+
+  int i, j, k;
+
+  // copy block data if possible, or set to blank
+  for( i=0; i<x; i++ ) for( j=0; j<y; j++ ) for( k=0; k<z; k++ ) {
+    int offs_co = co->x*co->y*k + co->x*j + i;
+
+    if( ref && i < ref->x && j < ref->y && k < ref->z ) {
+      int offs_ref = ref->x*ref->y*k + ref->x*j + i;
+
+      co->map [ offs_co ] = ref->map [ offs_ref ];
+      co->dmap[ offs_co ] = ref->dmap[ offs_ref ];
+    } else {
+      memset( co->map  + offs_co, 0, sizeof co->map [ offs_co ] );
+      memset( co->dmap + offs_co, 0, sizeof co->dmap[ offs_co ] );
+    }
+  }
+
+  return NULL;
+}

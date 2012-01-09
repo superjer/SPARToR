@@ -1,7 +1,7 @@
 /**
  **  SPARToR 
  **  Network Game Engine
- **  Copyright (C) 2010-2011  Jer Wilson
+ **  Copyright (C) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -58,37 +58,22 @@ void SJGL_SetTex(GLuint tex)
 }
 
 
-//uses GL to do the same thing as SJDL_BlitScaled
-int SJGL_Blit(SDL_Rect *s, int x, int y, int z)
+//uses GL to do draw a sprite
+int SJGL_Blit(REC *s, int x, int y, int z)
 {
   if( z<0 ) z = (y+s->h)*-z;
 
+  int x2 = ( s->w > 0 ? x+s->w : x-s->w );
+  int y2 = ( s->h > 0 ? y+s->h : y-s->h );
+
   glBegin(GL_QUADS);
-  glTexCoord3i(s->x     ,s->y     ,z); glVertex3i(x     ,y     ,z);
-  glTexCoord3i(s->x+s->w,s->y     ,z); glVertex3i(x+s->w,y     ,z);
-  glTexCoord3i(s->x+s->w,s->y+s->h,z); glVertex3i(x+s->w,y+s->h,z);
-  glTexCoord3i(s->x     ,s->y+s->h,z); glVertex3i(x     ,y+s->h,z);
+  glTexCoord3i(s->x     , s->y     , z); glVertex3i(x , y , z);
+  glTexCoord3i(s->x+s->w, s->y     , z); glVertex3i(x2, y , z);
+  glTexCoord3i(s->x+s->w, s->y+s->h, z); glVertex3i(x2, y2, z);
+  glTexCoord3i(s->x     , s->y+s->h, z); glVertex3i(x , y2, z);
   glEnd();
 
   return 0;
-}
-
-
-//blits from one surface to another after scaling s/drect positions and sizes
-int SJDL_BlitScaled(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect, int scale)
-{
-  SDL_Rect srcrect2 = (SDL_Rect){srcrect->x*scale, srcrect->y*scale, srcrect->w*scale, srcrect->h*scale};
-  dstrect->x *= scale;
-  dstrect->y *= scale;
-  return SDL_BlitSurface(src,&srcrect2,dst,dstrect);
-}
-
-
-//fills a rectangle after scaling its position and size
-int SJDL_FillScaled(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color, int scale)
-{
-  SDL_Rect dstrect2 = (SDL_Rect){dstrect->x*scale, dstrect->y*scale, dstrect->w*scale, dstrect->h*scale};
-  return SDL_FillRect(dst,&dstrect2,color);
 }
 
 
@@ -177,28 +162,6 @@ void SJDL_GetPixel(SDL_Surface *surf, int x, int y, Uint8 *R, Uint8 *G, Uint8 *B
   }
   SDL_GetRGB(color, surf->format, R, G, B);
 } 
-
-
-void SJDL_DrawSquare(SDL_Surface *surf, SDL_Rect *rect, unsigned int color)
-{
-  SDL_Rect edge;
-  glBegin(GL_LINE_LOOP);
-  glVertex2i(rect->x        ,rect->y        );
-  glVertex2i(rect->x+rect->w,rect->y        );
-  glVertex2i(rect->x+rect->w,rect->y+rect->h);
-  glVertex2i(rect->x        ,rect->y+rect->h);
-  glEnd();
-  edge = *rect;
-  edge.w = 1;
-  SDL_FillRect(surf,&edge,color);
-  edge.x += rect->w - 1;
-  SDL_FillRect(surf,&edge,color);
-  edge = *rect;
-  edge.h = 1;
-  SDL_FillRect(surf,&edge,color);
-  edge.y += rect->h - 1;
-  SDL_FillRect(surf,&edge,color);
-}
 
 
 // returns the equivalent opengl format of an sdl surface

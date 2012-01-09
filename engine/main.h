@@ -144,7 +144,7 @@ typedef struct {
 #undef ENDSTRUCT
 
 //get a pointer to a member in 'flexible' struct -- whee polymorphism sort of
-#define flex(o,memb) ((void *)((char *)(o->data) + flexer[(o)->type].memb))
+#define flex(o,memb) ((void *)((char *)((o)->data) + flexer[(o)->type].memb))
 
 
 

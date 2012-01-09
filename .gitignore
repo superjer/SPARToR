@@ -2,6 +2,7 @@
 *.[oa]
 *.swp
 *.sh
+cscope.*
 tags
 spartor_linux
 spartor_win32.exe
@@ -10,6 +11,6 @@ spartor_mac.app
 stdout.txt
 stderr.txt
 .DS_Store
-mcdiddy/maps/backup
-mcdiddy/maps/autosave
-deadking
+game/maps/backup
+game/maps/autosave
+console.log

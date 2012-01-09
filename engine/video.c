@@ -15,6 +15,7 @@
 #include "SDL_net.h"
 #include "mod.h"
 #include "video.h"
+#include "sprite.h"
 #include "main.h"
 #include "console.h"
 #include "font.h"
@@ -26,9 +27,7 @@ size_t tex_count;
 
 int v_drawhulls  = 0;
 int v_showstats  = 0;
-int v_usealpha   = 1;
 int v_fullscreen = 0;
-int v_oob        = 0; // show objects out-of-bounds fading away
 int v_center     = 1; // whether to center the scaled game rendering
 
 int v_camx       = 0;
@@ -86,7 +85,6 @@ void render()
   const SDL_VideoInfo *vidinfo;
   int x,y,w,h;
   int i;
-  char buf[1000];
   Uint32 vidfr = (metafr-1);
   Uint32 vidfrmod = vidfr%maxframes;
 
@@ -114,14 +112,11 @@ void render()
 
   glMatrixMode(GL_TEXTURE);
   glLoadIdentity();
-  glScalef(1.0f/256.0f, 1.0f/256.0f, 1);
+  glScalef(1.0f/512.0f, 1.0f/512.0f, 1);
 
   glColor4f(1.0f,1.0f,1.0f,1.0f);
   glEnable(GL_TEXTURE_2D);
-  if( v_usealpha )
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  else
-    glBlendFunc(GL_ONE, GL_ZERO);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
   glAlphaFunc(GL_GREATER,0.01);
@@ -139,7 +134,8 @@ void render()
   glOrtho(0,NATIVEW,NATIVEH,0,-NATIVEH*3-1,NATIVEH*3+1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  int camx = NATIVEW/2-(int)v_camx, camy = NATIVEH/2-(int)v_camy;
+  int camx = NATIVEW/2-(int)v_camx;
+  int camy = NATIVEH/2-(int)v_camy;
   glTranslatef(camx,camy,0);
 
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
@@ -149,7 +145,7 @@ void render()
   for(i=0;i<maxobjs;i++) {
     OBJ_t *o = fr[vidfrmod].objs+i;
     if( o->flags&OBJF_VIS )
-      mod_draw(i,o); // have the mod draw the actual thing
+      mod_draw(i,vidfrmod,o); // have the mod draw the actual thing
   }
 
   mod_postdraw(vidfr);
@@ -164,36 +160,65 @@ void render()
     if( mycontext ) {
       CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
       int x,y,z;
-      for( z=0; z<co->z; z++ )
-        for( y=0; y<co->y; y++ )
-          for( x=0; x<co->x; x++ ) {
-            int pos = co->x*co->y*z + co->x*y + x;
-            int flags;
 
-            if( co->dmap[ pos ].flags & CBF_NULL )
-              flags = co->map[  pos ].flags;
-            else
-              flags = co->dmap[ pos ].flags;
+      for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ ) {
+        int pos = co->x*co->y*z + co->x*y + x;
+        int flags = co->dmap[pos].flags;
 
-            if( flags & CBF_SOLID ) {
-              glColor4f(1,0,0,1);
-              SJGL_Blit( &(SDL_Rect){0,0,16,16}, x*16,   y*16,   z );
-              SJGL_Blit( &(SDL_Rect){0,0,12,12}, x*16+2, y*16+2, z );
-            } else if( flags & CBF_PLAT ) {
-              glColor4f(0,1,0,1);
-              SJGL_Blit( &(SDL_Rect){0,0,16, 2}, x*16,   y*16,   z );
-            }
-          }
+        int x1 = (x  )*co->bsx;
+        int x2 = (x+1)*co->bsx;
+        int y1 = (y  )*co->bsy;
+        int y2 = (y+1)*co->bsy;
+        int z1 = (z  )*co->bsz;
+        int z2 = (z+1)*co->bsz;
+
+        if     ( flags & CBF_SOLID ) ;
+        else if( flags & CBF_PLAT  ) { y2 = y1 + 4; }
+        else continue;
+
+        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define SOL_R  SOL_VERTEX(1  ,0  ,0  ,x1, y1, z1);
+        #define SOL_RG SOL_VERTEX(1  ,0.2,0  ,x1, y1, z2);
+        #define SOL_W  SOL_VERTEX(1  ,0.2,0.2,x2, y1, z2);
+        #define SOL_RB SOL_VERTEX(1  ,0  ,0.2,x2, y1, z1);
+        #define SOL_K  SOL_VERTEX(0.5,0  ,0  ,x1, y2, z1);
+        #define SOL_G  SOL_VERTEX(0.5,0.2,0  ,x1, y2, z2);
+        #define SOL_GB SOL_VERTEX(0.5,0.2,0.2,x2, y2, z2);
+        #define SOL_B  SOL_VERTEX(0.5,0  ,0.2,x2, y2, z1);
+
+        glBegin(GL_LINE_STRIP);
+        SOL_GB SOL_B  SOL_RB SOL_B  SOL_K  SOL_R  SOL_K  SOL_G
+        SOL_GB SOL_W  SOL_RB SOL_R  SOL_RG SOL_G  SOL_RG SOL_W
+        glEnd();
+      }
     }
 
-    glColor4f(1,1,1,1);
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,OBJF_POS);
-      V *hull = flex(o,OBJF_HULL);
-      if( pos && hull ) {
-        SDL_Rect rect = (SDL_Rect){0, 0, hull[1].x-hull[0].x, hull[1].y-hull[0].y};
-        SJGL_Blit( &rect, pos->x+hull[0].x, pos->y+hull[0].y, 0 );
+
+      if( (o->flags & OBJF_POS) && (o->flags & OBJF_HULL) ) {
+        V *pos  = flex(o,pos );
+        V *hull = flex(o,hull);
+        int x  = pos->x + hull[0].x;
+        int y  = pos->y + hull[0].y;
+        int z  = pos->z + hull[0].z;
+        int x2 = pos->x + hull[1].x;
+        int y2 = pos->y + hull[1].y;
+        int z2 = pos->z + hull[1].z;
+
+        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define HULL_R  HULL_VERTEX(1,0,0,x , y , z );
+        #define HULL_RG HULL_VERTEX(1,1,0,x , y , z2);
+        #define HULL_W  HULL_VERTEX(1,1,1,x2, y , z2);
+        #define HULL_RB HULL_VERTEX(1,0,1,x2, y , z );
+        #define HULL_K  HULL_VERTEX(0,0,0,x , y2, z );
+        #define HULL_G  HULL_VERTEX(0,1,0,x , y2, z2);
+        #define HULL_GB HULL_VERTEX(0,1,1,x2, y2, z2);
+        #define HULL_B  HULL_VERTEX(0,0,1,x2, y2, z );
+        glBegin(GL_LINE_STRIP);
+        HULL_GB HULL_B  HULL_RB HULL_B  HULL_K  HULL_R  HULL_K  HULL_G
+        HULL_GB HULL_W  HULL_RB HULL_R  HULL_RG HULL_G  HULL_RG HULL_W
+        glEnd();
       }
     }
 
@@ -201,15 +226,21 @@ void render()
 
     for(i=0;i<maxobjs;i++) {
       OBJ_t *o = fr[vidfrmod].objs+i;
-      V *pos  = flex(o,OBJF_POS);
-      if( pos ) {
-        sprintf(buf,"%d",i);
-        SJF_DrawText(pos->x, pos->y, buf);
+
+      if( o->flags & OBJF_POS ) {
+        V *pos  = flex(o,pos);
+        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_CENTER, "%d", i);
       }
     }
+
+    glColor4f(1,1,1,1);
   }
 
-  // viewport and matrixes for HUD
+  // translate back for HUD
+  glTranslatef(-camx,-camy,0);
+  mod_huddraw(vidfr);
+
+  // viewport and matrixes for outerdraw
   glViewport(0,0,w,h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -217,7 +248,7 @@ void render()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  //paint black over the border areas, subtractively with v_oob
+  //paint black over the border areas
   {
     int outerl = 0;   int innerl = pad_left;
     int outert = 0;   int innert = pad_top;
@@ -225,14 +256,7 @@ void render()
     int outerb = h;   int innerb = pad_top  + NATIVEH*scale;
     glDisable(GL_TEXTURE_2D);
     glPushAttrib(GL_COLOR_BUFFER_BIT);
-    if( v_oob ) {
-      glColor4f(0.02,0.02,0.02,0.02);
-      glBlendFunc(GL_ONE,GL_ONE);
-      if( GLEW_EXT_blend_equation_separate )
-        glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
-    }
-    else
-      glColor4f(0,0,0,1.0f);
+    glColor4f(0,0,0,1.0f);
     glBegin(GL_QUADS);
     glVertex2i(outerl,outert); glVertex2i(outerr,outert); glVertex2i(outerr,innert); glVertex2i(outerl,innert); //top
     glVertex2i(outerl,innerb); glVertex2i(outerr,innerb); glVertex2i(outerr,outerb); glVertex2i(outerl,outerb); //bottom
@@ -262,16 +286,14 @@ void render()
     x = 10;
     y = conh-20;
     if((ticks/200)%2)
-      SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '_');
+      SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '\2');
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
-        SJF_DrawText(x,y,SJC.buf[i]);
-      y -= 10;
+        SJF_DrawText(x, y, SJF_LEFT, "%s", SJC.buf[i]);
+      y -= 12;
     }
     if( SJC.buf[0] && SJC.buf[0][0] ) {
-      char s[10];
-      sprintf(s,"%d",SJC.buf[0][strlen(SJC.buf[0])-1]);
-      SJF_DrawText(w-20,conh-20,s);
+      SJF_DrawText(w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);
     }
   }
 
@@ -282,22 +304,14 @@ void render()
   Uint32 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
   if( v_showstats ) {
     Uint32 denom = vidfrmod+1;
-    sprintf(buf,"idle_time %4d"       ,       idle_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),10,buf);
-    sprintf(buf,"render_time %4d"     ,     render_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),20,buf);
-    sprintf(buf,"adv_move_time %4d"   ,   adv_move_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),30,buf);
-    sprintf(buf,"adv_collide_time %4d",adv_collide_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),40,buf);
-    sprintf(buf,"adv_game_time %4d"   ,   adv_game_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),50,buf);
-    sprintf(buf,"unaccounted_time %4d",unaccounted_time/denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),60,buf);
-    sprintf(buf,"adv_frames  %2.2f"   ,(float)adv_frames/(float)denom);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),70,buf);
-    sprintf(buf,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
-    SJF_DrawText(w-20-SJF_TextExtents(buf),80,buf);
+    SJF_DrawText(w-20,10,SJF_RIGHT,"idle_time %4d"       ,        idle_time/denom);
+    SJF_DrawText(w-20,20,SJF_RIGHT,"render_time %4d"     ,      render_time/denom);
+    SJF_DrawText(w-20,30,SJF_RIGHT,"adv_move_time %4d"   ,    adv_move_time/denom);
+    SJF_DrawText(w-20,40,SJF_RIGHT,"adv_collide_time %4d", adv_collide_time/denom);
+    SJF_DrawText(w-20,50,SJF_RIGHT,"adv_game_time %4d"   ,    adv_game_time/denom);
+    SJF_DrawText(w-20,60,SJF_RIGHT,"unaccounted_time %4d", unaccounted_time/denom);
+    SJF_DrawText(w-20,70,SJF_RIGHT,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
+    SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
   }
 
   SDL_GL_SwapBuffers();
@@ -372,13 +386,13 @@ void setvideosoon(int w,int h,int go_full,int delay)
 
 int screen2native_x(int x)
 {
-  return (x - pad_left)/scale;
+  return (x - pad_left)/scale + v_camx - NATIVEW/2;
 }
 
 
 int screen2native_y(int y)
 {
-  return (y - pad_top)/scale;
+  return (y - pad_top )/scale + v_camy - NATIVEH/2;
 }
 
 
@@ -403,6 +417,7 @@ int make_sure_texture_is_loaded(const char *texfile)
       SJC_Write("Texture %s is new, using slot %d",texfile,j);
       textures[j].filename = malloc( strlen(texfile) + 1 );
       strcpy(textures[j].filename,texfile);
+      load_sprites(j);
     } else if( !strcmp(textures[j].filename,texfile) ) {
       SJC_Write("Texture %s was loaded before, reusing slot %d",texfile,j);
       if( textures[j].generated )

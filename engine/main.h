@@ -5,8 +5,9 @@
 #include "SDL.h"
 #include "SDL_net.h"
 #include "SDL_image.h"
+#include "mod_constants.h"
 
-#define VERSION "0.1n?"
+#define VERSION "0.1p"
 
 #define TICKSAFRAME 30
 
@@ -15,9 +16,30 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define TRY do{
 #define HARDER }while(0);
+#define SWAP(a,b,T) TRY T SWAP_tmp__ = (a); (a) = (b); (b) = SWAP_tmp__; HARDER
 #define HAS(v,flags) (((v)&(flags)) == (flags))
+#define COUNTOF(ident) ((sizeof (ident)) / (sizeof *(ident)))
 
 #define assert(expr) { if(!(expr)) SJC_Write( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
+
+
+#define TOKEN_PASTE_(a,b) a ## b
+#define TOKEN_PASTE(a,b) TOKEN_PASTE_(a,b)
+#define STRINGIFY_(a) #a
+#define STRINGIFY(a) STRINGIFY_(a)
+
+
+#define FLEXER_EXTRAS
+struct {
+  const char *name;
+  ptrdiff_t pos;
+  ptrdiff_t vel;
+  ptrdiff_t hull;
+  ptrdiff_t pvel;
+  ptrdiff_t model;
+  FLEXER_EXTRAS
+} flexer[OBJT_MAX];
+
 
 //OBJect Flags
 #define OBJF_POS  (1<< 0) //has position
@@ -29,8 +51,9 @@
 #define OBJF_PVEL (1<< 6) //has player-controlled velocity
 #define OBJF_DEL  (1<< 7) //object is marked for deletion
 #define OBJF_BNDX (1<< 8) //clips against context edge X-wise
-#define OBJF_BNDT (1<< 9) //clips against context top edge
-#define OBJF_BNDB (1<<10) //clips against context bottom edge
+#define OBJF_BNDZ (1<< 9) //clips against context edge Z-wise
+#define OBJF_BNDT (1<<10) //clips against context top edge
+#define OBJF_BNDB (1<<11) //clips against context bottom edge
 
 //CoMmanD Flags
 #define CMDF_NEW  (1<< 0) //new client connect
@@ -41,6 +64,11 @@
 #define CBF_SOLID (1<< 0) //solid
 #define CBF_PLAT  (1<< 1) //platform
 #define CBF_NULL  (1<< 2) //(dmap only) delta data not present
+#define CBF_VIS   (1<< 3) //is visible
+
+//Projection mode for contexts
+#define ORTHOGRAPHIC 1
+#define DIMETRIC     2
 
 
 typedef struct{
@@ -78,15 +106,9 @@ typedef struct{
 // map structures //
 typedef struct{
   short     flags;
-  Uint8      data[CBDATASIZE];
+  int       spr;
+  Uint8     data[CBDATASIZE];
 } CB;
-
-typedef struct{
-  int       blocksize;
-  int       x,y,z;
-  CB       *map;
-  CB       *dmap;
-} CONTEXT_t;
 
 
 // texture structures //
@@ -108,6 +130,22 @@ typedef struct {
   int    presscmd;
   int    releasecmd;
 } INPUTNAME_t;
+
+
+#define EXPOSE(T,N,A) T N A;
+#define HIDE(X) X
+#define STRUCT() typedef struct {
+#define ENDSTRUCT(TYPE) } TOKEN_PASTE(TYPE,_t);
+#include "engine_structs.h"
+#include "game_structs.h"
+#undef EXPOSE
+#undef HIDE
+#undef STRUCT
+#undef ENDSTRUCT
+
+//get a pointer to a member in 'flexible' struct -- whee polymorphism sort of
+#define flex(o,memb) ((void *)((char *)(o->data) + flexer[(o)->type].memb))
+
 
 
 //externs
@@ -146,7 +184,7 @@ void advance();
 int  findfreeslot(int frame1);
 void clearframebuffer();
 void cleanup();
-void *flex(OBJ_t *o,Uint32 part);
+
 
 //frame setters
 void setmetafr( Uint32 to);
@@ -155,6 +193,7 @@ void setdrawnfr(Uint32 to);
 void sethotfr(  Uint32 to);
 void setcmdfr(  Uint32 to);
 void jogframebuffer(Uint32 newmetafr,Uint32 newsurefr);
+
 
 #endif
 

@@ -1,0 +1,26 @@
+.default  size 46 24  anchor cen bot
+
+.grid  cols 5  pos 0 0  size 46 24  anchor 23 24
+  grass1
+  grass2
+  pave1
+  pave2
+  dirt1  anchor 23 12
+  dirt2
+  sand
+  crust1
+  crust2
+  stone1
+  stone2
+  grass3
+  crust-grass-sw
+  wood-plank
+  .
+  blank-plank-sw
+  . 4
+.end
+
+flower  pos 0 96  size 18 28
+dirt1-column1 230 0 46 72 cen bot
+dirt1-column2 230 0 46 36 cen 36
+

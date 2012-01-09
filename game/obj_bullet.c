@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **

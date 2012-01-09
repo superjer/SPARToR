@@ -1,12 +1,26 @@
-//
-// map header format:
-//  gamename mapversion spritecount
-//  spritename
-//  spritename
-//  ...
-//  blocksizeX blocksizeY blocksizeZ
-//  dimensionX dimensionY dimensionZ
-//  [blockdata...]
+/**
+ **  SPARToR
+ **  Network Game Engine
+ **  Copyright (C) 2010-2012  Jer Wilson
+ **
+ **  See COPYING for details.
+ **
+ **  http://www.superjer.com/
+ **  http://www.spartor.com/
+ **  http://github.com/superjer/SPARToR
+ **/
+
+/**
+ **  map file header format:
+ **   gamename mapversion spritecount
+ **   spritename
+ **   spritename
+ **   ...
+ **   projection-mode tileUW tileUH
+ **   blocksizeX blocksizeY blocksizeZ
+ **   dimensionX dimensionY dimensionZ
+ **   [blockdata...]
+ **/
 
 #include "mod.h"
 #include "main.h"

@@ -1,7 +1,7 @@
 /**
  **  SPARToR
  **  Network Game Engine
- **  Copyright (C) 2010-2011  Jer Wilson
+ **  Copyright (C) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **

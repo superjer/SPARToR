@@ -705,7 +705,7 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
   if( co->projection == DIMETRIC )
-    y = co->y * co->bsy; // layers are all anchored at the bottom of the context
+    y = y * co->bsy; // layers are all anchored at the bottom of the context
 
   SJGL_SetTex( spr->texnum );
 

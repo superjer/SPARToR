@@ -96,10 +96,12 @@ STRUCT()
 STRUCT()
   EXPOSE(V,pos,)
   EXPOSE(V,vel,)
+  EXPOSE(V,hull,[2])
   EXPOSE(int,model,)
   HIDE(
     int owner;
     Uint8 ttl;
+    char dead;
   )
 #include "endstruct.h"
 

@@ -25,7 +25,10 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   int i;
   BULLET_t  *bu = ob->data;
+  BULLET_t  *oldbu = oa->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
+
+  if( !oldbu ) return;
 
   if( bu->ttl ) bu->ttl--;
 
@@ -38,13 +41,36 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
         continue;
       pl->vel.y += -5.0f;
       pl->vel.x += (bu->vel.x>0.0f?5.0f:-5.0f);
+      bu->dead = 1;
       bu->ttl = 0; //delete bullet
     }
 
+  if( (bu->ttl==0 || bu->pos.y>co->y*co->bsy) && !bu->dead ) {
+    bu->dead = 1;
+    bu->ttl = 90;
+    bu->hull[0] = (V){-1,-1,-1};
+    bu->hull[1] = (V){ 1, 1, 1};
+    ob->flags |= OBJF_CLIP|OBJF_HULL|OBJF_BNDB;
+  }
+
   if(bu->pos.x<=-10.0f || bu->pos.x>=co->x*co->bsx+10.0f || bu->ttl==0) {
-    if( fr[b].objs[bu->owner].type==OBJT_PLAYER )
-      ((PLAYER_t *)fr[b].objs[bu->owner].data)->projectiles--;
+    bu->dead = 1;
     ob->flags |= OBJF_DEL;
+  }
+  
+  if( bu->dead ) { // gravity, friction only if dead
+    if( !oldbu->dead && fr[b].objs[bu->owner].type==OBJT_PLAYER )
+      ((PLAYER_t *)fr[b].objs[bu->owner].data)->projectiles--;
+
+    bu->pos.z =  1.0f;
+
+    if( oldbu->dead && bu->vel.y==0.0f )
+      bu->vel.y = -0.4f * oldbu->vel.y;
+    else
+      bu->vel.y += 0.50001f;
+
+    if( fabsf(bu->vel.x)<0.1f ) bu->vel.x = 0.0f;
+    else                        bu->vel.x *= bu->vel.y ? 0.95f : 0.90f;
   }
 }
 

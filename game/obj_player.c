@@ -203,6 +203,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       bu->vel.y +=  8;
       bu->pos.y += 10;
     }
+    bu->dead        = 0;
     bu->model       = 1;
     bu->owner       = objid;
     bu->ttl         = 50;

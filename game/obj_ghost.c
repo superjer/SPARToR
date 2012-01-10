@@ -1,6 +1,6 @@
 /**
- **  Dead Kings' Quest
- **  A special game for the SPARToR Network Game Engine
+ **  McDiddy's: The Game: Vengeance
+ **  Implementation example for the SPARToR Network Game Engine
  **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.

@@ -1,6 +1,6 @@
 /**
- **  Dead Kings' Quest
- **  A special game for the SPARToR Network Game Engine
+ **  McDiddy's: The Game: Vengeance
+ **  Implementation example for the SPARToR Network Game Engine
  **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
@@ -31,12 +31,8 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
                             {"right"      ,CMDT_1RIGHT,CMDT_0RIGHT},
                             {"up"         ,CMDT_1UP   ,CMDT_0UP   },
                             {"down"       ,CMDT_1DOWN ,CMDT_0DOWN },
-                            {"nw"         ,CMDT_1NW   ,CMDT_0NW   },
-                            {"ne"         ,CMDT_1NE   ,CMDT_0NE   },
-                            {"sw"         ,CMDT_1SW   ,CMDT_0SW   },
-                            {"se"         ,CMDT_1SE   ,CMDT_0SE   },
-                            {"select"     ,CMDT_1SEL  ,CMDT_0SEL  },
-                            {"back"       ,CMDT_1BACK ,CMDT_0BACK },
+                            {"fire"       ,CMDT_1FIRE ,CMDT_0FIRE },
+                            {"jump"       ,CMDT_1JUMP ,CMDT_0JUMP },
                          /* {"cons-cmd"   ,CMDT_1CON  ,CMDT_0CON  }, this may not be necessary, it may even be dangerous */
                             {"edit-paint" ,CMDT_1EPANT,CMDT_0EPANT},
                             {"edit-prev"  ,CMDT_1EPREV,CMDT_0EPREV},
@@ -88,20 +84,15 @@ void mod_setup(Uint32 setupfr)
   MAYBE_BIND(INP_KEYB,SDLK_RIGHT   ,RIGHT); MAYBE_BIND(INP_KEYB,SDLK_d       ,RIGHT);
   MAYBE_BIND(INP_KEYB,SDLK_UP      ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_w       ,UP   );
   MAYBE_BIND(INP_KEYB,SDLK_DOWN    ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_s       ,DOWN );
-  MAYBE_BIND(INP_KEYB,SDLK_a       ,SEL  ); MAYBE_BIND(INP_KEYB,SDLK_SPACE   ,SEL  );
-  MAYBE_BIND(INP_KEYB,SDLK_s       ,BACK );
-
-  // keypad directions!
-  MAYBE_BIND(INP_KEYB,SDLK_KP7     ,NW   ); MAYBE_BIND(INP_KEYB,SDLK_KP8     ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_KP9     ,NE   );
-  MAYBE_BIND(INP_KEYB,SDLK_KP4     ,LEFT );                                           MAYBE_BIND(INP_KEYB,SDLK_KP6     ,RIGHT);
-  MAYBE_BIND(INP_KEYB,SDLK_KP1     ,SW   ); MAYBE_BIND(INP_KEYB,SDLK_KP2     ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_KP3     ,SE   );
+  MAYBE_BIND(INP_KEYB,SDLK_z       ,JUMP ); MAYBE_BIND(INP_KEYB,SDLK_SPACE   ,JUMP );
+  MAYBE_BIND(INP_KEYB,SDLK_x       ,FIRE ); MAYBE_BIND(INP_KEYB,SDLK_RETURN  ,FIRE );
 
   MAYBE_BIND(INP_JAXN,0            ,LEFT ); MAYBE_BIND(INP_JAXN,3            ,LEFT ); //joystick or gamepad
   MAYBE_BIND(INP_JAXP,0            ,RIGHT); MAYBE_BIND(INP_JAXP,3            ,RIGHT);
   MAYBE_BIND(INP_JAXN,1            ,UP   ); MAYBE_BIND(INP_JAXN,4            ,UP   );
   MAYBE_BIND(INP_JAXP,1            ,DOWN ); MAYBE_BIND(INP_JAXP,4            ,DOWN );
-  MAYBE_BIND(INP_JBUT,1            ,SEL  );
-  MAYBE_BIND(INP_JBUT,2            ,BACK );
+  MAYBE_BIND(INP_JBUT,1            ,JUMP );
+  MAYBE_BIND(INP_JBUT,2            ,FIRE );
 
   MAYBE_BIND(INP_MBUT,1            ,EPANT); //editing controls...
   MAYBE_BIND(INP_MBUT,4            ,EPREV);
@@ -115,7 +106,7 @@ void mod_setup(Uint32 setupfr)
 
   //make the mother object
   fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
-  *(MOTHER_t *)fr[setupfr].objs[0].data = (MOTHER_t){0,{0,0,0,0,0,0}};
+  *(MOTHER_t *)fr[setupfr].objs[0].data = (MOTHER_t){0};
 
   //make default context object (map)
   fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
@@ -135,7 +126,7 @@ void mod_setup(Uint32 setupfr)
     co->map[ i].spr   = 0;
     co->dmap[i].flags = CBF_NULL;
   }
-  load_context("dirtfarm",1,setupfr); //load a default map
+  load_context("noise",1,setupfr); //load a default map
 
   //make some dummys
   #define MAYBE_A_DUMMY(i,x,y,w,h) {                                                         \
@@ -493,7 +484,6 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
     case OBJT_GHOST:          obj_ghost_draw(      objid, vidfrmod, o, co );     break;
     case OBJT_BULLET:         obj_bullet_draw(     objid, vidfrmod, o, co );     break;
     case OBJT_SLUG:           obj_slug_draw(       objid, vidfrmod, o, co );     break;
-    case OBJT_PERSON:         obj_person_draw(     objid, vidfrmod, o, co );     break;
     case OBJT_DUMMY:          obj_dummy_draw(      objid, vidfrmod, o, co );     break;
     case OBJT_AMIGO:          obj_amigo_draw(      objid, vidfrmod, o, co );     break;
     case OBJT_AMIGOSWORD:     obj_amigosword_draw( objid, vidfrmod, o, co );     break;
@@ -503,31 +493,6 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 
 void mod_huddraw(Uint32 vidfr)
 {
-  SJGL_SetTex( sys_tex[TEX_HUD].num  );
-  SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
-  SJGL_Blit( &(REC){0,0,160,50}, 160, NATIVEH-50, 0 );
-  SJGL_Blit( &(REC){0,0,160,50}, 320, NATIVEH-50, 0 );
-
-  MOTHER_t *mo = fr[vidfr%maxframes].objs[0].data;
-
-  int i;
-  for( i=0; i<6; i++ ) {
-    if( !mo->party[i] )
-      continue;
-
-    PERSON_t *pe = fr[vidfr%maxframes].objs[mo->party[i]].data;
-
-    #define BAR_W(stat) (pe->stat>0 ? 15+32*pe->stat/pe->max_##stat : 0)
-    SJGL_Blit( &(REC){0,50+6*0,BAR_W(hp),6}, 57   , NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*1,BAR_W(mp),6}, 57+51, NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*2,BAR_W(st),6}, 57   , NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*3,BAR_W(ap),6}, 57+51, NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*4,BAR_W(pn),6}, 57   , NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*5,BAR_W(ml),6}, 57+51, NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*6,BAR_W(to),6}, 57   , NATIVEH-50+13+9*3, 0 );
-    SJGL_Blit( &(REC){0,50+6*7,BAR_W(xp),6}, 57+51, NATIVEH-50+13+9*3, 0 );
-    #undef BAR_W
-  }
 }
 
 
@@ -686,10 +651,6 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
       assert(ob->size==sizeof(SLUG_t));
       obj_slug_adv(       objid, a, b, oa, ob );
       break;
-    case OBJT_PERSON:
-      assert(ob->size==sizeof(PERSON_t));
-      obj_person_adv(       objid, a, b, oa, ob );
-      break;
     case OBJT_AMIGO:
       assert(ob->size==sizeof(AMIGO_t));
       obj_amigo_adv(      objid, a, b, oa, ob );
@@ -715,6 +676,8 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
 
   if( spr->ancy > co->tileuh ) // for sprites that pop out of the flat plane
     r += co->tileuh / 2;
+
+  r = 0; // TODO: remove once sprite ordering works in all projection modes
 
   // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
   // which always in the southernmost corner

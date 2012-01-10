@@ -1,4 +1,4 @@
-GAMENAME = deadking
+GAMENAME = mcdiddy
 
 OBJS += game/mod.o
 OBJS += game/obj_amigo.o
@@ -9,5 +9,4 @@ OBJS += game/obj_ghost.o
 OBJS += game/obj_mother.o
 OBJS += game/obj_player.o
 OBJS += game/obj_slug.o
-OBJS += game/obj_person.o
 

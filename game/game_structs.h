@@ -5,7 +5,6 @@
 STRUCT()
   HIDE(
     char edit;
-    int party[6];
   )
 #include "endstruct.h"
 
@@ -57,38 +56,6 @@ STRUCT()
     char turning;
     char stabbing;
     char hovertime;
-  )
-#include "endstruct.h"
-
-#define TYPE PERSON
-STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(V,pvel,)
-  EXPOSE(int,model,)
-  HIDE(
-    int ghost;
-    int tilex;
-    int tilez;
-    enum DIR8 dir;
-    int walkcounter;
-    int hp;
-    int mp;
-    int st;
-    int ap;
-    int pn;
-    int ml;
-    int to;
-    int xp;
-    int max_hp;
-    int max_mp;
-    int max_st;
-    int max_ap;
-    int max_pn;
-    int max_ml;
-    int max_to;
-    int max_xp;
   )
 #include "endstruct.h"
 

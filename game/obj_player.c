@@ -1,6 +1,6 @@
 /**
- **  Dead Kings' Quest
- **  A special game for the SPARToR Network Game Engine
+ **  McDiddy's: The Game: Vengeance
+ **  Implementation example for the SPARToR Network Game Engine
  **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
@@ -21,45 +21,39 @@ int    setmodel = -1;
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
-  V shadow = pl->pos;
-  shadow.y = co->bsy*co->y;
   int c = POINT2NATIVE_X(&pl->pos);
   int d = POINT2NATIVE_Y(&pl->pos);
-  int r = POINT2NATIVE_Y(&shadow);
 
   //girl hair
   if     ( pl->model!=4 ) ;
-  else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7, r );
-  else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7, r );
+  else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7, d );
+  else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7, d );
 
   //player sprite
   if( pl->goingd ) {
-    if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d, r);
-    else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d, r);
-    else                   sprblit( &SM(ctblue_duck_l), c, d, r);
+    if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d, d);
+    else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d, d);
+    else                   sprblit( &SM(ctblue_duck_l), c, d, d);
   } else {
-    if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d, r);
-    else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d, r);
-    else                   sprblit( &SM(ctblue_l),      c, d, r);
+    if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d, d);
+    else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d, d);
+    else                   sprblit( &SM(ctblue_l),      c, d, d);
   }
 
   // knife or gun
-  if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44, r );
-  else if( pl->stabbing>0 ) sprblit( &SM(knife_down), c, d+10, r );
+  if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44, d );
+  else if( pl->stabbing>0 ) sprblit( &SM(knife_down), c, d+10, d );
   else {
     int gb = pl->gunback;
     int gd = pl->gundown/5;
 
-    if     ( pl->goingu && pl->facingr ) sprblit( &SM(mp5_up_r),   c+20-gb, d-25+gd, r );
-    else if( pl->goingu                ) sprblit( &SM(mp5_up_l),   c-20+gb, d-25+gd, r );
-    else if( pl->goingd && pl->facingr ) sprblit( &SM(mp5_down_r), c+20-gb, d-10+gd, r );
-    else if( pl->goingd                ) sprblit( &SM(mp5_down_l), c-20+gb, d-10+gd, r );
-    else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd, r );
-    else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd, r );
+    if     ( pl->goingu && pl->facingr ) sprblit( &SM(mp5_up_r),   c+20-gb, d-25+gd, d );
+    else if( pl->goingu                ) sprblit( &SM(mp5_up_l),   c-20+gb, d-25+gd, d );
+    else if( pl->goingd && pl->facingr ) sprblit( &SM(mp5_down_r), c+20-gb, d-10+gd, d );
+    else if( pl->goingd                ) sprblit( &SM(mp5_down_l), c-20+gb, d-10+gd, d );
+    else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd, d );
+    else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd, d );
   }
-
-  // draw shadow
-  sprblit( &SM(shadow), c, r, r-1 );
 }
 
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -83,10 +77,10 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     case CMDT_0UP:    newme->goingu  = 0;                      break;
     case CMDT_1DOWN:  newme->goingd  = 1;                      break;
     case CMDT_0DOWN:  newme->goingd  = 0;                      break;
-    case CMDT_1SEL:   newme->jumping = 1;                      break;
-    case CMDT_0SEL:   newme->jumping = 0;                      break;
-    case CMDT_1BACK:  newme->firing  = 1;                      break;
-    case CMDT_0BACK:  newme->firing  = 0; newme->cooldown = 0; break;
+    case CMDT_1JUMP:  newme->jumping = 1;                      break;
+    case CMDT_0JUMP:  newme->jumping = 0;                      break;
+    case CMDT_1FIRE:  newme->firing  = 1;                      break;
+    case CMDT_0FIRE:  newme->firing  = 0; newme->cooldown = 0; break;
   }
 
   if( !oldme ) { //FIXME why's this null?
@@ -147,26 +141,16 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     else                         newme->velxz += amt;
   P_FRIC( vel.x,0.2f)
   P_FRIC(pvel.x,0.5f)
-  P_FRIC( vel.z,0.2f)
-  P_FRIC(pvel.z,0.5f)
   #undef P_FRIC
 
-  // -- WALK --
-  int keys;
   if( newme->turning )
     newme->turning--;
-  #define P_MOVE(dir1, dir2, xz, plus, gt)                \
-    if( (keys = newme->dir1 + newme->dir2) ) {            \
-      newme->pvel.xz plus ## = (keys==1 ? 0.707f : 1.0f); \
-      float max = 0 plus (keys==1 ? 2.121f : 3.0f);       \
-      if( newme->pvel.xz gt max )                         \
-        newme->pvel.xz = max;                             \
-    }
-  P_MOVE(goingl,goingu,x,-,<)
-  P_MOVE(goingr,goingd,x,+,>)
-  P_MOVE(goingu,goingr,z,-,<)
-  P_MOVE(goingd,goingl,z,+,>)
-  #undef P_MOVE
+
+  // -- WALK --
+  if( newme->goingl )
+    newme->vel.x = newme->vel.x<-2.0f ? -2.0f : newme->vel.x-1.0f;
+  if( newme->goingr )
+    newme->vel.x = newme->vel.x> 2.0f ?  2.0f : newme->vel.x+1.0f;
 
   // -- JUMP --
   if( newme->pvel.y <= -2.0f ) {     //jumping in progress
@@ -190,10 +174,10 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     MKOBJ( bu, BULLET, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
     if( newme->facingr ) {
       bu->pos = (V){newme->pos.x+19,newme->pos.y-19,newme->pos.z};
-      bu->vel = (V){ 6,0,-6};
+      bu->vel = (V){ 6,0,0};
     } else {
       bu->pos = (V){newme->pos.x-19,newme->pos.y-19,newme->pos.z};
-      bu->vel = (V){-6,0, 6};
+      bu->vel = (V){-6,0,0};
     }
     if( newme->goingu ) { // aiming
       bu->vel.y += -8;

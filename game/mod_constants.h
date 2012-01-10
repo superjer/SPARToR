@@ -6,9 +6,9 @@
 #include "constants.h"
 
 
-#define NATIVEW    480
-#define NATIVEH    300
-#define GAMENAME   "deadking"
+#define NATIVEW    384
+#define NATIVEH    240
+#define GAMENAME   "mcdiddy"
 #define CBDATASIZE 4     //context block (CB) payload size
 #define MAXCMDDATA 64    //maximum size of extra command data
 
@@ -17,8 +17,6 @@
 #define TEX_PLAYER 1
 #define TEX_WORLD  2
 #define TEX_AMIGO  3
-#define TEX_PERSON 4
-#define TEX_HUD    5
 
 
 //obj types
@@ -27,7 +25,6 @@ enum { ENGINE_OBJT_LIST()
        OBJT_GHOST,
        OBJT_DUMMY,
        OBJT_PLAYER,
-       OBJT_PERSON,
        OBJT_BULLET,
        OBJT_SLUG,
        OBJT_AMIGO,

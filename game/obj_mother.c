@@ -63,6 +63,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     pl->turning        = 0;
     pl->stabbing       = 0;
     pl->hovertime      = 0;
+    pl->walkcounter    = 0;
 
   } //end for i<maxclients
 

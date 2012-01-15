@@ -56,6 +56,7 @@ STRUCT()
     char turning;
     char stabbing;
     char hovertime;
+    char walkcounter;
   )
 #include "endstruct.h"
 

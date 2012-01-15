@@ -114,8 +114,12 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( newme->stabbing==-1 || newme->stabbing==1 )          //last frame of stabbing is over
     newme->stabbing = 0;
   if( newme->stabbing && newme->vel.y==0.0 ) {             //tink tink tink!
-    if( newme->stabbing>0 )
+    if( newme->stabbing>0 ) {
       newme->vel.y -= 0.8f*oldme->vel.y;
+      play("game/sounds/tink.wav");
+    } else {
+      play("game/sounds/tink2.wav");
+    }
     newme->stabbing += (newme->stabbing>0 ? -1 : 1);
   }
   if(        newme->stabbing && newme->goingu ) {          //expand hull for stabbing
@@ -163,10 +167,31 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->pvel.y   = 0.0f;
     newme->jumping  = 0;             //must press jump again now
   }
+
   if( !newme->jumping )              //low-jump, cancel jump velocity early
     newme->pvel.y   = 0.0f;
-  if( (newme->vel.y==0.0f || oldme->vel.y==0.0f) && newme->jumping ) //FIXME 0 velocity means grounded? not really
+
+  if( (newme->vel.y==0.0f || oldme->vel.y==0.0f) && newme->jumping ) { //FIXME 0 velocity means grounded? not really
     newme->pvel.y  = -9.1f;          //initiate jump!
+    play("game/sounds/jump2.wav");
+  }
+
+  if( newme->vel.y==0.0f ) {
+    if( oldme->vel.y>0.0f && oldme->pos.y < newme->pos.y ) {
+      play("game/sounds/footstep1.wav");
+      newme->walkcounter = 0;
+    }
+    if( oldme->vel.y<0.0f )
+      play("game/sounds/headbump.wav");
+  }
+
+  if( newme->vel.y==0.0f && fabsf(newme->vel.x)>0.9f ) {
+    newme->walkcounter = (newme->walkcounter+1) % 14;
+    if( newme->walkcounter==0 )
+      play("game/sounds/footstep1.wav");
+    if( newme->walkcounter==7 )
+      play("game/sounds/footstep2.wav");
+  }
 
   // -- FIRE --
   if( newme->cooldown>0 )

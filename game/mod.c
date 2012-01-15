@@ -212,7 +212,7 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
   CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
 
   // apply magic command?
-  if( !sym ) {
+  if( device==-1 ) {
     if( magic_c.datasz ) {
       memcpy(c, &magic_c, sizeof magic_c);
       memset(&magic_c, 0, sizeof magic_c);
@@ -377,7 +377,7 @@ int mod_command(char *q)
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
     magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
-    putcmd(0,0,0);
+    putcmd(-1,-1,-1);
     return 0;
 
   }else if( strcmp(q,"tilespacing")==0 ){
@@ -398,7 +398,7 @@ int mod_command(char *q)
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
     magic_c.cmd = CMDT_0CON;
-    putcmd(0,0,0);
+    putcmd(-1,-1,-1);
     return 0;
 
   }else if( strcmp(q,"orthographic")==0 || strcmp(q,"dimetric")==0 ){
@@ -409,7 +409,7 @@ int mod_command(char *q)
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
     magic_c.cmd = CMDT_0CON;
-    putcmd(0,0,0);
+    putcmd(-1,-1,-1);
     return 0;
   }
 

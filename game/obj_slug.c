@@ -45,13 +45,13 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
         pl->vel.y = sl->vel.y;
         sl->vel.y = -5.0f;
         kill = 1;
-        play("game/sounds/stab.wav");
+        play("stab");
       } else if( dn_stabbed ) {
         pl->vel.y = -4.5f;
         pl->hovertime = 7;
         sl->vel.y = 0.0f;
         kill = 1;
-        play("game/sounds/stab.wav");
+        play("stab");
       }
     } else if(fr[b].objs[i].type==OBJT_BULLET) {
       BULLET_t *bu = fr[b].objs[i].data;
@@ -60,7 +60,7 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       bu->ttl = 0;
       sl->vel.y = -3.0f;
       kill = 1;
-      play("game/sounds/wibbity.wav");
+      play("wibbity");
     }
   }
 

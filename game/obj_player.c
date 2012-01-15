@@ -189,7 +189,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->cooldown--;
   if( newme->firing && newme->cooldown==0 && newme->projectiles<5 ) { // create bullet
     MKOBJ( bu, BULLET, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
-    play("game/sounds/mp5_shot.wav");
+    play("mp5_shot");
     if( newme->facingr ) {
       bu->pos = (V){newme->pos.x+19,newme->pos.y-19,newme->pos.z};
       bu->vel = (V){ 6,0,-6};

@@ -23,6 +23,7 @@
 #include "client.h"
 #include "input.h"
 #include "video.h"
+#include "audio.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
 #include <math.h>
@@ -110,6 +111,7 @@ int main(int argc,char **argv)
   toggleconsole();
   videoinit();
   inputinit();
+  audioinit();
 
   mod_setup(0);
 
@@ -338,6 +340,8 @@ void advance()
 void cleanup()
 {
   int i;
+
+  audiodestroy();
 
   IMG_Quit();
   SDLNet_Quit();

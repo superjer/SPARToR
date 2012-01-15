@@ -17,7 +17,7 @@
 #define DASH_COOLDOWN 30
 #define FLAIL_COOLDOWN 20
 
-#define MAX_WALK 2.6f
+#define MAX_WALK 5.4f
 
 //FIXME REMOVE! hack
 int smack = 0;
@@ -28,22 +28,22 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
 
-  int x = pl->pos.x-10;
-  int y = pl->pos.y-30;
+  int x = pl->pos.x-20;
+  int y = pl->pos.y-60;
   int z = y + pl->hull[1].y;
-  int xshift = (pl->goingd>0 ? 40 : 0) + (pl->turning ? 80 : (pl->facingr ? 0 : 20 ));
-  int flailshift = ((pl->cooldown % 6) / 3) * 30 + 60;
-  int yshift = pl->cooldown > FLAIL_COOLDOWN ? 30 : (pl->cooldown > 0 ? flailshift : 0);
+  int xshift = (pl->goingd>0 ? 80 : 0) + (pl->turning ? 160 : (pl->facingr ? 0 : 40 ));
+  int flailshift = ((pl->cooldown % 6) / 3) * 60 + 120;
+  int yshift = pl->cooldown > FLAIL_COOLDOWN ? 60 : (pl->cooldown > 0 ? flailshift : 0);
 
   SJGL_SetTex( sys_tex[TEX_PLAYER].num );
 
   if( smack )
-    SJGL_Blit( &(REC){236,0,20,36}, x+smack*10, y-3, z);
+    SJGL_Blit( &(REC){472,0,40,72}, x+smack*20, y-6, z);
 
   if( pl->facingr ) {
-    SJGL_Blit( &(REC){xshift,yshift,20,30}, x, y, z);
+    SJGL_Blit( &(REC){xshift,yshift,40,60}, x, y, z);
   } else {
-    SJGL_Blit( &(REC){xshift,yshift,20,30}, x, y, z);
+    SJGL_Blit( &(REC){xshift,yshift,40,60}, x, y, z);
   }
 }
 
@@ -118,8 +118,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     if(      newme->velxz> amt ) newme->velxz -= amt;  \
     else if( newme->velxz>-amt ) newme->velxz  = 0.0f; \
     else                         newme->velxz += amt;
-  P_FRIC( vel.x,0.35f)
-  P_FRIC(pvel.x,0.35f)
+  P_FRIC( vel.x,0.7f)
+  P_FRIC(pvel.x,0.7f)
   #undef P_FRIC
 
   // -- WALK --
@@ -137,10 +137,10 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       V *youvel = flex(fr[b].objs+i, vel);
 
       if( !youvel ) break;
-      else if( newme->goingu && !oldme->goingu ) { youvel->y = -10.0f;                     }
-      else if( newme->goingr && !oldme->goingr ) { youvel->y =  -5.0f; youvel->x =  12.0f; }
-      else if( newme->goingd && !oldme->goingd ) { youvel->y =  10.0f;                     }
-      else if( newme->goingl && !oldme->goingl ) { youvel->y =  -5.0f; youvel->x = -12.0f; }
+      else if( newme->goingu && !oldme->goingu ) { youvel->y = -20.0f;                     }
+      else if( newme->goingr && !oldme->goingr ) { youvel->y = -10.0f; youvel->x =  24.0f; }
+      else if( newme->goingd && !oldme->goingd ) { youvel->y =  20.0f;                     }
+      else if( newme->goingl && !oldme->goingl ) { youvel->y = -10.0f; youvel->x = -24.0f; }
       else break;
 
       youvel->y += newme->vel.y;
@@ -150,21 +150,21 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   if( !busy && newme->goingl && !cantwalk ) {
-    newme->pvel.x += -1;
+    newme->pvel.x += -2;
     if( newme->pvel.x < -MAX_WALK )
       newme->pvel.x = -MAX_WALK;
   }
 
   if( !busy && newme->goingr && !cantwalk ) {
-    newme->pvel.x +=  1;
-    if( newme->pvel.x >  MAX_WALK )
-      newme->pvel.x =  MAX_WALK;
+    newme->pvel.x += 2;
+    if( newme->pvel.x > MAX_WALK )
+      newme->pvel.x = MAX_WALK;
   }
 
   // -- JUMP --
-  if( newme->pvel.y <= -2.0f ) {     //jumping in progress
-    newme->pvel.y   +=  2.0f;        //jumpvel fades into real velocity
-    newme->vel.y    += -2.0f;
+  if( newme->pvel.y <= -4.0f ) {     //jumping in progress
+    newme->pvel.y   +=  4.0f;        //jumpvel fades into real velocity
+    newme->vel.y    += -4.0f;
   }
   else if( newme->pvel.y < 0.0f ) {  //jumping ending
     newme->vel.y    += newme->pvel.y;
@@ -180,7 +180,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( newme->jumping &&
       (newme->vel.y==0.0f || oldme->vel.y==0.0f) &&
       cool_enough                                   ) {
-    newme->pvel.y   = -7.5f;         //initiate jump!
+    newme->pvel.y   = -15.0f;         //initiate jump!
     newme->cooldown = 0;
   }
 
@@ -196,7 +196,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   // -- DASH --
   if( !newme->cooldown && newme->dashing && !newme->beholden ) {
-    newme->vel.x = newme->facingr ? 10 : -10;
+    newme->vel.x = newme->facingr ? 20 : -20;
     newme->vel.y = 0;
     newme->pvel.x = 0;
     newme->pvel.y = 0;
@@ -214,9 +214,9 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   V clawpos = newme->pos;
-  clawpos.y -= 14.0f;
-  if( newme->facingr ) clawpos.x += 5.0f;
-  else                 clawpos.x -= 5.0f;
+  clawpos.y -= 28.0f;
+  if( newme->facingr ) clawpos.x += 10.0f;
+  else                 clawpos.x -= 10.0f;
 
   // -- INTERACTION --
   for(i=0;i<maxobjs;i++)
@@ -228,14 +228,14 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       if(    !fr[a].objs[i].data
           || !youpos
           || newme->cooldown < FLAIL_COOLDOWN
-          || fabsf(clawpos.x - youpos->x)>10.0f //we're not on top of each other
-          || fabsf(clawpos.y - youpos->y)>15.0f )
+          || fabsf(clawpos.x - youpos->x)>20.0f //we're not on top of each other
+          || fabsf(clawpos.y - youpos->y)>30.0f )
         continue;
 
       newme->beholden = i;
       newme->cooldown = 0;
       // slow player down!
-      if( fabsf(newme->vel.x) > 2.0f ) newme->vel.x = (newme->vel.x>0.0 ? 2.0f : -2.0f);
+      if( fabsf(newme->vel.x) > 4.0f ) newme->vel.x = (newme->vel.x>0.0 ? 4.0f : -4.0f);
     }
 
   // relocate beholden enemy to claw every frame
@@ -254,6 +254,6 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   // -- GRAVITY --
   if( newme->cooldown < FLAIL_COOLDOWN )
-    newme->vel.y += 0.500001f;
+    newme->vel.y += 1.00001f;
 }
 

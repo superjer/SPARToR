@@ -11,16 +11,21 @@
  **/
 
 #include "obj_.h"
+#include "sprite.h"
+#include "sprite_helpers.h"
 
-#define SLUG_VEL 0.5f
+#define SLUG_VEL 1.0f
 
 void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   SLUG_t *sl = o->data;
   int c = POINT2NATIVE_X(&sl->pos);
   int d = POINT2NATIVE_Y(&sl->pos);
-  SJGL_SetTex( sys_tex[TEX_PLAYER].num );
-  SJGL_Blit( &(REC){(sl->vel.x>0?20:0)+(sl->dead?40:0),177,20,16}, c-10, d-8, sl->pos.y );
+
+  if( sl->dead )
+    sprblit( sl->vel.x<0 ? &SM(slug_ouch_r) : &SM(slug_ouch_l), c, d, 0 );
+  else 
+    sprblit( sl->vel.x<0 ? &SM(slug_r)      : &SM(slug_l)     , c, d, 0 );
 }
 
 void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -44,24 +49,24 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       if( !you || !oldyou )
         continue;
 
-      if( fabsf( sl->pos.x - you->pos.x)>30.1f || fabsf( sl->pos.y - you->pos.y)>16.1f )
+      if( fabsf( sl->pos.x - you->pos.x)>30.1f || fabsf( sl->pos.y - you->pos.y)>32.1f )
         continue; // no hit
 
       float diffvelx    =    sl->vel.x -    you->vel.x;
       float diffvely    =    sl->vel.y -    you->vel.y;
       float olddiffvelx = oldsl->vel.x - oldyou->vel.x;
       float olddiffvely = oldsl->vel.y - oldyou->vel.y;
-      if(    (   diffvelx*   diffvelx +    diffvely*   diffvely < 25.0f)
-          && (olddiffvelx*olddiffvelx + olddiffvely*olddiffvely < 25.0f) )
+      if(    (   diffvelx*   diffvelx +    diffvely*   diffvely < 50.0f)
+          && (olddiffvelx*olddiffvelx + olddiffvely*olddiffvely < 50.0f) )
         continue; // low velocity
 
-      sl->vel.y = -3.0f;
-      sl->vel.x = sl->pos.x > you->pos.x ? 3.0f : -3.0f;
+      sl->vel.y = -6.0f;
+      sl->vel.x = sl->pos.x > you->pos.x ? 6.0f : -6.0f;
       sl->dead = 1;
       ob->flags &= ~OBJF_PLAT;
 
-      you->vel.y = -3.0f;
-      you->vel.x = you->pos.x > sl->pos.x ? 3.0f : -3.0f;
+      you->vel.y = -6.0f;
+      you->vel.x = you->pos.x > sl->pos.x ? 6.0f : -6.0f;
       you->dead = 1;
       fr[b].objs[i].flags &= ~OBJF_PLAT;
     }
@@ -93,6 +98,6 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       || sl->pos.y > co->y*co->bsy+10.0f )
     ob->flags |= OBJF_DEL;
 
-  sl->vel.y += 0.50001f; //gravity
+  sl->vel.y += 1.0001f; //gravity
 }
 

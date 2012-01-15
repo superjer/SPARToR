@@ -137,20 +137,20 @@ void mod_setup(Uint32 setupfr)
     du = fr[setupfr].objs[i+20].data = malloc(sizeof *du);                                   \
     du->pos = (V){x*8,y*8,0};                                                                \
     du->vel = (V){0,0,0};                                                                    \
-    du->hull[0] = (V){-w*8,-h*8,-8};                                                         \
-    du->hull[1] = (V){ w*8, h*8, 8};                                                         \
+    du->hull[0] = (V){-w*16,-h*16,-16};                                                      \
+    du->hull[1] = (V){ w*16, h*16, 16};                                                      \
     du->model = 0;                                                                           }
-  MAYBE_A_DUMMY(20,  3,-25,1,1);
-  MAYBE_A_DUMMY(21,  3,-20,1,1);
-  MAYBE_A_DUMMY(22,  3,-15,1,1);
-  MAYBE_A_DUMMY(23,  3,-10,1,1);
-  MAYBE_A_DUMMY(24,  5,-15,1,1);
-  MAYBE_A_DUMMY(25,  9,-15,1,1);
-  MAYBE_A_DUMMY(26, 43,-20,1,1);
-  MAYBE_A_DUMMY(27, 43,-15,1,1);
-  MAYBE_A_DUMMY(28, 45,-25,1,1);
-  MAYBE_A_DUMMY(29, 45,-20,1,1);
-  MAYBE_A_DUMMY(30, 45,-15,1,1);
+  MAYBE_A_DUMMY(20,  6,-25,1,1);
+  MAYBE_A_DUMMY(21,  6,-20,1,1);
+  MAYBE_A_DUMMY(22,  6,-15,1,1);
+  MAYBE_A_DUMMY(23,  6,-10,1,1);
+  MAYBE_A_DUMMY(24, 10,-15,1,1);
+  MAYBE_A_DUMMY(25, 18,-15,1,1);
+  MAYBE_A_DUMMY(26, 86,-20,1,1);
+  MAYBE_A_DUMMY(27, 86,-15,1,1);
+  MAYBE_A_DUMMY(28, 86,-25,1,1);
+  MAYBE_A_DUMMY(29, 86,-20,1,1);
+  MAYBE_A_DUMMY(30, 86,-15,1,1);
   #undef MAYBE_A_DUMMY
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client

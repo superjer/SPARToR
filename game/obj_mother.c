@@ -43,11 +43,11 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     gh->clipboard_y    = 0;
     gh->clipboard_data = NULL;
 
-    pl->pos            = (V){ 0,-50, 0};
-    pl->vel            = (V){ 0,  0, 0};
-    pl->hull[0]        = (V){-6,-30,-6};
-    pl->hull[1]        = (V){ 6,  0, 6};
-    pl->pvel           = (V){ 0,  0, 0};
+    pl->pos            = (V){  0,-50,  0};
+    pl->vel            = (V){  0,  0,  0};
+    pl->hull[0]        = (V){-12,-60,-12};
+    pl->hull[1]        = (V){ 12,  0, 12};
+    pl->pvel           = (V){  0,  0,  0};
     pl->model = i%5;
     pl->ghost = ghostslot;
     pl->beholden = 0;
@@ -69,8 +69,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     MKOBJ( sl, SLUG, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
     sl->pos     = (V){(hotfr%2)*368+8,0,0};
     sl->vel     = (V){(hotfr%2)?-0.5f:0.5f,0,0};
-    sl->hull[0] = (V){-8,-4,-8};
-    sl->hull[1] = (V){ 8, 8, 8};
+    sl->hull[0] = (V){-16,-24,-16};
+    sl->hull[1] = (V){ 16,  0, 16};
     sl->model   = 0;
     sl->dead    = 0;
   }

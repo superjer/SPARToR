@@ -6,9 +6,9 @@
 #include "constants.h"
 
 
-#define NATIVEW    384
-#define NATIVEH    240
-#define GAMENAME   "deadking"
+#define NATIVEW    960
+#define NATIVEH    540
+#define GAMENAME   "sleepykitty"
 #define CBDATASIZE 4     //context block (CB) payload size
 #define MAXCMDDATA 64    //maximum size of extra command data
 

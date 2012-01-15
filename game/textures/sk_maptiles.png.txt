@@ -1,0 +1,50 @@
+.default  size 32 32  anchor cen bot
+
+tnl-redfloor-single 0 0
+tnl-bricks-aligned 32 0
+tnl-black 64 0
+tnl_weight_gold 96 0
+
+.grid  cols 3  pos 0 32  stretch 2 1 0 1
+  tnl-redfloor-l
+  tnl-redfloor-c
+  tnl-redfloor-r
+  tnlgray-brick-tl
+  tnlgray-brick-t
+  tnlgray-brick-tr
+  tnlgray-brick-l
+  tnlgray-brick-flat
+  tnlgray-brick-r
+.end
+
+.grid  cols 3  pos 0 128
+  tnlred-brick-l-shadow1
+  tnlred-brick-flat-shadow1
+  tnlred-brick-r-shadow1
+  tnlred-brick-l
+  tnlred-brick-flat
+  tnlred-brick-r
+  tnlred-brickcurve-l
+  tnlred-brickcurve-flat
+  tnlred-brickcurve-r
+.end
+
+.grid  cols 4  pos 0 224  pipe
+  tnlred-pipe-none
+  tnlred-pipe-3
+  tnlred-pipe-3-9
+  tnlred-pipe-9
+  tnlred-pipe-6
+  tnlred-pipe-3-6
+  tnlred-pipe-3-6-9
+  tnlred-pipe-6-9
+  tnlred-pipe-12-6
+  tnlred-pipe-12-3-6
+  tnlred-pipe-12-3-6-9
+  tnlred-pipe-12-6-9
+  tnlred-pipe-12
+  tnlred-pipe-12-3
+  tnlred-pipe-12-3-9
+  tnlred-pipe-12-9
+.end
+

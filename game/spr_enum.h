@@ -47,4 +47,5 @@ X(ghost),\
 X(girlhair_r),\
 X(girlhair_l),\
 X(shadow),\
+X(tnl_weight_gold),\
 X(sprite_enum_unused)

@@ -12,6 +12,7 @@
 
 #include "obj_.h"
 #include "sprite.h"
+#include "audio.h"
 
 #define DASH_COOLDOWN 30
 #define FLAIL_COOLDOWN 20

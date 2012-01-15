@@ -14,6 +14,7 @@ OBJS = engine/main.o \
        engine/client.o \
        engine/input.o \
        engine/video.o \
+       engine/audio.o \
        engine/sjdl.o \
        engine/patt.o \
        engine/saveload.o \

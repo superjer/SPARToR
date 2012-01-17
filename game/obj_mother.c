@@ -81,7 +81,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   //create AMIGO!
   if(hotfr==200) {
     MKOBJ( am, AMIGO, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDZ );
-    am->pos       = (V){250,0,0};
+    am->pos       = (V){16*148,16*5,0};
     am->vel       = (V){0,0,0};
     am->hull[0]   = (V){-8,-18,-8};
     am->hull[1]   = (V){ 8, 18, 8};

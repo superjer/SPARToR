@@ -39,19 +39,46 @@ static int sound_count = 0;
 static int sound_alloc = 0;
 static SOUND_T *sounds = NULL;
 static int inited = 0;
+static SDL_AudioSpec spec;
 
 
 void mixaudio(void *unused, Uint8 *stream, int len)
 {
-  int i;
+  int i,j;
   Uint32 amount;
+  int buf[len];
+  static int fase;
+  static int freq = 200;
+  Sint16 *out = (Sint16*)stream;
+
+  memset(buf,0,sizeof *buf * len); // twice as big as it needs to be, if 16bit
 
   for( i=0; i<NUM_PLAYING; ++i ) {
-    amount = (playing[i].dlen-playing[i].dpos);
+    amount = playing[i].dlen-playing[i].dpos;
     if( amount > (Uint32)len )
       amount = len;
-    SDL_MixAudio(stream, &playing[i].data[playing[i].dpos], amount, SDL_MIX_MAXVOLUME);
+    for( j=0; j<(int)amount/2; j++ ) {
+      Sint16 *in = (Sint16*)(playing[i].data + playing[i].dpos) + j;
+      buf[j] += *in;
+    }
     playing[i].dpos += amount;
+  }
+
+  /*
+  unsigned int bytesperperiod = spec.freq / freq;
+  for( j=0; j<len/2; j++ ) {
+    buf[j] += (int)(70 * sin(fase*6.28/bytesperperiod));
+    fase = (fase+1) % bytesperperiod;
+  }
+
+  freq += 10;
+  if( freq > 1000 ) freq = 200;
+  */
+
+  for( j=0; j<len/2; j++ ) {
+    if(      buf[j] >  65535 ) out[j] = (Sint16) 65535;
+    else if( buf[j] < -65536 ) out[j] = (Sint16)-65536;
+    else                       out[j] = (Sint16)buf[j];
   }
 }
 
@@ -61,22 +88,41 @@ void audioinit()
 
   size_t i;
 
-  SDL_AudioSpec fmt;
+  SDL_AudioSpec desired;
 
-  fmt.freq = 22050;
-  fmt.format = AUDIO_S16;
-  fmt.channels = 2;
-  fmt.samples = 512; // A good value for games according to SDL
-  fmt.callback = mixaudio;
-  fmt.userdata = NULL;
+  desired.freq = 22050;
+  desired.format = AUDIO_S16LSB;
+  desired.channels = 1;
+  desired.samples = 512;
+  desired.callback = mixaudio;
+  desired.userdata = NULL;
 
-  if( SDL_OpenAudio(&fmt, NULL) < 0 ) {
+  fprintf(stderr,"Initing audio\n");
+  if( SDL_OpenAudio(&desired, &spec) < 0 ) {
+    fprintf(stderr,"Init audio error\n");
     SJC_Write("Unable to open audio: %s\n", SDL_GetError());
     return;
   } else {
+    fprintf(stderr,"Init audio OK\n");
     SDL_PauseAudio(0);
     inited = 1;
   }
+
+  char *sfmt = NULL;
+  switch( spec.format ) {
+    #define SFMT(X) case X: sfmt = #X; break;
+    SFMT(AUDIO_U8)
+    SFMT(AUDIO_S8)
+    SFMT(AUDIO_U16LSB)
+    SFMT(AUDIO_S16LSB)
+    SFMT(AUDIO_U16MSB)
+    SFMT(AUDIO_S16MSB)
+  }
+
+  SJC_Write("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
+            spec.freq, sfmt, spec.channels, spec.silence, spec.samples, spec.size);
+  fprintf(stderr,"Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d\n",
+            spec.freq, sfmt, spec.channels, spec.silence, spec.samples, spec.size);
 
   SJGLOB_T *files = SJglob( "game/sounds", "*.wav", SJGLOB_MARK|SJGLOB_NOESCAPE );
   for( i=0; i<files->gl_pathc; i++ )
@@ -171,7 +217,7 @@ void make_sure_sound_is_loaded(const char *file)
 
   s->name = name;
 
-  SDL_BuildAudioCVT(&s->cvt, wave.format, wave.channels, wave.freq, AUDIO_S16, 2, 22050);
+  SDL_BuildAudioCVT(&s->cvt, wave.format, wave.channels, wave.freq, spec.format, spec.channels, spec.freq);
   s->cvt.buf = malloc(dlen*s->cvt.len_mult);
   memcpy(s->cvt.buf, data, dlen);
   s->cvt.len = dlen;

@@ -176,10 +176,10 @@ void axisinput(SDL_JoyAxisEvent jaxis)
   if( i_watch )
     SJC_Write("joystick #%d, axis #%d, stat %d, value %d",jaxis.which,ax,*stat,val);
 
-  if( val> 11000 && !(*stat&POS_ON) ) { *stat|= POS_ON; kwik ? kwikbind(INP_JAXP,ax) : putcmd( INP_JAXP,ax,1 ); }
-  if( val< 10000 &&  (*stat&POS_ON) ) { *stat&=~POS_ON;                                putcmd( INP_JAXP,ax,0 ); }
-  if( val<-11000 && !(*stat&NEG_ON) ) { *stat|= NEG_ON; kwik ? kwikbind(INP_JAXN,ax) : putcmd( INP_JAXN,ax,1 ); }
-  if( val>-10000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
+  if( val> 21000 && !(*stat&POS_ON) ) { *stat|= POS_ON; kwik ? kwikbind(INP_JAXP,ax) : putcmd( INP_JAXP,ax,1 ); }
+  if( val< 20000 &&  (*stat&POS_ON) ) { *stat&=~POS_ON;                                putcmd( INP_JAXP,ax,0 ); }
+  if( val<-21000 && !(*stat&NEG_ON) ) { *stat|= NEG_ON; kwik ? kwikbind(INP_JAXN,ax) : putcmd( INP_JAXN,ax,1 ); }
+  if( val>-20000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
 }
 
 

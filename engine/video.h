@@ -9,6 +9,7 @@ extern size_t     tex_count;
 
 extern int v_drawhulls;
 extern int v_showstats;
+extern int v_oscillo;
 extern int v_fullscreen;
 extern int v_center;
 

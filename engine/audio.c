@@ -26,6 +26,10 @@
 #define WAVEFORM_LEN 1024
 #define FULL_MULT 32
 
+#define TWELFTH_ROOT 1.059463094
+
+#define NUM_ENVS 20
+
 struct sample {
     Uint8 *data;
     Uint32 dpos;
@@ -52,7 +56,22 @@ static SOUND_T *sounds = NULL;
 static int inited = 0;
 static SDL_AudioSpec spec;
 
-static enum { SINE, SQUARE, TRIANGLE, SAWTOOTH, NOISE, NUM_SHAPES } waveshape;
+enum WVSHAPE { SINE, SQUARE, TRIANGLE, SAWTOOTH, NOISE, NUM_SHAPES };
+
+typedef struct {
+  enum WVSHAPE shape;
+  double start_freq;
+  double volume;
+  double attack, decay, sustain, release, attack_ratio;
+  double duty_start, duty_end, duty_speed, duty_accel;
+  double tremolo_steps,    tremolo_period, tremolo_speed,    tremolo_accel;
+  double vibrato_steps,    vibrato_period, vibrato_speed,    vibrato_accel;
+  double portamento_steps, portamento_len, portamento_speed, portamento_accel;
+  double glissando_steps,  glissando_len,  glissando_speed,  glissando_accel;
+  double pos, duty;
+} ENVELOPE;
+
+ENVELOPE envs[NUM_ENVS];
 
 struct {
   char name[3];
@@ -186,40 +205,83 @@ struct {
 
 static void music_test( int *buf, int len )
 {
-  static int    freq_time  = 100;
-  static int    note       = 50;
-  static double denom      = 1;
-
-  static int attack        = 0;
-  static int decay         = 0;
-  static int sustain       = 0;
-  static int release       = 0;
-  static int attack_peak   = 1.6;
-  static int sustain_level = 1.0;
-
-  static int vibrato       = 0;
-  static int vibrato_time  = 0;
-
+/*
+  static int freq_time = 100;
   if( ++freq_time >= 100 ) {
-    note      = rand() % NUM_MUSIC_NOTES;
-  //note      = (note+1) % NUM_MUSIC_NOTES;
     freq_time = 0;
+*/
+  if( rand()%100==0 ) {
+    ENVELOPE *e = envs + rand()%NUM_ENVS;
+    memset(e,0,sizeof *e);
 
-    waveshape = rand() % NUM_SHAPES;
+    int note = rand() % NUM_MUSIC_NOTES;
 
-    if( rand()%2 ) { attack = 4; decay = 8; sustain = 40; release = 100; }
-    else           { attack = 1; decay = 2; sustain =  5; release = 20;  }
+    e->shape      = rand() % NOISE;
+    e->start_freq = music_notes[note].frequency;
+    e->volume     = 1.0 + 0.08 * music_notes[note].wavelength;
 
-    vibrato = (rand()%2 && (unsigned)note+12<NUM_MUSIC_NOTES);
-    vibrato_time = 0;
+    e->attack_ratio = (double)(rand()%100) * 0.01 + 1.0;
 
-    switch( rand()%4 ) {
-      case 0: denom =  2; break;
-      case 1: denom =  3; break;
-      case 2: denom =  8; break;
-      case 3: denom = 16; break;
+    double len = music_notes[note].wavelength * 0.01;
+    if( len > 0.015 ) len = 0.015;
+
+    e->attack  = (rand()%4==0 ? (double)(rand()%100) * len : 0.0) + 0.05;
+    e->decay   = (rand()%4==0 ? (double)(rand()%100) * len : 0.0) + e->attack;
+    e->sustain = (rand()%4==0 ? (double)(rand()%300) * len : 0.0) + e->decay;
+    e->release = (rand()%4==0 ? (double)(rand()%300) * len : 0.0) + e->sustain;
+
+    if( e->release < 0.01 ) e->release = 1.0;
+
+    e->duty_start   = (double[4]){0.5,0.25,0.125,0.0625}[rand()%4];
+    e->duty_end     = e->duty_start;
+    if( rand()%4==0 ) {
+      e->duty_end   = (double[4]){0.5,0.25,0.125,0.0625}[rand()%4];
+      e->duty_speed = (double)(rand()%100) * 0.00001;
+      if( rand()%2 )
+        e->duty_accel = (double)(rand()%100) * 0.0000001;
     }
 
+    if( rand()%4==0 ) {
+      e->tremolo_steps  = rand()%49 - 24;
+      e->tremolo_period = (double)(rand()%100) * 0.01;
+      if( rand()%3 ) {
+        e->tremolo_speed = (double)(rand()%100) * 0.00001;
+        if( rand()%2 )
+          e->tremolo_accel = (double)(rand()%100) * 0.0000001;
+      }
+    }
+
+    if( rand()%4==0 ) {
+      e->vibrato_steps  = rand()%49 - 24;
+      e->vibrato_period = (double)(rand()%100) * 0.01;
+      if( rand()%3 ) {
+        e->vibrato_speed = (double)(rand()%100) * 0.00001;
+        if( rand()%2 )
+          e->vibrato_accel = (double)(rand()%100) * 0.0000001;
+      }
+    }
+
+    if( rand()%4==0 ) {
+      e->portamento_steps = rand()%49 - 24;
+      e->portamento_len   = (double)(rand()%100) * 0.01;
+      if( rand()%3 ) {
+        e->portamento_speed = (double)(rand()%100) * 0.00001;
+        if( rand()%2 )
+          e->portamento_accel = (double)(rand()%100) * 0.0000001;
+      }
+    }
+
+    if( rand()%4==0 ) {
+      e->glissando_steps = rand()%49 - 24;
+      e->glissando_len   = (double)(rand()%100) * 0.01;
+      if( rand()%3 ) {
+        e->glissando_speed = (double)(rand()%100) * 0.00001;
+        if( rand()%2 )
+          e->glissando_accel = (double)(rand()%100) * 0.0000001;
+      }
+    }
+
+    /*
     SJC_Write("Note: %2s%d %c ADSR=%2d,%2d,%2d,%2d %10s%c%.f",
         music_notes[note].name,
         music_notes[note].octave,
@@ -228,68 +290,65 @@ static void music_test( int *buf, int len )
         (char[NUM_SHAPES][10]){"SINE","SQUARE","TRIANGLE","SAWTOOTH","NOISE"}[waveshape],
         waveshape==SQUARE?'/':'\0',
         denom);
+    */
   }
 
-  double veloc = music_notes[note].wavelength * 200 + 1800;
+  int j,n;
 
-  // Do an ADSR envelope!
-  int t = freq_time;
-  if( t <= attack )
-    veloc *= ((double)t/attack) * attack_peak;
-  else if( t <= decay )
-    veloc *= ((double)(decay-t)/(decay-attack)) * (attack_peak-sustain_level) + sustain_level;
-  else if( t <= sustain )
-    veloc *= sustain_level;
-  else if( t <= release )
-    veloc *= ((double)(release-t)/(release-sustain)) * sustain_level;
-  else
-    veloc = 0;
-
-  double nfreq = music_notes[note].frequency;
-  double vfreq = vibrato ? music_notes[note+12].frequency : nfreq;
-
-  double nbpp  = spec.freq / nfreq;
-  double vbpp  = spec.freq / vfreq;
-  double nbpp2 = waveshape == SQUARE ? nbpp/denom : nbpp/2;
-  double vbpp2 = waveshape == SQUARE ? vbpp/denom : vbpp/2;
-  double nddq  = 1/nbpp;
-  double vddq  = 1/vbpp;
-
-  int j;
   for( j=0; j<len/2; j++ ) {
-    static int    fase      =  0;
     static double noiseval  =  0;
     static int    noisectr  =  1;
     static int    noisesign = -1;
 
     if( noisectr-- <= 0 ) {
-      int minimum = music_notes[note].wavelength*2;
-      int range   = music_notes[note].wavelength*25;
+      int minimum = 15;
+      int range   = 150;
       noisectr  = minimum + rand()%range;
       noisesign = noisesign<0 ? 1 : -1;
       noiseval  = 1.0;
     }
 
-    noiseval *= 0.99;
+    noiseval *= 0.995;
 
-    double bpp,bpp2,ddq;
-    if( vibrato_time<1000 ) { bpp = nbpp; bpp2 = nbpp2; ddq = nddq; }
-    else                    { bpp = vbpp; bpp2 = vbpp2; ddq = vddq; }
+    for( n=0; n<NUM_ENVS; n++ ) {
+      ENVELOPE *e = envs + n;
 
-    if( ++vibrato_time >= 2000 )
-      vibrato_time = 0;
+      if( e->pos >= e->release )
+        continue;
 
-    double frac = fmod(fase,bpp); // fraction of the current period
+      double t = e->pos;
+      e->pos += 1.0/44100;
 
-    switch( waveshape ) {
-      case SINE:     buf[j] += (int)(veloc * sin(frac*6.28318531*ddq));             break;
-      case SQUARE:   buf[j] += frac>bpp2 ? veloc : -veloc;                          break;
-      case TRIANGLE: buf[j] += (4*ddq*(frac>bpp2 ? (bpp-frac) : frac) - 1) * veloc; break;
-      case SAWTOOTH: buf[j] += (2*ddq*frac - 1) * veloc;                            break;
-      case NOISE:    buf[j] += (noisesign<0 ? -noiseval : noiseval) * veloc;        break;
-      default: break;
+      double veloc = e->volume * 2200;
+      if     ( t <= e->attack  ) veloc *= t/e->attack * e->attack_ratio;
+      else if( t <= e->decay   ) veloc *= (e->decay-t)/(e->decay-e->attack) * (e->attack_ratio-1.0) + 1.0;
+      else if( t <= e->sustain ) ;
+      else if( t <= e->release ) veloc *= (e->release-t)/(e->release-e->sustain);
+
+      double tr_freq = e->start_freq * pow(TWELFTH_ROOT,e->tremolo_steps);
+      double vi_freq = e->start_freq * pow(TWELFTH_ROOT,e->vibrato_steps);
+
+      e->tremolo_period += e->tremolo_speed;
+      e->tremolo_speed  += e->tremolo_accel;
+
+      e->vibrato_period += e->vibrato_speed;
+      e->vibrato_speed  += e->vibrato_accel;
+
+      double freq = e->start_freq; //FIXME!
+      double wl   = 1.0/freq;
+      double wl2  = wl/2.0;
+      double frac = fmod(e->pos,wl);
+
+      //if( e->shape==SINE ) fprintf(stderr,"%f / %f\n",frac,wl);
+      switch( e->shape ) {
+        case SINE:     buf[j] += veloc * sin(frac*freq*6.28318531);                  break;
+        case SQUARE:   buf[j] += frac>wl2 ? veloc : -veloc;                          break;
+        case TRIANGLE: buf[j] += (4*freq*(frac>wl2 ? (wl-frac) : frac) - 1) * veloc; break;
+        case SAWTOOTH: buf[j] += (2*freq*frac - 1) * veloc;                          break;
+        case NOISE:    buf[j] += (noisesign<0 ? -noiseval : noiseval) * veloc;       break;
+        default: break;
+      }
     }
-    fase++;
   }
 }
 

@@ -1,0 +1,11 @@
+#.default  size 40 40  anchor cen bot
+
+.grid  cols 3  pos 0 36  size 24 52  anchor bot cen
+  desert-flower1  anchor 11 bot
+  desert-flower2  anchor 14 bot
+  desert-flower3  anchor 18 bot
+.end
+
+pine1 343 0 52 93 cen bot
+pine2 395 2 63 91 cen bot
+pine3 459 3 53 90 cen bot

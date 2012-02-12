@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -13,6 +13,7 @@
 #include "obj_.h"
 #include "saveload.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
 
 
 static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
@@ -43,34 +44,69 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     mycontext   = ob->context;
   }
 
-  FCMD_t *c = fr[b].cmds + gh->client;
-  switch( c->cmd ) {
-    case CMDT_0CON: { //FIXME: edit rights!
-      size_t n = 0;
-      char letter = (char)unpackbytes(c->data,MAXCMDDATA,&n,1);
-      int  x      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-      int  y      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-      int  z      = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
+  if( co->projection == DIMETRIC     )
+    memcpy( gh->hull, (V[2]){{-64,-72,-64},{64,  0, 64}}, sizeof (V[2]) );
+  if( co->projection == ORTHOGRAPHIC )
+    memcpy( gh->hull, (V[2]){{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}}, sizeof (V[2]) );
 
-      if( letter!='b' ) { SJC_Write("Unknown edit command!"); break; }
+
+  FCMD_t *c = fr[b].cmds + gh->client;
+
+  switch( c->cmd ) {
+  case CMDT_0CON: { //FIXME: edit rights!
+    size_t n = 0;
+    char letter = (char)unpackbytes(c->data,MAXCMDDATA,&n,1);
+
+    switch( letter ) {
+    case 'o': // orthographic
+      co->projection = ORTHOGRAPHIC;
+      SJC_Write("Setting context projection to ORTHOGRAPHIC");
+      break;
+
+    case 'd': // dimetric
+      co->projection = DIMETRIC;
+      SJC_Write("Setting context projection to DIMETRIC");
+      break;
+
+    case 'b': { // bounds
+      int x = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      int y = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      int z = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
 
       CONTEXT_t tmp;
-
       const char *error = create_context(&tmp, co, x, y, z);
 
-      if( error ) {
+      if( error )
         SJC_Write("%s", error);
-        break;
-      }
+      else
+        memcpy(co, &tmp, sizeof tmp);
 
-      memcpy(co, &tmp, sizeof tmp);
+      break; }
 
-      // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
+    case 'z': { // blocksize
+      co->bsx = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->bsy = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->bsz = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+
+      break; }
+
+    case 't': { // tilespacing
+      co->tileuw = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+      co->tileuh = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
+
+      break; }
+
+    default:
+      SJC_Write("Unknown edit command!");
       break;
     }
-    case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
-      ghost_paint( c, gh, pl, co );
-      break;
+
+    // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
+    break; }
+
+  case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
+    ghost_paint( c, gh, pl, co );
+    break;
   }
 }
 
@@ -86,8 +122,6 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
   int  upy    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  upz    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  sprnum = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
-
-SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill me!
 
   if( letter!='p' ) { SJC_Write("Unknown edit command!"); return; }
 
@@ -124,20 +158,20 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
     int pos = k*co->y*co->x + j*co->x + i;
 
     if( !tool_num ) { // regular tile painting
-      if( co->dmap[pos].flags & CBF_NULL )
-        co->dmap[pos].flags = co->map[pos].flags;
+      int dsprnum = sprnum;
+
+      if( co->projection == ORTHOGRAPHIC )
+        dsprnum = sprite_grid_transform_xy(sprites + sprnum, co, i, j, k, i-dnx, j-dny, upx-dnx+1, upy-dny+1) - sprites;
+
       co->dmap[pos].flags &= ~CBF_NULL;
       co->dmap[pos].flags |= CBF_VIS;
-      co->dmap[pos].spr    = sprnum;
+      co->dmap[pos].spr    = dsprnum;
       continue;
     }
 
-    // copy map data to dmap if setting sol, plat or opn
-    if( (tool_num == TOOL_SOL || tool_num == TOOL_PLAT || tool_num == TOOL_OPN) && co->dmap[pos].flags & CBF_NULL )
-      memcpy( co->dmap+pos, co->map+pos, sizeof co->map[0] );
-
     switch( tool_num ) {
     case TOOL_NUL:
+      co->dmap[pos] = co->map[pos];
       co->dmap[pos].flags |= CBF_NULL;
       break;
 
@@ -155,10 +189,9 @@ SJC_Write("dn %d %d %d / up %d %d %d", dnx,dny,dnz,upx,upy,upz); // FIXME: kill 
       co->dmap[pos].flags &= ~(CBF_NULL|CBF_SOLID|CBF_PLAT);
       break;
 
-    case TOOL_COPY: {
-      CB *cb = ( (co->dmap[pos].flags & CBF_NULL) ? co->map : co->dmap ) + pos;
-      gh->clipboard_data[ (k-dnz)*clipy*clipx + (j-dny)*clipx + (i-dnx) ] = *cb;
-      break; }
+    case TOOL_COPY:
+      gh->clipboard_data[ (k-dnz)*clipy*clipx + (j-dny)*clipx + (i-dnx) ] = co->dmap[pos];
+      break;
 
     case TOOL_PSTE: {
       int x = (i-dnx+shx) % clipx;

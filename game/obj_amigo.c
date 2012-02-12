@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -66,8 +66,8 @@ void obj_amigo_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
       break;
   }
   SJGL_SetTex( sys_tex[TEX_AMIGO].num );
-  int c = POINT2NATIVE_X(am->pos);
-  int d = POINT2NATIVE_Y(am->pos);
+  int c = POINT2NATIVE_X(&am->pos);
+  int d = POINT2NATIVE_Y(&am->pos);
   SJGL_Blit(&(REC){     x,     y,     w,     h }, c-34,        d-32,        z);
   SJGL_Blit(&(REC){ tip.x, tip.y, tip.w, tip.h }, c-34+tip.dx, d-32+tip.dy, z);
 }

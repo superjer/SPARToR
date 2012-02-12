@@ -1,4 +1,4 @@
-.default  size 46 24  anchor mid bot
+.default  size 46 24  anchor cen bot
 
 .grid  cols 5  pos 0 0  size 46 24  anchor 23 24
   grass1
@@ -21,6 +21,6 @@
 .end
 
 flower  pos 0 96  size 18 28
-dirt1-column1 230 0 46 72 mid bot
-dirt1-column2 230 0 46 72 mid 36
+dirt1-column1 230 0 46 72 cen bot
+dirt1-column2 230 0 46 36 cen 36
 

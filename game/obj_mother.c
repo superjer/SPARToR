@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -37,8 +37,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     gh->pos            = (V){  0,  0,  0};
     gh->vel            = (V){  0,  0,  0};
-    gh->hull[0]        = (V){-64,-64,-64};
-    gh->hull[1]        = (V){ 64, 64, 64};
+    gh->hull[0]        = (V){  0,  0,  0};
+    gh->hull[1]        = (V){  0,  0,  0};
     gh->model          = 0;
     gh->client         = i;
     gh->avatar         = slot0;
@@ -48,8 +48,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     pl->pos            = (V){ 0,-50, 0};
     pl->vel            = (V){ 0,  0, 0};
-    pl->hull[0]        = (V){-6,-15,-6};
-    pl->hull[1]        = (V){ 6, 15, 6};
+    pl->hull[0]        = (V){-6,-30,-6};
+    pl->hull[1]        = (V){ 6,  0, 6};
     pl->pvel           = (V){ 0,  0, 0};
     pl->model          = i%5;
     pl->ghost          = ghostslot;

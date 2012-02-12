@@ -6,6 +6,55 @@
   desert-flower3  anchor 18 bot
 .end
 
-pine1 343 0 52 93 cen bot
-pine2 395 2 63 91 cen bot
-pine3 459 3 53 90 cen bot
+.grid  cols 3  pos 0 0  size 21 33 anchor bot cen
+  desert-scrub1
+  desert-scrub2
+  desert-scrub3
+.end
+
+.grid cols 3  pos 0 90  size 31 41 anchor bot cen
+  desert-rock1
+  desert-rock2
+  desert-rock3
+.end
+
+.grid cols 3  pos 0 131  size 47 36 anchor bot cen
+  desert-rock4
+  desert-rock5
+  desert-rock6
+.end
+
+.grid cols 2  pos 0 239  size 47 28 anchor bot cen
+  desert-campburnt
+  desert-campfresh
+.end
+
+.grid cols 3  pos 72 45  size 28 13 anchor bot cen
+  desert-vine1
+  desert-vine2
+  desert-vine3
+.end
+
+desert-bush1 72 58 30 30 cen bot
+
+desert-largerock1  0 167 54 72 cen bot
+desert-largerock2  54 167 94 55 cen bot
+
+wheat1  63 0 47 45 cen bot
+wheat2  111 1 48 44 cen bot
+
+wheattrampled1  159 0 46 27 cen bot
+wheattrampled2  205 2 48 25 cen bot
+
+pine1  343 0 52 93 cen bot
+pine2  395 2 63 91 cen bot
+pine3  459 3 53 90 cen bot
+
+barrel1  253 0 20 27 cen bot
+barrel2  273 1 19 26 cen bot
+crate1 292 0 46 44 cen bot
+
+alder1  388 93 67 92 cen bot
+alderdead1  455 96 57 89 cen bot
+cabbage1  464 185 21 17 cen bot
+log1  485 185 27 16 cen bot

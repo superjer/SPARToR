@@ -9,9 +9,7 @@ extern size_t     tex_count;
 
 extern int v_drawhulls;
 extern int v_showstats;
-extern int v_usealpha;
 extern int v_fullscreen;
-extern int v_oob;
 extern int v_center;
 
 extern int v_camx;

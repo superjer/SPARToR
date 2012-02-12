@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -15,8 +15,8 @@
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PERSON_t *pe = o->data;
-  int c = POINT2NATIVE_X(pe->pos);
-  int d = POINT2NATIVE_Y(pe->pos);
+  int c = POINT2NATIVE_X(&pe->pos);
+  int d = POINT2NATIVE_Y(&pe->pos);
   SJGL_SetTex( sys_tex[TEX_PERSON].num );
   REC rect;
   int flip = 0;
@@ -65,8 +65,6 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   int x = c - rect.w/2;
   int y = d - 43;
   int r = d + 12;
-
-  fprintf(stderr,"player: %d\n",r);
 
   if( flip ) {
     rect.x += rect.w;

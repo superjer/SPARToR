@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -15,8 +15,8 @@
 void obj_dummy_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   DUMMY_t *du = o->data;
-  int c = POINT2NATIVE_X(du->pos) + du->hull[0].x;
-  int d = POINT2NATIVE_Y(du->pos) + du->hull[0].y;
+  int c = POINT2NATIVE_X(&du->pos) + du->hull[0].x;
+  int d = POINT2NATIVE_Y(&du->pos) + du->hull[0].y;
   int w = du->hull[1].x-du->hull[0].x;
   int h = du->hull[1].y-du->hull[0].y;
 

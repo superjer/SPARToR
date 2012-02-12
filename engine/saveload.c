@@ -1,12 +1,26 @@
-//
-// map header format:
-//  modname mapversion texturefilecount
-//  texturefilepath
-//  texturefilepath
-//  ...
-//  blocksizeX blocksizeY blocksizeZ
-//  dimensionX dimensionY dimensionZ
-//  [blockdata...]
+/**
+ **  SPARToR
+ **  Network Game Engine
+ **  Copyright (C) 2010-2012  Jer Wilson
+ **
+ **  See COPYING for details.
+ **
+ **  http://www.superjer.com/
+ **  http://www.spartor.com/
+ **  http://github.com/superjer/SPARToR
+ **/
+
+/**
+ **  map file header format:
+ **   gamename mapversion spritecount
+ **   spritename
+ **   spritename
+ **   ...
+ **   projection-mode tileUW tileUH
+ **   blocksizeX blocksizeY blocksizeZ
+ **   dimensionX dimensionY dimensionZ
+ **   [blockdata...]
+ **/
 
 #include "mod.h"
 #include "main.h"
@@ -69,8 +83,8 @@ int save_context(const char *name,int context,int savefr)
   char  bakdir[256];
   char *bakfile;
 
-  snprintf( path,   256, "%s/maps/%s.txt", MODNAME, name );
-  snprintf( bakdir, 256, "%s/maps/backup", MODNAME       );
+  snprintf( path,   256, "game/maps/%s.txt", name );
+  snprintf( bakdir, 256, "game/maps/backup" );
 
   // attempt to backup existing file by moving it to backup directory
   if( !(bakfile = sjtempnam(bakdir,name,".txt")) ) {
@@ -106,7 +120,7 @@ int save_context(const char *name,int context,int savefr)
   int in_use[ spr_count ];
   memset( in_use, -1, sizeof in_use[0] * spr_count );
   for( i=0; i<co->x*co->y*co->z; i++ ) {
-    size_t n = (co->dmap[i].flags & CBF_NULL) ? co->map[i].spr : co->dmap[i].spr;
+    size_t n = co->dmap[i].spr;
 
     if( n < spr_count )
       in_use[n] = 0; // zero means used, -1 means unusued
@@ -121,10 +135,13 @@ int save_context(const char *name,int context,int savefr)
       in_use[i] = use_count++;
 
   // start writing the file
-  if(0>fprintf( f, "%s %i %i\n", MODNAME, MAPVERSION, use_count )) goto fail;
+  if(0>fprintf( f, "%s %i %i\n", GAMENAME, MAPVERSION, use_count )) goto fail;
 
   for( i=0; i<(int)spr_count; i++ )
     if( in_use[i]!=-1 && 0>fprintf( f, "%s\n", sprites[i].name ) ) goto fail;
+
+  const char *proj = (co->projection == DIMETRIC ? "DIMETRIC" : "ORTHOGRAPHIC");
+  if(0>fprintf( f, "%s %i %i\n", proj, co->tileuw, co->tileuh )) goto fail;
 
   if(0>fprintf( f, "%i %i %i\n", co->bsx, co->bsy, co->bsz )) goto fail;
 
@@ -134,7 +151,7 @@ int save_context(const char *name,int context,int savefr)
     for( y=0; y<co->y; y++ ) {
       for( x=0; x<co->x; x++ ) {
         int pos = co->x*co->y*z + co->x*y + x;
-        CB *cb = (co->dmap[pos].flags & CBF_NULL) ? co->map+pos : co->dmap+pos;
+        CB *cb = co->dmap+pos;
         size_t val = in_use[cb->spr];
 
         if( cb->flags ) {
@@ -172,7 +189,7 @@ int load_context(const char *name,int context,int loadfr)
   char path[256];
   int i;
 
-  snprintf( path, 256, "%s/maps/%s.txt", MODNAME, name );
+  snprintf( path, 256, "game/maps/%s.txt", name );
 
   FILE *f = fopen( path, "r" );
   if( !f ) {
@@ -180,11 +197,11 @@ int load_context(const char *name,int context,int loadfr)
     return -1;
   }
 
-  char modname[256];
+  char buf[256];
   int version = 0;
   int nspr = 0;
-  if( 3 != fscanf(f,"%100s %d %d\n",modname,&version,&nspr) )     return fail(f,"failed to read line 1");
-  if( 0 != strcmp(modname,MODNAME) )                              return fail(f,"MODNAME mismatch");
+  if( 3 != fscanf(f,"%100s %d %d\n",buf,&version,&nspr) )         return fail(f,"failed to read line 1");
+  if( 0 != strcmp(buf,GAMENAME) )                                 return fail(f,"GAMENAME mismatch");
   if( version != MAPVERSION )                                     return fail(f,"MAPVERSION mismatch");
   if( nspr<1 || nspr>65535 )                                      return fail(f,"invalid sprite count");
 
@@ -195,6 +212,15 @@ int load_context(const char *name,int context,int loadfr)
     if( 1 != fscanf(f,"%100s\n",sprnames[i]) )                    return fail(f,"error reading sprite name");
     sprnumbers[i] = find_sprite_by_name(sprnames[i]);
   }
+
+  int proj;
+  int tileuw,tileuh;
+  if( 3 != fscanf(f,"%80s %d %d\n",buf,&tileuw,&tileuh) )         return fail(f,"failed to read context projection");
+  if(      !strcmp(buf,"ORTHOGRAPHIC") ) proj = ORTHOGRAPHIC;
+  else if( !strcmp(buf,"DIMETRIC")     ) proj = DIMETRIC;
+  else                                                            return fail(f,"unknown projection mode");
+  if( tileuw<1 || tileuw>1024 )                                   return fail(f,"tileuw is out of range");
+  if( tileuh<1 || tileuh>1024 )                                   return fail(f,"tileuh is out of range");
 
   int bsx,bsy,bsz;
   if( 3 != fscanf(f,"%d %d %d\n",&bsx,&bsy,&bsz) )                return fail(f,"failed to read context size"); 
@@ -226,14 +252,17 @@ int load_context(const char *name,int context,int loadfr)
 
     if( n >= nspr ) SJC_Write("sprite number is too high! (%d/%d)",n,nspr);
 
-    map[ i].spr     = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
-    map[ i].flags   = flags;
-    dmap[i].flags   = CBF_NULL;
+    dmap[i].spr   = map[i].spr   = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
+    dmap[i].flags = map[i].flags = flags;
+    dmap[i].flags |= CBF_NULL;
   }
 
   // everything ok? swap it in
   loadfr = loadfr%maxframes;
   CONTEXT_t *co = fr[loadfr].objs[context].data;
+  co->projection = proj;
+  co->tileuw = tileuw;
+  co->tileuh = tileuh;
   co->bsx = bsx;
   co->bsy = bsy;
   co->bsz = bsz;

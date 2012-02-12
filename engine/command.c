@@ -1,7 +1,7 @@
 /**
  **  SPARToR 
  **  Network Game Engine
- **  Copyright (C) 2010-2011  Jer Wilson
+ **  Copyright (C) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -35,18 +35,14 @@ void command(const char *s)
   do {
     if( q==NULL ) {
       ;
+    }else if( strcmp(q,"redetect")==0 ) {
+      inputinit();
     }else if( strcmp(q,"realtime")==0 ) {
       eng_realtime = eng_realtime ? 0 : 1;
       SJC_Write("Realtime mode %s",eng_realtime?"on":"off");
     }else if( strcmp(q,"watch")==0 ) {
       i_watch = i_watch ? 0 : 1;
       SJC_Write("Input watch %s",i_watch?"on":"off");
-    }else if( strcmp(q,"alpha")==0 ) {
-      char *val = strtok(NULL," ");
-      if( val ) v_usealpha = atoi(val);
-    }else if( strcmp(q,"oob")==0 ) {
-      char *val = strtok(NULL," ");
-      if( val ) v_oob = atoi(val);
     }else if( strcmp(q,"exit")==0 || strcmp(q,"quit")==0 ) {
       cleanup();
     }else if( strcmp(q,"listen")==0 ) {
@@ -109,18 +105,19 @@ void command(const char *s)
       jogframebuffer(metafr,surefr);
     }else if( strcmp(q,"help")==0 ) {
       SJC_Write("Press your ~ key to open and close this console. Commands you can type:");
-      SJC_Write("     listen -- start a server");
-      SJC_Write("     connect -- connect to a server");
-      SJC_Write("     fullscreen 1024 768 -- go fullscreen at 1024x768");
-      SJC_Write("     window 3x -- go windowed at 3x up-scale");
-      SJC_Write("     bind -- choose input keys");
-      SJC_Write("Default controls: Z, X, ARROWS, F11");
+      SJC_Write("     \\#08Flisten               \\#FFFstart a server");
+      SJC_Write("     \\#08Fconnect              \\#FFFconnect to a server");
+      SJC_Write("     \\#08Ffullscreen           \\#FFFgo fullscreen");
+      SJC_Write("     \\#08Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
+      SJC_Write("     \\#08Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
+      SJC_Write("     \\#08Fbind                 \\#FFFchoose input keys");
+      SJC_Write("See commands.txt for more commands");
     }else if( strcmp(q,"report")==0 ) {
       int i;
       for( i=0; i<maxobjs; i++ ) {
         OBJ_t *o = fr[surefr%maxframes].objs+i;
         if( o->type )
-          SJC_Write( "#%i %s C:%i F:%x", i, objectnames[o->type], o->context, o->flags );
+          SJC_Write( "#%-3i %-20s C:%-3i F:%-5x", i, flexer[o->type].name, o->context, o->flags );
       }
     }else if( strcmp(q,"save")==0 ) {
       char *name = strtok(NULL," ");
@@ -147,8 +144,15 @@ void command(const char *s)
         SJC_Write("Invalid sprite number #%d (max %d)",n,spr_count-1);
         break;
       }
-      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\" flags %d",n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
-      SJC_Write("  pos %d %d  size %d %d  anchor %d %d",sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
+      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\" flags %d",
+                n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
+      SJC_Write("  pos %d %d  size %d %d  anchor %d %d",
+                sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
+      if( sprites[n].more )
+        SJC_Write("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
+                  sprites[n].more->gridwide,sprites[n].more->gridlast,
+                  sprites[n].more->piping,sprites[n].more->stretch,
+                  sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
     }else if( mod_command(q) ) {
       SJC_Write("Huh?");
     }

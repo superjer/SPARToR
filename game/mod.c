@@ -1,7 +1,7 @@
 /**
  **  Dead Kings' Quest
  **  A special game for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2011  Jer Wilson
+ **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -15,6 +15,7 @@
 #include "saveload.h"
 #include "sjglob.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
 
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
@@ -46,20 +47,6 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
                             {"edit-lay1"  ,CMDT_1ELAY1,CMDT_0ELAY1},
                             {"edit-lay2"  ,CMDT_1ELAY2,CMDT_0ELAY2}};
 int numinputnames = COUNTOF(inputnames);
-
-
-char objectnames[][16] =
-     { "empty",
-       "context",
-       "mother",
-       "ghost",
-       "dummy",
-       "player",
-       "person",
-       "bullet",
-       "slug",
-       "amigo",
-       "amigosword" };
 
 
 int    myghost;     //obj number of local player ghost
@@ -135,13 +122,9 @@ void mod_setup(Uint32 setupfr)
   CONTEXT_t *co = fr[setupfr].objs[1].data;
   co->bsx = co->bsy = co->bsz = 16;
   co->x   = co->y   = co->z   = 15;
-  co->tilex = TILEX;
-  co->tiley = TILEY;
-  co->tilew = 46;
-  co->tileh = 24;
   co->tileuw = 48;
   co->tileuh = 24;
-  co->isometric = 1;
+  co->projection = DIMETRIC;
   int volume = co->x * co->y * co->z;
   co->map  = hack_map  = malloc( (sizeof *co->map ) * volume ); //FIXME remove hack
   co->dmap = hack_dmap = malloc( (sizeof *co->dmap) * volume );
@@ -182,6 +165,8 @@ void mod_setup(Uint32 setupfr)
   #undef MAYBE_A_DUMMY
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client
+
+  SJC_Write("Default controls: \\#F80A, S, Numpad Arrows, F11");
 }
 
 
@@ -317,13 +302,18 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         int posx = screen2native_x(i_mousex);
         int posy = screen2native_y(i_mousey);
 
-        posx += co->tileuw/2; // tiles are centered in width
-        posy -= co->bsy;      // tiles are drawn at the bottom of the cube
+        if( co->projection == DIMETRIC ) {
+          posx += co->tileuw/2; // tiles are centered in width
+          posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+        }
 
         //map to game coordinates
         int tilex = NATIVE2TILE_X(co,posx,posy);
-        int tiley = ylayer; //NATIVE2TILE_Y(co,posx,posy);
+        int tiley = NATIVE2TILE_Y(co,posx,posy);
         int tilez = NATIVE2TILE_Z(co,posx,posy);
+
+        if( co->projection == DIMETRIC     ) tiley = ylayer;
+        if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
 
         if( c->cmd==CMDT_1EPANT ) {
           downx = tilex;
@@ -364,33 +354,72 @@ int mod_command(char *q)
 {
   if( q==NULL ){
     ;
+
   }else if( strcmp(q,"edit")==0 ){
     editmode = editmode ? 0 : 1;
     v_center = editmode ? 0 : 1;
     return 0;
+
   }else if( strcmp(q,"model")==0 ){
     setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
     return 0;
-  }else if( strcmp(q,"bounds")==0 ){
+
+  }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
     int x = safe_atoi(strtok(NULL," "));
     int y = safe_atoi(strtok(NULL," "));
     int z = safe_atoi(strtok(NULL," "));
+    char chr = strcmp(q,"bounds")==0 ? 'b' : 'z';
 
     if( !x || !y || !z ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
-      SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
+      if( chr == 'b' )
+        SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
+      else
+        SJC_Write("The current blocksize is (X,Y,Z): %d %d %d", co->bsx, co->bsy, co->bsz);
       return 0;
     }
 
     memset(&magic_c,0,sizeof magic_c);
-    packbytes(magic_c.data,'b',&n,1);
+    packbytes(magic_c.data,chr,&n,1);
     packbytes(magic_c.data,  x,&n,4);
     packbytes(magic_c.data,  y,&n,4);
     packbytes(magic_c.data,  z,&n,4);
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
     magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    putcmd(0,0,0);
+    return 0;
+
+  }else if( strcmp(q,"tilespacing")==0 ){
+    size_t n = 0;
+    int tileuw = safe_atoi(strtok(NULL," "));
+    int tileuh = safe_atoi(strtok(NULL," "));
+
+    if( !tileuw || !tileuh ) {
+      CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
+      SJC_Write("The current tilespacing is (W,H): %d %d", co->tileuw, co->tileuh);
+      return 0;
+    }
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,   't',&n,1);
+    packbytes(magic_c.data,tileuw,&n,4);
+    packbytes(magic_c.data,tileuh,&n,4);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON;
+    putcmd(0,0,0);
+    return 0;
+
+  }else if( strcmp(q,"orthographic")==0 || strcmp(q,"dimetric")==0 ){
+    size_t n = 0;
+
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,q[0],&n,1);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON;
     putcmd(0,0,0);
     return 0;
   }
@@ -412,7 +441,7 @@ void mod_loadsurfs(int quit)
 
   if( quit ) return;
 
-  SJGLOB_T *files = SJglob( MODNAME "/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
+  SJGLOB_T *files = SJglob( "game/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
 
   for( i=0; i<files->gl_pathc; i++ )
     make_sure_texture_is_loaded( files->gl_pathv[i] );
@@ -430,18 +459,23 @@ void mod_predraw(Uint32 vidfr)
   //draw context
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data; // FIXME: is mycontext always set here?
 
+  if( co->projection == ORTHOGRAPHIC )
+    PROJECTION_MODE(ORTHO);
+  else
+    PROJECTION_MODE(DIMETRIC);
+
   for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ ) {
     int pos = co->x*co->y*k + co->x*j + i;
 
     if( showlayer && ylayer!=j )
       continue;
 
-    CB *cb = (co->dmap[ pos ].flags & CBF_NULL) ? co->map + pos : co->dmap + pos;
+    CB *cb = co->dmap + pos;
     if( !(cb->flags & CBF_VIS) )
       continue;
 
     SPRITE_T *spr = sprites + cb->spr;
-    draw_sprite_on_tile( spr, co, i, 0, k );
+    draw_sprite_on_tile( spr, co, i, j, k );
   }
 }
 
@@ -508,8 +542,10 @@ void mod_postdraw(Uint32 vidfr)
   GHOST_t   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
 
-  posx += co->tileuw/2; // tiles are centered in width
-  posy -= co->bsy;      // tiles are drawn at the bottom of the cube
+  if( co->projection == DIMETRIC ) {
+    posx += co->tileuw/2; // tiles are centered in width
+    posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
+  }
 
   //map to game coordinates
   int upx = NATIVE2TILE_X(co,posx,posy);
@@ -545,9 +581,11 @@ void mod_postdraw(Uint32 vidfr)
       int y = (j-dny+shy) % clipy;
       int z = (k-dnz+shz) % clipz;
       dspr = sprites + gh->clipboard_data[ x + y*clipx + z*clipy*clipx ].spr;
+    } else if( co->projection == ORTHOGRAPHIC ) {
+      dspr = sprite_grid_transform_xy(spr, co, i, j, k, i-dnx, j-dny, upx-dnx+1, upy-dny+1);
     }
                  
-    draw_sprite_on_tile( dspr, co, i, 0, k );
+    draw_sprite_on_tile( dspr, co, i, j, k );
   }
 
   glPopAttrib();
@@ -611,9 +649,10 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glColor4f(1,1,1,1);
-  SJF_DrawText( w-sz, sz+ 4, "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-  SJF_DrawText( w-sz, sz+24, "Layer %d", ylayer );
+  SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+                "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+  SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+  SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
 
   glPopAttrib();
 }
@@ -665,16 +704,17 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
-  y = (co->y-1) * co->bsy; // FIXME : silly hack for layers all being at the bottom of the context
+  if( co->projection == DIMETRIC )
+    y = co->y * co->bsy; // layers are all anchored at the bottom of the context
 
   SJGL_SetTex( spr->texnum );
 
   int c = TILE2NATIVE_X(co,x,y,z);
   int d = TILE2NATIVE_Y(co,x,y,z);
-  int r = d + co->tileuh / 2;
+  int r = d;
 
-  if( x==10 && z==3 )
-    fprintf(stderr,"tile: %d\n",r);
+  if( spr->ancy > co->tileuh ) // for sprites that pop out of the flat plane
+    r += co->tileuh / 2;
 
   // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
   // which always in the southernmost corner

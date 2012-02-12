@@ -1,7 +1,7 @@
 /**
  **  SPARToR 
  **  Network Game Engine
- **  Copyright (C) 2010-2011  Jer Wilson
+ **  Copyright (C) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -39,14 +39,22 @@ static FCMD_t cmdbuf[250];
 static int    cbwrite = 0;
 static int    cbread = 0;
 
-static SDL_Joystick **joysticks;
+static SDL_Joystick **joysticks = NULL;
+
+static int started = 0;
 
 
 void inputinit()
 {
+  if( started ) {
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+    if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
+      SJC_Write("Error: could not restart the JOYSTICK SubSystem!");
+  }
+
   int i, numjoysticks;
   if( (numjoysticks=SDL_NumJoysticks())>0 ) {
-    joysticks = malloc(sizeof(*joysticks)*numjoysticks);
+    joysticks = realloc(joysticks, sizeof(*joysticks)*numjoysticks);
     SDL_JoystickEventState(SDL_ENABLE);
     SJC_Write("%d controller/joystick%s detected:",numjoysticks,(numjoysticks>1?"s":""));
     for( i=0; i<numjoysticks; i++ ) {
@@ -54,6 +62,8 @@ void inputinit()
       SJC_Write("  #%i: %.20s",i,SDL_JoystickName(i));
     }
   }
+
+  started = 1;
 }
 
 
@@ -121,6 +131,10 @@ void kbinput(int press,SDL_keysym keysym)
     }
     else if(sym==SDLK_BACKSPACE || sym==SDLK_DELETE)
       SJC_Rub();
+    else if(sym==SDLK_UP)
+      SJC_Up();
+    else if(sym==SDLK_DOWN)
+      SJC_Down();
     else if(sym==SDLK_ESCAPE && console_open)
       toggleconsole();
   } else
@@ -162,10 +176,10 @@ void axisinput(SDL_JoyAxisEvent jaxis)
   if( i_watch )
     SJC_Write("joystick #%d, axis #%d, stat %d, value %d",jaxis.which,ax,*stat,val);
 
-  if( val> 3400 && !(*stat&POS_ON) ) { *stat|= POS_ON; kwik ? kwikbind(INP_JAXP,ax) : putcmd( INP_JAXP,ax,1 ); }
-  if( val< 3000 &&  (*stat&POS_ON) ) { *stat&=~POS_ON;                                putcmd( INP_JAXP,ax,0 ); }
-  if( val<-3400 && !(*stat&NEG_ON) ) { *stat|= NEG_ON; kwik ? kwikbind(INP_JAXN,ax) : putcmd( INP_JAXN,ax,1 ); }
-  if( val>-3000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
+  if( val> 11000 && !(*stat&POS_ON) ) { *stat|= POS_ON; kwik ? kwikbind(INP_JAXP,ax) : putcmd( INP_JAXP,ax,1 ); }
+  if( val< 10000 &&  (*stat&POS_ON) ) { *stat&=~POS_ON;                                putcmd( INP_JAXP,ax,0 ); }
+  if( val<-11000 && !(*stat&NEG_ON) ) { *stat|= NEG_ON; kwik ? kwikbind(INP_JAXN,ax) : putcmd( INP_JAXN,ax,1 ); }
+  if( val>-10000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
 }
 
 

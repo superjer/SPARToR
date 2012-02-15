@@ -15,15 +15,31 @@
   grass3
   crust-grass-sw
   wood-plank
-  .
-  blank-plank-sw
+  deserttile1
   grass-sw
   grass-ne
   grass-nw
   grass-se
+  deserttile2
+  stone-sw
+  stone-ne
+  stone-nw
+  stone-se
+  deserttile3
+  crust-wall-sw
+  deserttile-broken1
 .end
 
-flower  pos 0 96  size 18 28
+flower  pos 276 0  size 18 28
 dirt1-column1 230 0 46 72 cen bot
 dirt1-column2 230 0 46 36 cen 36
+adobe-wall1 230 72 46 72 cen bot
+adobe-wall2 230 72 46 36 cen 36
+adobe-wall3 230 144 46 72 cen bot
+adobe-wall4 230 144 46 36 cen 36
+adobe-wall5 230 216 46 72 cen bot
+adobe-wall6 230 216 46 36 cen 36
+adobe-wall7 230 288 46 72 cen bot
+adobe-wall8 230 288 46 36 cen 36
+
 

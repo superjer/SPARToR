@@ -31,15 +31,15 @@
   sand3
   .
   deserttile-broken1
-  .
-  .
-  .
-  .
+  sand-sw
+  sand-ne
+  sand-nw
+  sand-se
   deserttileskunge-nw
-  .
-  .
-  .
-  .
+  sand-s
+  sand-w
+  sand-n
+  sand-e
   deserttileskunge-ne
 .end
 

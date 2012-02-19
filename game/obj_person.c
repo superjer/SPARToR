@@ -41,16 +41,22 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   enum DIR8 dir = NODIR;  // direction we want to move
   int stop = 0;           // whether to end the current turn
 
+  spatt(hotfr);
+
+  if( mo->intervalstart == hotfr )
+    newpe->to += 10;    // TODO: use speed instead of "10"
+
   if( mo->active==objid ) {
     if( mo->turnstart == hotfr ) {
+      newpe->to = 0;
       newpe->ap += 100;
       if( newpe->ap > newpe->max_ap )
         newpe->ap = newpe->max_ap;
     }
 
-    // check for input
-    if( newpe->ghost ) {
-      GHOST_t *gh = fr[b].objs[newpe->ghost].data;
+    // check for input if player controlled
+    if( mo->pc ) {
+      GHOST_t *gh = fr[b].objs[mo->ghost].data;
 
       switch( fr[b].cmds[gh->client].cmd ) {
         case CMDT_1LEFT:  dir=W;  break;
@@ -64,13 +70,18 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
         case CMDT_1SEL:   stop=1; break;
         case CMDT_1BACK:          break;
       }
+    } else { // npc
+      if( newpe->ap >= 10 )
+	dir = patt()%8 + 1;
+      else
+	stop = 1;
     }
 
-    if( stop ) mo->active = 0;
+    if( stop ) {
+      mo->active = 0;
+      newpe->pos.y -= 10; // hup!
+    }
   }
-
-  if( mo->intervalstart == hotfr )
-    newpe->pos.y -= 50;
 
   if( !oldpe ) { //FIXME why's this null?
     SJC_Write("Warning: oldpe is NULL!");

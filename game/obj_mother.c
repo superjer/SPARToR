@@ -12,6 +12,8 @@
 
 #include "obj_.h"
 
+int in_party(MOTHER_t *mo,int objid);
+
 void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   int i, j;
@@ -28,6 +30,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
           mo->active = i;
           mo->turnstart = hotfr;
           mo->intervalstart = hotfr;
+          mo->pc = in_party(mo,i);
           break;
         }
       }
@@ -53,7 +56,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, peslot );
 
-    // put pe in the party
+    mo->ghost    = ghostslot;
     mo->party[0] = peslot;
 
     gh->pos            = (V){  0,  0,  0};
@@ -76,7 +79,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     pe->hull[0]     = (V){-5,-34,-5};
     pe->hull[1]     = (V){ 5,  0, 5};
     pe->model       = 0;
-    pe->ghost       = ghostslot;
     pe->tilex       = 1;
     pe->tilez       = 1;
     pe->dir         = S;
@@ -104,7 +106,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     en->hull[0]     = (V){-5,-34,-5};
     en->hull[1]     = (V){ 5,  0, 5};
     en->model       = 0;
-    en->ghost       = 0;
     en->tilex       = 5;
     en->tilez       = 5;
     en->dir         = S;
@@ -116,16 +117,24 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     en->ap          = 1;
     en->pn          = 1;
     en->ml          = 1;
-    en->to          = 1;
+    en->to          = 0;
     en->xp          = 1;
     en->max_hp      = 10;
     en->max_mp      = 10;
     en->max_st      = 10;
-    en->max_ap      = 10;
+    en->max_ap      = 14;
     en->max_pn      = 10;
     en->max_ml      = 10;
-    en->max_to      = 10;
+    en->max_to      = 100;
     en->max_xp      = 10;
   } //end for i<maxclients
 }
 
+int in_party(MOTHER_t *mo,int objid)
+{
+  int i;
+  for( i=0; i<PARTY_SIZE; i++ )
+    if( mo->party[i]==objid )
+      return 1;
+  return 0;
+}

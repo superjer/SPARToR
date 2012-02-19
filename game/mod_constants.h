@@ -15,8 +15,11 @@
 
 #define TEX_TOOL   0
 #define TEX_PLAYER 1
-#define TEX_PERSON 4
-#define TEX_HUD    5
+#define TEX_PERSON 2
+#define TEX_HUD    3
+
+
+#define PARTY_SIZE 6
 
 
 //obj types

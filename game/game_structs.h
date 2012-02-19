@@ -4,10 +4,11 @@
 #define TYPE MOTHER
 STRUCT()
   HIDE(
-    char edit;         // whether edit mode is on
-    int party[6];      // objects in the players party (probably PERSONs)
-    int active;        // the active, currently moving, object
-    int pc;            // if the active is player controlled
+    int ghost;
+    char edit;                  // whether edit mode is on
+    int party[PARTY_SIZE];      // objects in the players party (probably PERSONs)
+    int active;                 // the active, currently moving, object
+    int pc;                     // if the active is player controlled
     unsigned int intervalstart; // frame number the current time interval started on
     unsigned int turnstart;     // frame number the turn started on
   )
@@ -41,7 +42,6 @@ STRUCT()
   EXPOSE(V,pvel,)
   EXPOSE(int,model,)
   HIDE(
-    int ghost;
     int tilex;
     int tilez;
     enum DIR8 dir;

@@ -45,6 +45,15 @@ enum { CMDT_NONE = 0,
        CMDT_1BACK,
        CMDT_0BACK,
 
+       CMDT_1CAMLEFT,
+       CMDT_0CAMLEFT,
+       CMDT_1CAMRIGHT,
+       CMDT_0CAMRIGHT,
+       CMDT_1CAMUP,
+       CMDT_0CAMUP,
+       CMDT_1CAMDOWN,
+       CMDT_0CAMDOWN,
+
        CMDT_0CON,
        CMDT_1CON,
 

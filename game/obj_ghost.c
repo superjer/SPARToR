@@ -16,7 +16,7 @@
 #include "sprite_helpers.h"
 
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
+static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co );
 
 
 void obj_ghost_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
@@ -35,7 +35,6 @@ void obj_ghost_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   GHOST_t   *gh = ob->data;
-  PLAYER_t  *pl = fr[b].objs[gh->avatar].data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
 
   if( gh->client==me )
@@ -49,6 +48,26 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( co->projection == ORTHOGRAPHIC )
     memcpy( gh->hull, (V[2]){{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}}, sizeof (V[2]) );
 
+  v_camx = POINT2NATIVE_X(&gh->pos);
+  v_camy = POINT2NATIVE_Y(&gh->pos);
+
+  switch( fr[b].cmds[gh->client].cmd ) {
+    case CMDT_1CAMLEFT:  gh->goingl = 1; break;
+    case CMDT_0CAMLEFT:  gh->goingl = 0; break;
+    case CMDT_1CAMRIGHT: gh->goingr = 1; break;
+    case CMDT_0CAMRIGHT: gh->goingr = 0; break;
+    case CMDT_1CAMUP:    gh->goingu = 1; break;
+    case CMDT_0CAMUP:    gh->goingu = 0; break;
+    case CMDT_1CAMDOWN:  gh->goingd = 1; break;
+    case CMDT_0CAMDOWN:  gh->goingd = 0; break;
+  }
+
+  gh->vel = (V){0,0,0};
+
+  if( gh->goingl || gh->goingu ) gh->vel.x += -5;
+  if( gh->goingr || gh->goingd ) gh->vel.x +=  5;
+  if( gh->goingl || gh->goingd ) gh->vel.z +=  5;
+  if( gh->goingr || gh->goingu ) gh->vel.z += -5;
 
   FCMD_t *c = fr[b].cmds + gh->client;
 
@@ -105,12 +124,12 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     break; }
 
   case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
-    ghost_paint( c, gh, pl, co );
+    ghost_paint( c, gh, co );
     break;
   }
 }
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
+static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
 {
   size_t n = 0;
   int  i, j, k;
@@ -201,9 +220,7 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
       break; }
 
     case TOOL_OBJ:
-      pl->pos.x = i*co->bsx;
-      pl->pos.y = j*co->bsy;
-      pl->pos.z = k*co->bsz;
+      // disabled, PLAYER_T removed
       break;
 
     case TOOL_ERAS:

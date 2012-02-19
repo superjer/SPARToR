@@ -20,32 +20,34 @@
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
-                       {"/slugtunnel.png" ,0},
-                       {"/amigo.png"      ,0},
                        {"/persons.png"    ,0},
                        {"/blankhud.png"   ,0}};
 size_t num_sys_tex = COUNTOF(sys_tex);
 
 
-INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
-                            {"right"      ,CMDT_1RIGHT,CMDT_0RIGHT},
-                            {"up"         ,CMDT_1UP   ,CMDT_0UP   },
-                            {"down"       ,CMDT_1DOWN ,CMDT_0DOWN },
-                            {"nw"         ,CMDT_1NW   ,CMDT_0NW   },
-                            {"ne"         ,CMDT_1NE   ,CMDT_0NE   },
-                            {"sw"         ,CMDT_1SW   ,CMDT_0SW   },
-                            {"se"         ,CMDT_1SE   ,CMDT_0SE   },
-                            {"select"     ,CMDT_1SEL  ,CMDT_0SEL  },
-                            {"back"       ,CMDT_1BACK ,CMDT_0BACK },
-                         /* {"cons-cmd"   ,CMDT_1CON  ,CMDT_0CON  }, this may not be necessary, it may even be dangerous */
-                            {"edit-paint" ,CMDT_1EPANT,CMDT_0EPANT},
-                            {"edit-prev"  ,CMDT_1EPREV,CMDT_0EPREV},
-                            {"edit-next"  ,CMDT_1ENEXT,CMDT_0ENEXT},
-                            {"edit-texup" ,CMDT_1EPGUP,CMDT_0EPGUP},
-                            {"edit-texdn" ,CMDT_1EPGDN,CMDT_0EPGDN},
-                            {"edit-lay0"  ,CMDT_1ELAY0,CMDT_0ELAY0},
-                            {"edit-lay1"  ,CMDT_1ELAY1,CMDT_0ELAY1},
-                            {"edit-lay2"  ,CMDT_1ELAY2,CMDT_0ELAY2}};
+INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
+                            {"right"      ,CMDT_1RIGHT   ,CMDT_0RIGHT   },
+                            {"up"         ,CMDT_1UP      ,CMDT_0UP      },
+                            {"down"       ,CMDT_1DOWN    ,CMDT_0DOWN    },
+                            {"nw"         ,CMDT_1NW      ,CMDT_0NW      },
+                            {"ne"         ,CMDT_1NE      ,CMDT_0NE      },
+                            {"sw"         ,CMDT_1SW      ,CMDT_0SW      },
+                            {"se"         ,CMDT_1SE      ,CMDT_0SE      },
+                            {"select"     ,CMDT_1SEL     ,CMDT_0SEL     },
+                            {"back"       ,CMDT_1BACK    ,CMDT_0BACK    },
+                            {"camleft"    ,CMDT_1CAMLEFT ,CMDT_0CAMLEFT },
+                            {"camright"   ,CMDT_1CAMRIGHT,CMDT_0CAMRIGHT},
+                            {"camup"      ,CMDT_1CAMUP   ,CMDT_0CAMUP   },
+                            {"camdown"    ,CMDT_1CAMDOWN ,CMDT_0CAMDOWN },
+                         /* {"cons-cmd"   ,CMDT_1CON     ,CMDT_0CON     }, this may not be necessary, it may even be dangerous */
+                            {"edit-paint" ,CMDT_1EPANT   ,CMDT_0EPANT   },
+                            {"edit-prev"  ,CMDT_1EPREV   ,CMDT_0EPREV   },
+                            {"edit-next"  ,CMDT_1ENEXT   ,CMDT_0ENEXT   },
+                            {"edit-texup" ,CMDT_1EPGUP   ,CMDT_0EPGUP   },
+                            {"edit-texdn" ,CMDT_1EPGDN   ,CMDT_0EPGDN   },
+                            {"edit-lay0"  ,CMDT_1ELAY0   ,CMDT_0ELAY0   },
+                            {"edit-lay1"  ,CMDT_1ELAY1   ,CMDT_0ELAY1   },
+                            {"edit-lay2"  ,CMDT_1ELAY2   ,CMDT_0ELAY2   }};
 int numinputnames = COUNTOF(inputnames);
 
 
@@ -84,10 +86,11 @@ void mod_setup(Uint32 setupfr)
   #define MAYBE_BIND(dev,sym,cmd)         \
     mod_keybind(dev,sym,0,CMDT_0 ## cmd); \
     mod_keybind(dev,sym,1,CMDT_1 ## cmd);
-  MAYBE_BIND(INP_KEYB,SDLK_LEFT    ,LEFT ); MAYBE_BIND(INP_KEYB,SDLK_a       ,LEFT ); //keyboard
-  MAYBE_BIND(INP_KEYB,SDLK_RIGHT   ,RIGHT); MAYBE_BIND(INP_KEYB,SDLK_d       ,RIGHT);
-  MAYBE_BIND(INP_KEYB,SDLK_UP      ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_w       ,UP   );
-  MAYBE_BIND(INP_KEYB,SDLK_DOWN    ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_s       ,DOWN );
+  MAYBE_BIND(INP_KEYB,SDLK_LEFT    ,CAMLEFT ); //keyboard
+  MAYBE_BIND(INP_KEYB,SDLK_RIGHT   ,CAMRIGHT);
+  MAYBE_BIND(INP_KEYB,SDLK_UP      ,CAMUP   );
+  MAYBE_BIND(INP_KEYB,SDLK_DOWN    ,CAMDOWN );
+
   MAYBE_BIND(INP_KEYB,SDLK_a       ,SEL  ); MAYBE_BIND(INP_KEYB,SDLK_SPACE   ,SEL  );
   MAYBE_BIND(INP_KEYB,SDLK_s       ,BACK );
 
@@ -136,33 +139,6 @@ void mod_setup(Uint32 setupfr)
     co->dmap[i].flags = CBF_NULL;
   }
   load_context("dirtfarm",1,setupfr); //load a default map
-
-  //make some dummys
-  #define MAYBE_A_DUMMY(i,x,y,w,h) {                                                         \
-    DUMMY_t *du;                                                                             \
-    fr[setupfr].objs[i+20].type = OBJT_DUMMY;                                                \
-    fr[setupfr].objs[i+20].flags = OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP| \
-                                   OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB;                            \
-    fr[setupfr].objs[i+20].context = 1;                                                      \
-    fr[setupfr].objs[i+20].size = sizeof *du;                                                \
-    du = fr[setupfr].objs[i+20].data = malloc(sizeof *du);                                   \
-    du->pos = (V){x*8,y*8,0};                                                                \
-    du->vel = (V){0,0,0};                                                                    \
-    du->hull[0] = (V){-w*8,-h*8,-8};                                                         \
-    du->hull[1] = (V){ w*8, h*8, 8};                                                         \
-    du->model = 0;                                                                           }
-  MAYBE_A_DUMMY(20,  3,-25,1,1);
-  MAYBE_A_DUMMY(21,  3,-20,1,1);
-  MAYBE_A_DUMMY(22,  3,-15,1,1);
-  MAYBE_A_DUMMY(23,  3,-10,1,1);
-  MAYBE_A_DUMMY(24,  5,-15,1,1);
-  MAYBE_A_DUMMY(25,  9,-15,1,1);
-  MAYBE_A_DUMMY(26, 43,-20,1,1);
-  MAYBE_A_DUMMY(27, 43,-15,1,1);
-  MAYBE_A_DUMMY(28, 45,-25,1,1);
-  MAYBE_A_DUMMY(29, 45,-20,1,1);
-  MAYBE_A_DUMMY(30, 45,-15,1,1);
-  #undef MAYBE_A_DUMMY
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client
 
@@ -489,14 +465,8 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 
   CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
   switch(o->type) {
-    case OBJT_PLAYER:         obj_player_draw(     objid, vidfrmod, o, co );     break;
     case OBJT_GHOST:          obj_ghost_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_BULLET:         obj_bullet_draw(     objid, vidfrmod, o, co );     break;
-    case OBJT_SLUG:           obj_slug_draw(       objid, vidfrmod, o, co );     break;
     case OBJT_PERSON:         obj_person_draw(     objid, vidfrmod, o, co );     break;
-    case OBJT_DUMMY:          obj_dummy_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_AMIGO:          obj_amigo_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_AMIGOSWORD:     obj_amigosword_draw( objid, vidfrmod, o, co );     break;
   }
 }
 
@@ -670,33 +640,9 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
       assert(ob->size==sizeof(GHOST_t));
       obj_ghost_adv(      objid, a, b, oa, ob );
       break;
-    case OBJT_DUMMY:
-      assert(ob->size==sizeof(DUMMY_t));
-      obj_dummy_adv(      objid, a, b, oa, ob );
-      break;
-    case OBJT_PLAYER:
-      assert(ob->size==sizeof(PLAYER_t));
-      obj_player_adv(     objid, a, b, oa, ob );
-      break;
-    case OBJT_BULLET:
-      assert(ob->size==sizeof(BULLET_t));
-      obj_bullet_adv(     objid, a, b, oa, ob );
-      break;
-    case OBJT_SLUG:
-      assert(ob->size==sizeof(SLUG_t));
-      obj_slug_adv(       objid, a, b, oa, ob );
-      break;
     case OBJT_PERSON:
       assert(ob->size==sizeof(PERSON_t));
       obj_person_adv(       objid, a, b, oa, ob );
-      break;
-    case OBJT_AMIGO:
-      assert(ob->size==sizeof(AMIGO_t));
-      obj_amigo_adv(      objid, a, b, oa, ob );
-      break;
-    case OBJT_AMIGOSWORD:
-      assert(ob->size==sizeof(AMIGOSWORD_t));
-      obj_amigosword_adv( objid, a, b, oa, ob );
       break;
   } //end switch ob->type
 }

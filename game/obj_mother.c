@@ -47,7 +47,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     //FIXME context is hardcoded as 1 for GHOST and PLAYER:
     MKOBJ( gh, GHOST,  1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT );
     int ghostslot = slot0;
-    MKOBJ( pl, PLAYER, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_PVEL|OBJF_PLAT|OBJF_CLIP );
     MKOBJ( pe, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
     int peslot = slot0;
     MKOBJ( en, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
@@ -62,32 +61,15 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     gh->hull[0]        = (V){  0,  0,  0};
     gh->hull[1]        = (V){  0,  0,  0};
     gh->model          = 0;
+    gh->goingl         = 0;
+    gh->goingr         = 0;
+    gh->goingu         = 0;
+    gh->goingd         = 0;
     gh->client         = i;
     gh->avatar         = slot0;
     gh->clipboard_x    = 0;
     gh->clipboard_y    = 0;
     gh->clipboard_data = NULL;
-
-    pl->pos            = (V){ 0,-50, 0};
-    pl->vel            = (V){ 0,  0, 0};
-    pl->hull[0]        = (V){-6,-30,-6};
-    pl->hull[1]        = (V){ 6,  0, 6};
-    pl->pvel           = (V){ 0,  0, 0};
-    pl->model          = i%5;
-    pl->ghost          = ghostslot;
-    pl->goingl         = 0;
-    pl->goingr         = 0;
-    pl->goingu         = 0;
-    pl->goingd         = 0;
-    pl->jumping        = 0;
-    pl->firing         = 0;
-    pl->cooldown       = 0;
-    pl->projectiles    = 0;
-    pl->grounded       = 0;
-    pl->facingr        = 1;
-    pl->turning        = 0;
-    pl->stabbing       = 0;
-    pl->hovertime      = 0;
 
     pe->pos         = (V){150,0,150};
     pe->vel         = (V){0,0,0};
@@ -145,28 +127,5 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     en->max_to      = 10;
     en->max_xp      = 10;
   } //end for i<maxclients
-
-  //create a slug every now and then
-  if(hotfr%77==0) {
-    MKOBJ( sl, SLUG, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
-    sl->pos     = (V){(hotfr%2)*368+8,0,0};
-    sl->vel     = (V){(hotfr%2)?-0.5f:0.5f,0,0};
-    sl->hull[0] = (V){-8,-4,-8};
-    sl->hull[1] = (V){ 8, 8, 8};
-    sl->model   = 0;
-    sl->dead    = 0;
-  }
-
-  //create AMIGO!
-  if(hotfr==200) {
-    MKOBJ( am, AMIGO, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDZ );
-    am->pos       = (V){250,0,0};
-    am->vel       = (V){0,0,0};
-    am->hull[0]   = (V){-8,-18,-8};
-    am->hull[1]   = (V){ 8, 18, 8};
-    am->model     = 0;
-    am->state     = AMIGO_HELLO;
-    am->statetime = 0;
-  }
 }
 

@@ -115,7 +115,7 @@ void mod_setup(Uint32 setupfr)
 
   //make the mother object
   fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
-  *(MOTHER_t *)fr[setupfr].objs[0].data = (MOTHER_t){0,{0,0,0,0,0,0}};
+  memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
 
   //make default context object (map)
   fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };

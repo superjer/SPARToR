@@ -12,69 +12,23 @@
 
 #include "obj_.h"
 
+SPRITE_T *get_azma_sprite(PERSON_t *pe);
+SPRITE_T *get_slug_sprite(PERSON_t *pe);
+
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PERSON_t *pe = o->data;
   int c = POINT2NATIVE_X(&pe->pos);
   int d = POINT2NATIVE_Y(&pe->pos);
-  SJGL_SetTex( sys_tex[TEX_PERSON].num );
-  REC rect;
-  int flip = 0;
+  SPRITE_T *spr;
 
-  #define P_REC(x,y,w,h) (rect = (REC){(x)*17,(y)*45,(w)*17,(h)*45})
-  switch( (pe->walkcounter/4) % 4 ) { // entangled_walkcounter
-    case 0:
-    case 2: switch( pe->dir ) {                      // standing
-      case NODIR: break;
-      case W : P_REC( 4, 0, 1, 1);           break;
-      case E : P_REC( 4, 0, 1, 1); flip = 1; break;
-      case N : P_REC( 3, 0, 1, 1);           break;
-      case S : P_REC( 0, 0, 1, 1);           break;
-      case NW: P_REC( 2, 0, 1, 1);           break;
-      case NE: P_REC( 2, 0, 1, 1); flip = 1; break;
-      case SW: P_REC( 1, 0, 1, 1); flip = 1; break;
-      case SE: P_REC( 1, 0, 1, 1);           break;
-    } break;
-
-    case 1: switch( pe->dir ) {                      // walking 1
-      case NODIR: break;
-      case W : P_REC(11, 1, 2, 1);           break;
-      case E : P_REC(11, 1, 2, 1); flip = 1; break;
-      case N : P_REC( 9, 1, 1, 1);           break;
-      case S : P_REC( 0, 1, 1, 1);           break;
-      case NW: P_REC( 6, 1, 1, 1);           break;
-      case NE: P_REC( 6, 1, 1, 1); flip = 1; break;
-      case SW: P_REC( 2, 1, 2, 1); flip = 1; break;
-      case SE: P_REC( 2, 1, 2, 1);           break;
-    } break;
-
-    case 3: switch( pe->dir ) {                      // walking 2
-      case NODIR: break;
-      case W : P_REC(13, 1, 2, 1);           break;
-      case E : P_REC(13, 1, 2, 1); flip = 1; break;
-      case N : P_REC(10, 1, 1, 1);           break;
-      case S : P_REC( 1, 1, 1, 1);           break;
-      case NW: P_REC( 7, 1, 2, 1);           break;
-      case NE: P_REC( 7, 1, 2, 1); flip = 1; break;
-      case SW: P_REC( 4, 1, 2, 1); flip = 1; break;
-      case SE: P_REC( 4, 1, 2, 1);           break;
-    } break;
-  }
-  #undef P_REC
-
-  int x = c - rect.w/2;
-  int y = d - 43;
-  int r = d + 12;
-
-  if( flip ) {
-    rect.x += rect.w;
-    rect.w *= -1;
+  switch( pe->character ) {
+    case CHR_AZMA: spr = get_azma_sprite(pe); break;
+    case CHR_SLUG: spr = get_slug_sprite(pe); break;
   }
 
-  SJGL_Blit( &rect, x, y, r );
-
-  // draw shadow
-  SJGL_Blit( &(REC){0 ,502,20,10}, c-10, d-5 , r-1 );
+  sprblit( spr, c, d, d+12 );
+  sprblit( &SM(shadow), c, d, d+11 );
 }
 
 void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -82,25 +36,41 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   PERSON_t  *oldpe = oa->data;
   PERSON_t  *newpe = ob->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
-  enum DIR8 dir = NODIR;
+  MOTHER_t  *mo = fr[b].objs[0].data;
 
-  // check for input
-  if( newpe->ghost ) {
-    GHOST_t *gh = fr[b].objs[newpe->ghost].data;
+  enum DIR8 dir = NODIR;  // direction we want to move
+  int stop = 0;           // whether to end the current turn
 
-    switch( fr[b].cmds[gh->client].cmd ) {
-      case CMDT_1LEFT:  dir=W;  break;
-      case CMDT_1RIGHT: dir=E;  break;
-      case CMDT_1UP:    dir=N;  break;
-      case CMDT_1DOWN:  dir=S;  break;
-      case CMDT_1NW:    dir=NW; break;
-      case CMDT_1NE:    dir=NE; break;
-      case CMDT_1SW:    dir=SW; break;
-      case CMDT_1SE:    dir=SE; break;
-      case CMDT_1SEL:           break;
-      case CMDT_1BACK:          break;
+  if( mo->active==objid ) {
+    if( mo->turnstart == hotfr ) {
+      newpe->ap += 100;
+      if( newpe->ap > newpe->max_ap )
+        newpe->ap = newpe->max_ap;
     }
+
+    // check for input
+    if( newpe->ghost ) {
+      GHOST_t *gh = fr[b].objs[newpe->ghost].data;
+
+      switch( fr[b].cmds[gh->client].cmd ) {
+        case CMDT_1LEFT:  dir=W;  break;
+        case CMDT_1RIGHT: dir=E;  break;
+        case CMDT_1UP:    dir=N;  break;
+        case CMDT_1DOWN:  dir=S;  break;
+        case CMDT_1NW:    dir=NW; break;
+        case CMDT_1NE:    dir=NE; break;
+        case CMDT_1SW:    dir=SW; break;
+        case CMDT_1SE:    dir=SE; break;
+        case CMDT_1SEL:   stop=1; break;
+        case CMDT_1BACK:          break;
+      }
+    }
+
+    if( stop ) mo->active = 0;
   }
+
+  if( mo->intervalstart == hotfr )
+    newpe->pos.y -= 50;
 
   if( !oldpe ) { //FIXME why's this null?
     SJC_Write("Warning: oldpe is NULL!");
@@ -125,9 +95,22 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( dir ) newpe->dir = dir;
 
   // move only if in-bounds
-  if( newx>=0 && newz>=0 && newx<co->x && newz<co->z ) {
-    newpe->tilex = newx;
-    newpe->tilez = newz;
+  if( dir && newx>=0 && newz>=0 && newx<co->x && newz<co->z ) {
+    int required_ap;
+    
+    switch( (newpe->tilex==newx ? 0 : 1) + (newpe->tilez==newz ? 0 : 1) ) {
+      case 2: required_ap = 14; break;
+      case 1: required_ap = 10; break;
+      default: SJC_Write("How many directions do you really need to move at one time, jeeez!");
+    }
+
+    if( newpe->ap >= required_ap ) {
+      newpe->tilex = newx;
+      newpe->tilez = newz;
+      newpe->ap -= required_ap;
+    } else {
+      SJC_Write("I can't let you do that, StarDave");
+    }
   }
 
   float posx = newpe->tilex*co->bsx + co->bsx/2;
@@ -159,3 +142,55 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   newpe->vel.y += 0.6f;      //gravity
 }
 
+//////////////////////////////////////////
+// Different persons' drawing routines! //
+//////////////////////////////////////////
+
+SPRITE_T* get_azma_sprite(PERSON_t *pe)
+{
+  SPRITE_T *defspr = &SM(azma_stand_s);
+  switch( (pe->walkcounter/4) % 4 ) { // entangled_walkcounter
+    case 0:
+    case 2: switch( pe->dir ) {                      // standing
+      case W : return &SM(azma_stand_w);
+      case E : return &SM(azma_stand_e);
+      case N : return &SM(azma_stand_n);
+      case S : return &SM(azma_stand_s);
+      case NW: return &SM(azma_stand_nw);
+      case NE: return &SM(azma_stand_ne);
+      case SW: return &SM(azma_stand_sw);
+      case SE: return &SM(azma_stand_se);
+      default: return defspr;
+    } break;
+
+    case 1: switch( pe->dir ) {                      // walking 1
+      case W : return &SM(azma_walk1_w);
+      case E : return &SM(azma_walk1_e);
+      case N : return &SM(azma_walk1_n);
+      case S : return &SM(azma_walk1_s);
+      case NW: return &SM(azma_walk1_nw);
+      case NE: return &SM(azma_walk1_ne);
+      case SW: return &SM(azma_walk1_sw);
+      case SE: return &SM(azma_walk1_se);
+      default: return defspr;
+    } break;
+
+    case 3: switch( pe->dir ) {                      // walking 2
+      case W : return &SM(azma_walk2_w);
+      case E : return &SM(azma_walk2_e);
+      case N : return &SM(azma_walk2_n);
+      case S : return &SM(azma_walk2_s);
+      case NW: return &SM(azma_walk2_nw);
+      case NE: return &SM(azma_walk2_ne);
+      case SW: return &SM(azma_walk2_sw);
+      case SE: return &SM(azma_walk2_se);
+      default: return defspr;
+    } break;
+  }
+  return defspr;
+}
+
+SPRITE_T* get_slug_sprite(PERSON_t *pe)
+{
+  return &SM(slug_r);
+}

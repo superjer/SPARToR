@@ -4,8 +4,12 @@
 #define TYPE MOTHER
 STRUCT()
   HIDE(
-    char edit;
-    int party[6];
+    char edit;         // whether edit mode is on
+    int party[6];      // objects in the players party (probably PERSONs)
+    int active;        // the active, currently moving, object
+    int pc;            // if the active is player controlled
+    unsigned int intervalstart; // frame number the current time interval started on
+    unsigned int turnstart;     // frame number the turn started on
   )
 #include "endstruct.h"
 
@@ -73,6 +77,7 @@ STRUCT()
     int tilez;
     enum DIR8 dir;
     int walkcounter;
+    int character;
     int hp;
     int mp;
     int st;

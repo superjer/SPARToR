@@ -34,8 +34,11 @@ enum { ENGINE_OBJT_LIST()
        OBJT_AMIGOSWORD,
        OBJT_MAX };
 
-
 enum DIR8 { NODIR=0, E, NE, N, NW, W, SW, S, SE };
+
+//character types for PERSON_t
+enum CHARACTERS { CHR_AZMA,
+                  CHR_SLUG };
 
 // Amigo's states
 enum { AMIGO_HELLO,

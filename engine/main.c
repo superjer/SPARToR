@@ -23,6 +23,7 @@
 #include "client.h"
 #include "input.h"
 #include "video.h"
+#include "audio.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
 #include <math.h>
@@ -110,6 +111,7 @@ int main(int argc,char **argv)
   toggleconsole();
   videoinit();
   inputinit();
+  audioinit();
 
   mod_setup(0);
 
@@ -198,31 +200,16 @@ void advance()
         pos->y += vel->y + pvel->y;
         pos->z += vel->z + pvel->z;
 
-        //context edges left & right
-        if( ob->flags & OBJF_BNDX )
-        {
-          if( pos->x + hull[1].x > co->x*co->bsx ) { pos->x = co->x*co->bsx - hull[1].x; vel->x = 0; }
-          if( pos->x + hull[0].x <             0 ) { pos->x =             0 - hull[0].x; vel->x = 0; }
+        #define BOUND_CLIP(B1,B2,X) {                                                  \
+          if( (ob->flags & OBJF_BND ## B1) && pos->X + hull[1].X > co->X*co->bs ## X ) \
+            { pos->X = co->X*co->bs ## X - hull[1].X; vel->X = 0; }                    \
+          if( (ob->flags & OBJF_BND ## B2) && pos->X + hull[0].X < 0 )                 \
+            { pos->X =                 0 - hull[0].X; vel->X = 0; }                    \
         }
 
-        //context edges back and front
-        if( ob->flags & OBJF_BNDZ )
-        {
-          if( pos->z + hull[1].z > co->z*co->bsz ) { pos->z = co->z*co->bsz - hull[1].z; vel->z = 0; }
-          if( pos->z + hull[0].z <             0 ) { pos->z =             0 - hull[0].z; vel->z = 0; }
-        }
-
-        //context edge bottom
-        if( ob->flags & OBJF_BNDB )
-        {
-          if( pos->y + hull[1].y > co->y*co->bsy ) { pos->y = co->y*co->bsy - hull[1].y; vel->y = 0; }
-        }
-
-        //context edge top
-        if( ob->flags & OBJF_BNDT )
-        {
-          if( pos->y + hull[0].y <             0 ) { pos->y =             0 - hull[0].y; vel->y = 0; }
-        }
+        BOUND_CLIP(X,X,x);
+        BOUND_CLIP(B,T,y);
+        BOUND_CLIP(Z,Z,z);
       }
     }
 
@@ -289,7 +276,6 @@ void advance()
             if( 0 ) ;
             ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y-1,z  ,0,1,y,>=)
             else if( flags & CBF_PLAT ) ;
-            // skip other sides for plat
             ELSE_IF_HIT_THEN_MOVE_STOP(x-1,y  ,z  ,0,1,x,>=)
             ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y  ,z-1,0,1,z,>=)
             ELSE_IF_HIT_THEN_MOVE_STOP(x  ,y  ,z+1,1,0,z,<=)
@@ -354,6 +340,8 @@ void advance()
 void cleanup()
 {
   int i;
+
+  audiodestroy();
 
   IMG_Quit();
   SDLNet_Quit();

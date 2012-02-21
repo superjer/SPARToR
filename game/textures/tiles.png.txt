@@ -58,5 +58,8 @@ adobe-wall9 276 216 46 72 cen bot
 adobe-wall10 276 216 46 36 cen 36
 adobe-wall11 276 288 46 72 cen bot
 adobe-wall12 276 288 46 36 cen 36
+lightadobe-wall-sw1 276 48 28 84 cen bot
+lightadobe-wall-sw2 276 132 28 84 cen bot
+lightadobe-wall-sw3 304 132 28 84 cen bot
 
 

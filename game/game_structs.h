@@ -47,6 +47,7 @@ STRUCT()
     enum DIR8 dir;
     int walkcounter;
     int character;
+    int armed;
     int hp;
     int mp;
     int st;

@@ -1,0 +1,79 @@
+.default  size 17 45  anchor cen bot
+
+.grid  cols 5  pos 0 0
+  azma_stand_s
+  azma_stand_se
+    .also
+    azma_stand_sw flipx
+  azma_stand_nw
+    .also
+    azma_stand_ne flipx
+  azma_stand_n
+  azma_stand_w
+    .also
+    azma_stand_e flipx
+.end
+
+.grid  cols 15  pos 0 45
+  azma_walk1_s
+  azma_walk2_s
+  azma_walk1_se size 34 45
+    .also
+    azma_walk1_sw flipx
+  .
+  azma_walk2_se size 34 45
+    .also
+    azma_walk2_sw flipx
+  .
+  azma_walk1_nw
+    .also
+    azma_walk1_ne flipx
+  azma_walk2_nw size 34 45
+    .also
+    azma_walk2_ne flipx
+  .
+  azma_walk1_n
+  azma_walk2_n
+  azma_walk1_w size 34 45
+    .also
+    azma_walk1_e flipx
+  .
+  azma_walk2_w size 34 45
+    .also
+    azma_walk2_e flipx
+  .
+.end
+
+.grid  cols 7  pos 0 90
+  azma_c_stand_s
+  azma_c_stand_se size 34 45
+    .also
+    azma_c_stand_sw flipx
+  .
+  azma_c_stand_nw
+    .also
+    azma_c_stand_ne flipx
+  azma_c_stand_n size 34 45
+  .
+  azma_c_stand_w
+    .also
+    azma_c_stand_e flipx
+.end
+
+.grid  cols 7  pos 0 135
+  azma_w_stand_s
+  azma_w_stand_se size 34 45
+    .also
+    azma_w_stand_sw flipx
+  .
+  azma_w_stand_nw
+    .also
+    azma_w_stand_ne flipx
+  azma_w_stand_n size 34 45
+  .
+  azma_w_stand_w
+    .also
+    azma_w_stand_e flipx
+.end
+
+shadow 0 502 20 10 cen mid

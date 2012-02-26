@@ -12,22 +12,29 @@
 
 #include "obj_.h"
 
-SPRITE_T *get_azma_sprite(PERSON_t *pe);
-SPRITE_T *get_slug_sprite(PERSON_t *pe);
+#define SPRITECOUNT 10
+
+static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe);
+static void get_slug_sprites(SPRITE_T **sprs, PERSON_t *pe);
+
 
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PERSON_t *pe = o->data;
   int c = POINT2NATIVE_X(&pe->pos);
   int d = POINT2NATIVE_Y(&pe->pos);
-  SPRITE_T *spr;
+  int i;
+  SPRITE_T *sprs[SPRITECOUNT] = {NULL};
 
   switch( pe->character ) {
-    case CHR_AZMA: spr = get_azma_sprite(pe); break;
-    case CHR_SLUG: spr = get_slug_sprite(pe); break;
+    case CHR_AZMA: get_azma_sprites(sprs,pe); break;
+    case CHR_SLUG: get_slug_sprites(sprs,pe); break;
   }
 
-  sprblit( spr, c, d, d+12 );
+  for( i=0; i<SPRITECOUNT; i++ )
+    if( sprs[i] )
+      sprblit( sprs[i], c, d, d+12 );
+
   sprblit( &SM(shadow), c, d, d+11 );
 }
 
@@ -157,51 +164,92 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 // Different persons' drawing routines! //
 //////////////////////////////////////////
 
-SPRITE_T* get_azma_sprite(PERSON_t *pe)
+static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
-  SPRITE_T *defspr = &SM(azma_stand_s);
-  switch( (pe->walkcounter/4) % 4 ) { // entangled_walkcounter
-    case 0:
-    case 2: switch( pe->dir ) {                      // standing
-      case W : return &SM(azma_stand_w);
-      case E : return &SM(azma_stand_e);
-      case N : return &SM(azma_stand_n);
-      case S : return &SM(azma_stand_s);
-      case NW: return &SM(azma_stand_nw);
-      case NE: return &SM(azma_stand_ne);
-      case SW: return &SM(azma_stand_sw);
-      case SE: return &SM(azma_stand_se);
-      default: return defspr;
-    } break;
+  SPRITE_T *defspr = &SM(azma_c_stand_s);
+  if( pe->armed )
+  {
+    switch( (pe->walkcounter/4) % 4 ) {
+      case 0:
+      case 2: switch( pe->dir ) {                      // standing
+        case W : sprs[0] = &SM(azma_c_stand_w);  sprs[1] = &SM(azma_w_stand_w);  break;
+        case E : sprs[0] = &SM(azma_c_stand_e);  sprs[1] = &SM(azma_w_stand_e);  break;
+        case N : sprs[0] = &SM(azma_c_stand_n);  sprs[1] = &SM(azma_w_stand_n);  break;
+        case S : sprs[0] = &SM(azma_c_stand_s);  sprs[1] = &SM(azma_w_stand_s);  break;
+        case NW: sprs[0] = &SM(azma_c_stand_nw); sprs[1] = &SM(azma_w_stand_nw); break;
+        case NE: sprs[0] = &SM(azma_c_stand_ne); sprs[1] = &SM(azma_w_stand_ne); break;
+        case SW: sprs[0] = &SM(azma_c_stand_sw); sprs[1] = &SM(azma_w_stand_sw); break;
+        case SE: sprs[0] = &SM(azma_c_stand_se); sprs[1] = &SM(azma_w_stand_se); break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
 
-    case 1: switch( pe->dir ) {                      // walking 1
-      case W : return &SM(azma_walk1_w);
-      case E : return &SM(azma_walk1_e);
-      case N : return &SM(azma_walk1_n);
-      case S : return &SM(azma_walk1_s);
-      case NW: return &SM(azma_walk1_nw);
-      case NE: return &SM(azma_walk1_ne);
-      case SW: return &SM(azma_walk1_sw);
-      case SE: return &SM(azma_walk1_se);
-      default: return defspr;
-    } break;
+      case 1: switch( pe->dir ) {                      // walking 1
+        case W : sprs[0] = &SM(azma_walk1_w);                                    break;
+        case E : sprs[0] = &SM(azma_walk1_e);                                    break;
+        case N : sprs[0] = &SM(azma_walk1_n);                                    break;
+        case S : sprs[0] = &SM(azma_walk1_s);                                    break;
+        case NW: sprs[0] = &SM(azma_walk1_nw);                                   break;
+        case NE: sprs[0] = &SM(azma_walk1_ne);                                   break;
+        case SW: sprs[0] = &SM(azma_walk1_sw);                                   break;
+        case SE: sprs[0] = &SM(azma_walk1_se);                                   break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
 
-    case 3: switch( pe->dir ) {                      // walking 2
-      case W : return &SM(azma_walk2_w);
-      case E : return &SM(azma_walk2_e);
-      case N : return &SM(azma_walk2_n);
-      case S : return &SM(azma_walk2_s);
-      case NW: return &SM(azma_walk2_nw);
-      case NE: return &SM(azma_walk2_ne);
-      case SW: return &SM(azma_walk2_sw);
-      case SE: return &SM(azma_walk2_se);
-      default: return defspr;
-    } break;
+      case 3: switch( pe->dir ) {                      // walking 2
+        case W : sprs[0] = &SM(azma_walk2_w);                                    break;
+        case E : sprs[0] = &SM(azma_walk2_e);                                    break;
+        case N : sprs[0] = &SM(azma_walk2_n);                                    break;
+        case S : sprs[0] = &SM(azma_walk2_s);                                    break;
+        case NW: sprs[0] = &SM(azma_walk2_nw);                                   break;
+        case NE: sprs[0] = &SM(azma_walk2_ne);                                   break;
+        case SW: sprs[0] = &SM(azma_walk2_sw);                                   break;
+        case SE: sprs[0] = &SM(azma_walk2_se);                                   break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
+    }
+  } else { // not armed
+    switch( (pe->walkcounter/4) % 4 ) {
+      case 0:
+      case 2: switch( pe->dir ) {                      // standing
+        case W : sprs[0] = &SM(azma_stand_w);                                    break;
+        case E : sprs[0] = &SM(azma_stand_e);                                    break;
+        case N : sprs[0] = &SM(azma_stand_n);                                    break;
+        case S : sprs[0] = &SM(azma_stand_s);                                    break;
+        case NW: sprs[0] = &SM(azma_stand_nw);                                   break;
+        case NE: sprs[0] = &SM(azma_stand_ne);                                   break;
+        case SW: sprs[0] = &SM(azma_stand_sw);                                   break;
+        case SE: sprs[0] = &SM(azma_stand_se);                                   break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
+
+      case 1: switch( pe->dir ) {                      // walking 1
+        case W : sprs[0] = &SM(azma_walk1_w);                                    break;
+        case E : sprs[0] = &SM(azma_walk1_e);                                    break;
+        case N : sprs[0] = &SM(azma_walk1_n);                                    break;
+        case S : sprs[0] = &SM(azma_walk1_s);                                    break;
+        case NW: sprs[0] = &SM(azma_walk1_nw);                                   break;
+        case NE: sprs[0] = &SM(azma_walk1_ne);                                   break;
+        case SW: sprs[0] = &SM(azma_walk1_sw);                                   break;
+        case SE: sprs[0] = &SM(azma_walk1_se);                                   break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
+
+      case 3: switch( pe->dir ) {                      // walking 2
+        case W : sprs[0] = &SM(azma_walk2_w);                                    break;
+        case E : sprs[0] = &SM(azma_walk2_e);                                    break;
+        case N : sprs[0] = &SM(azma_walk2_n);                                    break;
+        case S : sprs[0] = &SM(azma_walk2_s);                                    break;
+        case NW: sprs[0] = &SM(azma_walk2_nw);                                   break;
+        case NE: sprs[0] = &SM(azma_walk2_ne);                                   break;
+        case SW: sprs[0] = &SM(azma_walk2_sw);                                   break;
+        case SE: sprs[0] = &SM(azma_walk2_se);                                   break;
+        default: sprs[0] = defspr;                                               break;
+      } break;
+    }
   }
-  return defspr;
 }
 
-SPRITE_T* get_slug_sprite(PERSON_t *pe)
+static void get_slug_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
-  return &SM(slug_r);
+  sprs[0] = &SM(slug_r);
 }

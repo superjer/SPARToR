@@ -111,6 +111,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     en->dir         = S;
     en->walkcounter = 0;
     en->character   = CHR_SLUG;
+    en->armed       = 1;
     en->hp          = 1;
     en->mp          = 1;
     en->st          = 1;

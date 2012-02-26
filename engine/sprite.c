@@ -40,6 +40,7 @@ static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base);
 static int fail(const char *msg);
 static int tokenize(char *s);
 static int read_anchor(int i,SPRITE_T *arg);
+static void read_num(int *num, const char *token);
 
 
 void sprblit( SPRITE_T *spr, int x, int y, int z )
@@ -179,10 +180,10 @@ int load_sprites(int texnum)
         if( count-i != 2 && count-i != 4 && count-i != 6 )
           return fail("Expecting 2, 4 or 6 numeric args, when no name found");
 
-        targ->rec.x = atoi(tokens[  i]);
-        targ->rec.y = atoi(tokens[++i]);  if( i>=count-1 ) break;
-        targ->rec.w = atoi(tokens[++i]);
-        targ->rec.h = atoi(tokens[++i]);  if( i>=count-1 ) break;
+        read_num(&targ->rec.x, tokens[  i]);
+        read_num(&targ->rec.y, tokens[++i]);  if( i>=count-1 ) break;
+        read_num(&targ->rec.w, tokens[++i]);
+        read_num(&targ->rec.h, tokens[++i]);  if( i>=count-1 ) break;
 
         i = read_anchor(i+1,targ);
 
@@ -190,15 +191,15 @@ int load_sprites(int texnum)
         if( count-i < 3 )
           return fail("Expecting 2 args for 'pos'");
 
-        targ->rec.x = atoi(tokens[++i]);
-        targ->rec.y = atoi(tokens[++i]);
+        read_num(&targ->rec.x, tokens[++i]);
+        read_num(&targ->rec.y, tokens[++i]);
 
       } else if( !strcmp(tokens[i],"size") ) {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'size'");
 
-        targ->rec.w = atoi(tokens[++i]);
-        targ->rec.h = atoi(tokens[++i]);
+        read_num(&targ->rec.w, tokens[++i]);
+        read_num(&targ->rec.h, tokens[++i]);
 
       } else if( !strcmp(tokens[i],"anchor") ) {
         if( count-i < 3 )
@@ -357,13 +358,19 @@ static int tokenize(char *s)
 static int read_anchor(int i,SPRITE_T *targ)
 {
   int flipme = 0;
+  int xcaret = 0;
+  int ycaret = 0;
 
-  targ->ancx = 0;
-  targ->ancy = 0;
-  targ->flags &= ~SPRF_ALIGNMASK;
 
   char *p = tokens[i];
+
+  if( *p!='^' ) {
+    targ->ancx = 0;
+    targ->flags &= ~SPRF_ALIGNXMASK;
+  }
+
   if( isdigit(*p) || *p=='-'  ) { targ->ancx = atoi(p);                }
+  else if( *p=='^'            ) { xcaret = targ->ancx;                 }
   else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP; flipme = 1; }
   else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT;             }
   else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID; flipme = 1; }
@@ -373,10 +380,17 @@ static int read_anchor(int i,SPRITE_T *targ)
 
   while( *p && *p!='-' && *p!='+' )
     p++;
-  if( *p ) targ->ancx = atoi(p);
+  if( *p ) targ->ancx = atoi(p) + xcaret;
 
   p = tokens[++i];
+
+  if( *p!='^' ) {
+    targ->ancy = 0;
+    targ->flags &= ~SPRF_ALIGNYMASK;
+  }
+
   if( isdigit(*p) || *p=='-'  ) { targ->ancy = atoi(p);                }
+  else if( *p=='^'            ) { ycaret = targ->ancy;                 }
   else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP;             }
   else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT; flipme = 1; }
   else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID;             }
@@ -386,10 +400,28 @@ static int read_anchor(int i,SPRITE_T *targ)
 
   while( *p && *p!='-' && *p!='+' )
     p++;
-  if( *p ) targ->ancy = atoi(p);
+  if( *p ) targ->ancy = atoi(p) + ycaret;
   
   if( flipme ) SWAP( targ->ancx, targ->ancy, int );
 
   return i;
 }
 
+
+// Read a number from token into num, like atoi
+// But if it starts with ^, add the number to num
+// It is OK if there's no number after the ^
+static void read_num(int *num, const char *token)
+{
+  if( *token!='^' ) {
+    *num = atoi(token);
+    return;
+  }
+
+  token++;
+
+  if( *token!='+' && *token!='-' )
+    return;
+
+  *num += atoi(token);
+}

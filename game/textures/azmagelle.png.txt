@@ -61,17 +61,17 @@
 .end
 
 .grid  cols 7  pos 0 135
-  azma_w_stand_s
-  azma_w_stand_se size 34 45
+  azma_w_stand_s  anchor ^ ^-1 
+  azma_w_stand_se  pos ^+6 ^  size 22 ^  anchor ^ ^+3
     .also
     azma_w_stand_sw flipx
   .
-  azma_w_stand_nw
+  azma_w_stand_nw  pos ^-2 ^  size ^+4 ^  anchor ^ ^+3
     .also
     azma_w_stand_ne flipx
-  azma_w_stand_n size 34 45
+  azma_w_stand_n  size 34 ^  anchor ^ ^+5
   .
-  azma_w_stand_w
+  azma_w_stand_w  anchor ^ ^+4
     .also
     azma_w_stand_e flipx
 .end

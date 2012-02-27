@@ -1,6 +1,6 @@
-.default  size 23 51  anchor mid bot
+.default  size 23 51  anchor cen bot
 
-.grid  cols 5  anchor mid bot
+.grid  cols 5
   gyllioc_idle_s
   gyllioc_idle_se
   .also

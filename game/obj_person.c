@@ -253,7 +253,21 @@ static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
 
 static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
-  sprs[0] = &SM(gyllioc_idle_s);
+  SPRITE_T *defspr = &SM(gyllioc_idle_s);
+
+  switch( (pe->walkcounter/4) % 4 ) {
+    default: switch( pe->dir ) {                      // standing
+      case W : sprs[0] = &SM(gyllioc_idle_w);  break;
+      case E : sprs[0] = &SM(gyllioc_idle_e);  break;
+      case N : sprs[0] = &SM(gyllioc_idle_n);  break;
+      case S : sprs[0] = &SM(gyllioc_idle_s);  break;
+      case NW: sprs[0] = &SM(gyllioc_idle_nw); break;
+      case NE: sprs[0] = &SM(gyllioc_idle_ne); break;
+      case SW: sprs[0] = &SM(gyllioc_idle_sw); break;
+      case SE: sprs[0] = &SM(gyllioc_idle_se); break;
+      default: sprs[0] = defspr;               break;
+    } break;
+  }
 }
 
 static void get_slug_sprites(SPRITE_T **sprs, PERSON_t *pe)

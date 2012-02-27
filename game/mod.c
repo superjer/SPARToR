@@ -485,17 +485,18 @@ void mod_huddraw(Uint32 vidfr)
     if( !mo->party[i] )
       continue;
 
+    int x = 57 + i*160;
     PERSON_t *pe = fr[vidfr%maxframes].objs[mo->party[i]].data;
 
     #define BAR_W(stat) (pe->stat>0 ? 15+32*pe->stat/pe->max_##stat : 0)
-    SJGL_Blit( &(REC){0,50+6*0,BAR_W(hp),6}, 57   , NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*1,BAR_W(mp),6}, 57+51, NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*2,BAR_W(st),6}, 57   , NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*3,BAR_W(ap),6}, 57+51, NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*4,BAR_W(pn),6}, 57   , NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*5,BAR_W(ml),6}, 57+51, NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*6,BAR_W(to),6}, 57   , NATIVEH-50+13+9*3, 0 );
-    SJGL_Blit( &(REC){0,50+6*7,BAR_W(xp),6}, 57+51, NATIVEH-50+13+9*3, 0 );
+    SJGL_Blit( &(REC){0,50+6*0,BAR_W(hp),6}, x   , NATIVEH-50+13+9*0, 0 );
+    SJGL_Blit( &(REC){0,50+6*1,BAR_W(mp),6}, x+51, NATIVEH-50+13+9*0, 0 );
+    SJGL_Blit( &(REC){0,50+6*2,BAR_W(st),6}, x   , NATIVEH-50+13+9*1, 0 );
+    SJGL_Blit( &(REC){0,50+6*3,BAR_W(ap),6}, x+51, NATIVEH-50+13+9*1, 0 );
+    SJGL_Blit( &(REC){0,50+6*4,BAR_W(pn),6}, x   , NATIVEH-50+13+9*2, 0 );
+    SJGL_Blit( &(REC){0,50+6*5,BAR_W(ml),6}, x+51, NATIVEH-50+13+9*2, 0 );
+    SJGL_Blit( &(REC){0,50+6*6,BAR_W(to),6}, x   , NATIVEH-50+13+9*3, 0 );
+    SJGL_Blit( &(REC){0,50+6*7,BAR_W(xp),6}, x+51, NATIVEH-50+13+9*3, 0 );
     #undef BAR_W
   }
 }

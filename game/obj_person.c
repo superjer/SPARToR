@@ -14,8 +14,8 @@
 
 #define SPRITECOUNT 10
 
-static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe);
-static void get_slug_sprites(SPRITE_T **sprs, PERSON_t *pe);
+static void get_azma_sprites(   SPRITE_T **sprs, PERSON_t *pe);
+static void get_slug_sprites(   SPRITE_T **sprs, PERSON_t *pe);
 
 
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
@@ -27,8 +27,8 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   SPRITE_T *sprs[SPRITECOUNT] = {NULL};
 
   switch( pe->character ) {
-    case CHR_AZMA: get_azma_sprites(sprs,pe); break;
-    case CHR_SLUG: get_slug_sprites(sprs,pe); break;
+    case CHR_AZMA:    get_azma_sprites(   sprs,pe); break;
+    case CHR_SLUG:    get_slug_sprites(   sprs,pe); break;
   }
 
   for( i=0; i<SPRITECOUNT; i++ )

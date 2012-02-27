@@ -50,14 +50,14 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     //FIXME context is hardcoded as 1 for GHOST and PLAYER:
     MKOBJ( gh, GHOST,  1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT );
     int ghostslot = slot0;
-    MKOBJ( pe, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
-    int peslot = slot0;
+    MKOBJ( az, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
+    int azslot = slot0;
     MKOBJ( en, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
 
-    SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, peslot );
+    SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, azslot );
 
     mo->ghost    = ghostslot;
-    mo->party[0] = peslot;
+    mo->party[0] = azslot;
 
     gh->pos            = (V){  0,  0,  0};
     gh->vel            = (V){  0,  0,  0};
@@ -74,32 +74,32 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     gh->clipboard_y    = 0;
     gh->clipboard_data = NULL;
 
-    pe->pos         = (V){150,0,150};
-    pe->vel         = (V){0,0,0};
-    pe->hull[0]     = (V){-5,-34,-5};
-    pe->hull[1]     = (V){ 5,  0, 5};
-    pe->model       = 0;
-    pe->tilex       = 1;
-    pe->tilez       = 1;
-    pe->dir         = S;
-    pe->walkcounter = 0;
-    pe->character   = CHR_AZMA;
-    pe->hp          = 77;
-    pe->mp          = 100;
-    pe->st          = 50;
-    pe->ap          = 32;
-    pe->pn          = 0;
-    pe->ml          = 0;
-    pe->to          = 100;
-    pe->xp          = 3;
-    pe->max_hp      = 100;
-    pe->max_mp      = 100;
-    pe->max_st      = 100;
-    pe->max_ap      = 100;
-    pe->max_pn      = 100;
-    pe->max_ml      = 100;
-    pe->max_to      = 100;
-    pe->max_xp      = 100;
+    az->pos         = (V){150,0,150};
+    az->vel         = (V){0,0,0};
+    az->hull[0]     = (V){-5,-34,-5};
+    az->hull[1]     = (V){ 5,  0, 5};
+    az->model       = 0;
+    az->tilex       = 1;
+    az->tilez       = 1;
+    az->dir         = S;
+    az->walkcounter = 0;
+    az->character   = CHR_AZMA;
+    az->hp          = 77;
+    az->mp          = 100;
+    az->st          = 50;
+    az->ap          = 32;
+    az->pn          = 0;
+    az->ml          = 0;
+    az->to          = 100;
+    az->xp          = 3;
+    az->max_hp      = 100;
+    az->max_mp      = 100;
+    az->max_st      = 100;
+    az->max_ap      = 100;
+    az->max_pn      = 100;
+    az->max_ml      = 100;
+    az->max_to      = 100;
+    az->max_xp      = 100;
 
     en->pos         = (V){150,0,150};
     en->vel         = (V){0,0,0};

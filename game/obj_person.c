@@ -166,44 +166,44 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
 static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
-  SPRITE_T *defspr = &SM(azma_c_stand_s);
+  SPRITE_T *defspr = &SM(azma_c_idle_s);
   if( pe->armed )
   {
     switch( (pe->walkcounter/4) % 4 ) {
       case 0:
       case 2: switch( pe->dir ) {                      // standing
-        case W : sprs[0] = &SM(azma_c_stand_w);  sprs[1] = &SM(azma_w_stand_w);  break;
-        case E : sprs[0] = &SM(azma_c_stand_e);  sprs[1] = &SM(azma_w_stand_e);  break;
-        case N : sprs[0] = &SM(azma_c_stand_n);  sprs[1] = &SM(azma_w_stand_n);  break;
-        case S : sprs[0] = &SM(azma_c_stand_s);  sprs[1] = &SM(azma_w_stand_s);  break;
-        case NW: sprs[0] = &SM(azma_c_stand_nw); sprs[1] = &SM(azma_w_stand_nw); break;
-        case NE: sprs[0] = &SM(azma_c_stand_ne); sprs[1] = &SM(azma_w_stand_ne); break;
-        case SW: sprs[0] = &SM(azma_c_stand_sw); sprs[1] = &SM(azma_w_stand_sw); break;
-        case SE: sprs[0] = &SM(azma_c_stand_se); sprs[1] = &SM(azma_w_stand_se); break;
+        case W : sprs[0] = &SM(azma_c_idle_w);   sprs[1] = &SM(azma_w_idle_w);   break;
+        case E : sprs[0] = &SM(azma_c_idle_e);   sprs[1] = &SM(azma_w_idle_e);   break;
+        case N : sprs[0] = &SM(azma_c_idle_n);   sprs[1] = &SM(azma_w_idle_n);   break;
+        case S : sprs[0] = &SM(azma_c_idle_s);   sprs[1] = &SM(azma_w_idle_s);   break;
+        case NW: sprs[0] = &SM(azma_c_idle_nw);  sprs[1] = &SM(azma_w_idle_nw);  break;
+        case NE: sprs[0] = &SM(azma_c_idle_ne);  sprs[1] = &SM(azma_w_idle_ne);  break;
+        case SW: sprs[0] = &SM(azma_c_idle_sw);  sprs[1] = &SM(azma_w_idle_sw);  break;
+        case SE: sprs[0] = &SM(azma_c_idle_se);  sprs[1] = &SM(azma_w_idle_se);  break;
         default: sprs[0] = defspr;                                               break;
       } break;
 
       case 1: switch( pe->dir ) {                      // walking 1
-        case W : sprs[0] = &SM(azma_walk1_w);                                    break;
-        case E : sprs[0] = &SM(azma_walk1_e);                                    break;
-        case N : sprs[0] = &SM(azma_walk1_n);                                    break;
-        case S : sprs[0] = &SM(azma_walk1_s);                                    break;
-        case NW: sprs[0] = &SM(azma_walk1_nw);                                   break;
-        case NE: sprs[0] = &SM(azma_walk1_ne);                                   break;
-        case SW: sprs[0] = &SM(azma_walk1_sw);                                   break;
-        case SE: sprs[0] = &SM(azma_walk1_se);                                   break;
+        case W : sprs[0] = &SM(azma_c_walk1_w);  sprs[1] = &SM(azma_w_walk1_w);  break;
+        case E : sprs[0] = &SM(azma_c_walk1_e);  sprs[1] = &SM(azma_w_walk1_e);  break;
+        case N : sprs[0] = &SM(azma_c_walk1_n);  sprs[1] = &SM(azma_w_walk1_n);  break;
+        case S : sprs[0] = &SM(azma_c_walk1_s);  sprs[1] = &SM(azma_w_walk1_s);  break;
+        case NW: sprs[0] = &SM(azma_c_walk1_nw); sprs[1] = &SM(azma_w_walk1_nw); break;
+        case NE: sprs[0] = &SM(azma_c_walk1_ne); sprs[1] = &SM(azma_w_walk1_ne); break;
+        case SW: sprs[0] = &SM(azma_c_walk1_sw); sprs[1] = &SM(azma_w_walk1_sw); break;
+        case SE: sprs[0] = &SM(azma_c_walk1_se); sprs[1] = &SM(azma_w_walk1_se); break;
         default: sprs[0] = defspr;                                               break;
       } break;
 
       case 3: switch( pe->dir ) {                      // walking 2
-        case W : sprs[0] = &SM(azma_walk2_w);                                    break;
-        case E : sprs[0] = &SM(azma_walk2_e);                                    break;
-        case N : sprs[0] = &SM(azma_walk2_n);                                    break;
-        case S : sprs[0] = &SM(azma_walk2_s);                                    break;
-        case NW: sprs[0] = &SM(azma_walk2_nw);                                   break;
-        case NE: sprs[0] = &SM(azma_walk2_ne);                                   break;
-        case SW: sprs[0] = &SM(azma_walk2_sw);                                   break;
-        case SE: sprs[0] = &SM(azma_walk2_se);                                   break;
+        case W : sprs[0] = &SM(azma_c_walk2_w);  sprs[1] = &SM(azma_w_walk2_w);  break;
+        case E : sprs[0] = &SM(azma_c_walk2_e);  sprs[1] = &SM(azma_w_walk2_e);  break;
+        case N : sprs[0] = &SM(azma_c_walk2_n);  sprs[1] = &SM(azma_w_walk2_n);  break;
+        case S : sprs[0] = &SM(azma_c_walk2_s);  sprs[1] = &SM(azma_w_walk2_s);  break;
+        case NW: sprs[0] = &SM(azma_c_walk2_nw); sprs[1] = &SM(azma_w_walk2_nw); break;
+        case NE: sprs[0] = &SM(azma_c_walk2_ne); sprs[1] = &SM(azma_w_walk2_ne); break;
+        case SW: sprs[0] = &SM(azma_c_walk2_sw); sprs[1] = &SM(azma_w_walk2_sw); break;
+        case SE: sprs[0] = &SM(azma_c_walk2_se); sprs[1] = &SM(azma_w_walk2_se); break;
         default: sprs[0] = defspr;                                               break;
       } break;
     }
@@ -211,14 +211,14 @@ static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
     switch( (pe->walkcounter/4) % 4 ) {
       case 0:
       case 2: switch( pe->dir ) {                      // standing
-        case W : sprs[0] = &SM(azma_stand_w);                                    break;
-        case E : sprs[0] = &SM(azma_stand_e);                                    break;
-        case N : sprs[0] = &SM(azma_stand_n);                                    break;
-        case S : sprs[0] = &SM(azma_stand_s);                                    break;
-        case NW: sprs[0] = &SM(azma_stand_nw);                                   break;
-        case NE: sprs[0] = &SM(azma_stand_ne);                                   break;
-        case SW: sprs[0] = &SM(azma_stand_sw);                                   break;
-        case SE: sprs[0] = &SM(azma_stand_se);                                   break;
+        case W : sprs[0] = &SM(azma_idle_w);                                     break;
+        case E : sprs[0] = &SM(azma_idle_e);                                     break;
+        case N : sprs[0] = &SM(azma_idle_n);                                     break;
+        case S : sprs[0] = &SM(azma_idle_s);                                     break;
+        case NW: sprs[0] = &SM(azma_idle_nw);                                    break;
+        case NE: sprs[0] = &SM(azma_idle_ne);                                    break;
+        case SW: sprs[0] = &SM(azma_idle_sw);                                    break;
+        case SE: sprs[0] = &SM(azma_idle_se);                                    break;
         default: sprs[0] = defspr;                                               break;
       } break;
 

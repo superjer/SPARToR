@@ -361,22 +361,18 @@ static int read_anchor(int i,SPRITE_T *targ)
   int xcaret = 0;
   int ycaret = 0;
 
-
   char *p = tokens[i];
 
-  if( *p!='^' ) {
-    targ->ancx = 0;
-    targ->flags &= ~SPRF_ALIGNXMASK;
-  }
+  if( *p!='^' ) targ->ancx = 0;
 
-  if( isdigit(*p) || *p=='-'  ) { targ->ancx = atoi(p);                }
-  else if( *p=='^'            ) { xcaret = targ->ancx;                 }
-  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP; flipme = 1; }
-  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT;             }
-  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID; flipme = 1; }
-  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN;             }
-  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT; flipme = 1; }
-  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT;             }
+  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->ancx = atoi(p);                }
+  else if( *p=='^'            ) {                                  xcaret = targ->ancx;                 }
+  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP; flipme = 1; }
+  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT;             }
+  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID; flipme = 1; }
+  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN;             }
+  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT; flipme = 1; }
+  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT;             }
 
   while( *p && *p!='-' && *p!='+' )
     p++;
@@ -384,19 +380,16 @@ static int read_anchor(int i,SPRITE_T *targ)
 
   p = tokens[++i];
 
-  if( *p!='^' ) {
-    targ->ancy = 0;
-    targ->flags &= ~SPRF_ALIGNYMASK;
-  }
+  if( *p!='^' ) targ->ancy = 0;
 
-  if( isdigit(*p) || *p=='-'  ) { targ->ancy = atoi(p);                }
-  else if( *p=='^'            ) { ycaret = targ->ancy;                 }
-  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP;             }
-  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT; flipme = 1; }
-  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID;             }
-  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN; flipme = 1; }
-  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT;             }
-  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT; flipme = 1; }
+  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->ancy = atoi(p);                }
+  else if( *p=='^'            ) {                                  ycaret = targ->ancy;                 }
+  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP;             }
+  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT; flipme = 1; }
+  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID;             }
+  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN; flipme = 1; }
+  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT;             }
+  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT; flipme = 1; }
 
   while( *p && *p!='-' && *p!='+' )
     p++;

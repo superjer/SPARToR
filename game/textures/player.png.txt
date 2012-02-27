@@ -52,7 +52,7 @@ knife_down 148 150 5 27 bot cen
 knife_up   153 150 5 27 top cen
 
 .grid  pos 0 177  size 20 16  anchor bot cen
-  slug_r
+  slug_r  anchor cen bot
   slug_l
   slug_ouch_r
   slug_ouch_l

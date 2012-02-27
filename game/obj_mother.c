@@ -52,12 +52,15 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     int ghostslot = slot0;
     MKOBJ( az, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
     int azslot = slot0;
+    MKOBJ( gy, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
+    int gyslot = slot0;
     MKOBJ( en, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
 
     SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, azslot );
 
     mo->ghost    = ghostslot;
     mo->party[0] = azslot;
+    mo->party[1] = gyslot;
 
     gh->pos            = (V){  0,  0,  0};
     gh->vel            = (V){  0,  0,  0};
@@ -100,6 +103,33 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     az->max_ml      = 100;
     az->max_to      = 100;
     az->max_xp      = 100;
+
+    gy->pos         = (V){150,0,150};
+    gy->vel         = (V){0,0,0};
+    gy->hull[0]     = (V){-5,-34,-5};
+    gy->hull[1]     = (V){ 5,  0, 5};
+    gy->model       = 0;
+    gy->tilex       = 3;
+    gy->tilez       = 5;
+    gy->dir         = S;
+    gy->walkcounter = 0;
+    gy->character   = CHR_GYLLIOC;
+    gy->hp          = 99;
+    gy->mp          = 67;
+    gy->st          = 50;
+    gy->ap          = 38;
+    gy->pn          = 1;
+    gy->ml          = 1;
+    gy->to          = 80;
+    gy->xp          = 3;
+    gy->max_hp      = 100;
+    gy->max_mp      = 100;
+    gy->max_st      = 100;
+    gy->max_ap      = 100;
+    gy->max_pn      = 100;
+    gy->max_ml      = 100;
+    gy->max_to      = 100;
+    gy->max_xp      = 100;
 
     en->pos         = (V){150,0,150};
     en->vel         = (V){0,0,0};

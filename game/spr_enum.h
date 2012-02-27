@@ -73,6 +73,14 @@ X(azma_w_walk1_e),\
 X(azma_w_walk2_w),\
 X(azma_w_walk2_e),\
 X(shadow),\
+X(gyllioc_idle_s),\
+X(gyllioc_idle_se),\
+X(gyllioc_idle_sw),\
+X(gyllioc_idle_nw),\
+X(gyllioc_idle_ne),\
+X(gyllioc_idle_n),\
+X(gyllioc_idle_w),\
+X(gyllioc_idle_e),\
 X(wheat1),\
 X(wheat2),\
 X(wheattrampled1),\

@@ -1,0 +1,15 @@
+.default  size 23 51  anchor mid bot
+
+.grid  cols 5  anchor mid bot
+  gyllioc_idle_s
+  gyllioc_idle_se
+  .also
+    gyllioc_idle_sw  flipx
+  gyllioc_idle_nw
+  .also
+    gyllioc_idle_ne  flipx
+  gyllioc_idle_n
+  gyllioc_idle_w
+  .also
+    gyllioc_idle_e  flipx
+.end

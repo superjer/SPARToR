@@ -58,19 +58,24 @@ void SJGL_SetTex(GLuint tex)
 }
 
 
-//uses GL to do draw a sprite
+// wrapper for SJFL_Blit when there's only one z
 int SJGL_Blit(REC *s, int x, int y, int z)
 {
-  if( z<0 ) z = (y+s->h)*-z;
+  return SJGL_BlitSkew(s,x,y,z,z);
+}
 
+
+//uses GL to do draw a sprite
+int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
+{
   int x2 = ( s->w > 0 ? x+s->w : x-s->w );
   int y2 = ( s->h > 0 ? y+s->h : y-s->h );
 
   glBegin(GL_QUADS);
-  glTexCoord3i(s->x     , s->y     , z); glVertex3i(x , y , z);
-  glTexCoord3i(s->x+s->w, s->y     , z); glVertex3i(x2, y , z);
-  glTexCoord3i(s->x+s->w, s->y+s->h, z); glVertex3i(x2, y2, z);
-  glTexCoord3i(s->x     , s->y+s->h, z); glVertex3i(x , y2, z);
+  glTexCoord2i(s->x     , s->y     ); glVertex3i(x , y , zhi);
+  glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2, y , zhi);
+  glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x2, y2, zlo);
+  glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x , y2, zlo);
   glEnd();
 
   return 0;

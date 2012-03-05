@@ -8,6 +8,8 @@
 
 #define NATIVEW    480
 #define NATIVEH    300
+#define NEARVAL    (-99999)
+#define FARVAL     ( 99999)
 #define GAMENAME   "deadking"
 #define CBDATASIZE 4     //context block (CB) payload size
 #define MAXCMDDATA 64    //maximum size of extra command data
@@ -20,6 +22,9 @@
 
 
 #define PARTY_SIZE 6
+
+
+#define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH/2)
 
 
 //obj types

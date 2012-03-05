@@ -31,13 +31,16 @@ enum { TOOL_NUL = 1,
        SPRF_ALIGNXMASK = 0x3800,
        SPRF_ALIGNMASK = 0x3F00,
        SPRF_FLIPX = 0x4000,
-       SPRF_FLIPY = 0x8000 };
+       SPRF_FLIPY = 0x8000,
+       SPRF_FLOOR = 0x10000 };
 
 typedef struct {
-  int    texnum;
-  char  *name;
-  REC    rec;
-  int    ancx,ancy; // anchor position
+  int      texnum;
+  int      bump;
+  char    *name;
+  REC      rec;
+  int      ancx; // anchor position
+  int      ancy;
   unsigned flags;
   struct {
     int gridwide;
@@ -58,7 +61,7 @@ extern char      *spr_names[];
 extern int        spr_map[];
 
 
-void sprblit( SPRITE_T *spr, int x, int y, int z );
+void sprblit( SPRITE_T *spr, int x, int y );
 int load_sprites(int texnum);
 void unload_sprites();
 int find_sprite_by_name(const char *name);

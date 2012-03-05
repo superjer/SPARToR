@@ -1,4 +1,4 @@
-.default  size 46 24  anchor cen bot
+.default  size 46 24  anchor mid cen  floor
 
 # this is a comment!
 

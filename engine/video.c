@@ -131,7 +131,7 @@ void render()
   glViewport(pad_left,h-NATIVEH*scale-pad_top,NATIVEW*scale,NATIVEH*scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,NATIVEW,NATIVEH,0,-NATIVEH*3-1,NATIVEH*3+1);
+  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   int camx = NATIVEW/2-(int)v_camx;
@@ -244,7 +244,7 @@ void render()
   glViewport(0,0,w,h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,w,h,0,-1,1);
+  glOrtho(0,w,h,0,NEARVAL,FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 

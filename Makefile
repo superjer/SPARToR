@@ -42,20 +42,8 @@ ifeq ($(UNAME),Linux)
 endif
 ifeq ($(UNAME),Darwin)
 	EXE_NAME = platforms/mac/spartor_mac.app/Contents/MacOS/spartor_mac
-	LIBS = platforms/mac/spartor_mac.app/SDLmain.m \
-	       -lm \
-	       -L/opt/local/var/macports/software/glew/1.5.8_0/opt/local/lib -lGLEW \
-	       -framework OPENGL \
-	       -framework SDL \
-	       -framework SDL_net \
-	       -framework SDL_image \
-	       -framework Cocoa \
-	       -Fplatforms/mac/spartor_mac.app/Contents/Frameworks
-	INC += -I/opt/local/var/macports/software/glew/1.5.8_0/opt/local/include \
-	       -Iplatforms/mac/spartor_mac.app \
-	       -Iplatforms/mac/spartor_mac.app/Contents/Frameworks/SDL.framework/Headers \
-	       -Iplatforms/mac/spartor_mac.app/Contents/Frameworks/SDL_net.framework/Headers \
-	       -Iplatforms/mac/spartor_mac.app/Contents/Frameworks/SDL_image.framework/Headers
+	FLAGS += `sdl-config --cflags`
+	LIBS = -lm `sdl-config --libs` -lSDL_net -lSDL_image -framework OpenGL -lGLEW
 	POSTCC = cp -R -f platforms/mac/spartor_mac.app .
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))

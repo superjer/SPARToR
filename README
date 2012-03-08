@@ -33,22 +33,30 @@ How to build:
    Build for Win32:
    ----------------
    1. Install msysGit
-      - http://code.google.com/p/msysgit/
-   2. Compile and install libSDL, libSDL-net and libSDL-image
-      - http://www.libsdl.org/
+        <http://code.google.com/p/msysgit/>
+   2. Compile and install* libSDL, libSDL-net and libSDL-image
+        <http://www.libsdl.org/>
    3. Run `make`
       - this will create the executable `spartor_win32.exe`
 
 
    Build for Mac:
    --------------
-   1. Install MacPorts
-      - http://www.macports.org/
-   2. Run `sudo port selfupdate`
-   3. Run `sudo port install glew`
-   4. The required SDL dev packages for Mac are included with
-      this source so you shouldn't need to get them yourself.
+   1. Get Xcode, or just "Command Line Tools for Xcode" which
+      is sufficient and MUCH smaller
+        <https://developer.apple.com/downloads/index.action>
+   2. Compile and install* libGLEW
+        <http://glew.sourceforge.net/>
+   3. Compile and install* libSDL, libSDL-net and libSDL-image
+        <http://www.libsdl.org/>
    5. Run `make`
       - this will create the executable `spartor_mac` and
         place it in `spartor_mac.app/Contents/MacOS`
 
+
+   * Compiling and installing libraries:
+     Extract the .zip or .tar.gz somewhere like ~/SDL
+     cd ~/SDL
+     ./configure
+     make
+     sudo make install

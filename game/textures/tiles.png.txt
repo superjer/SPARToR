@@ -45,7 +45,7 @@
 
 flower  pos 276 0  size 18 28
 
-.default  anchor cen bot-12  bump -23
+.default  anchor cen bot-12  bump -24
 dirt1-column1       230   0 46 72
 dirt1-column2       230   0 46 36
 adobe-wall1         230  72 46 72
@@ -57,7 +57,7 @@ adobe-wall6         230 216 46 36
 adobe-wall7         230 288 46 72
 adobe-wall8         230 288 46 36
 adobe-wall9         276 216 46 72
-adobe-wall10        276 216 46 36 ^ ^ bump 0
+adobe-wall10        276 216 46 36
 adobe-wall11        276 288 46 72
 adobe-wall12        276 288 46 36
 lightadobe-wall-sw1 276  48 28 84

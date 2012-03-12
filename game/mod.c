@@ -404,6 +404,12 @@ int mod_command(char *q)
   }else if( strcmp(q,"depth")==0 ){
     m_showdepth = !m_showdepth;
     return 0;
+  }else if( strcmp(q,"resprite")==0 ){
+    reload_sprites();
+    renumber_sprites();
+    SJC_Write("Was %d sprites, now %d sprites.",old_spr_count,spr_count);
+    unload_sprites(old_sprites,old_spr_count);
+    return 0;
   }
 
   return 1;

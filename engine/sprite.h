@@ -60,10 +60,14 @@ extern size_t     spr_count;
 extern char      *spr_names[];
 extern int        spr_map[];
 
+extern SPRITE_T  *old_sprites;
+extern size_t     old_spr_count;
+
 
 void sprblit( SPRITE_T *spr, int x, int y );
 int load_sprites(int texnum);
-void unload_sprites();
+void reload_sprites();
+void unload_sprites(SPRITE_T *sprites,size_t spr_count);
 int find_sprite_by_name(const char *name);
 
 

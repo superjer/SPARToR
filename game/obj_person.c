@@ -129,7 +129,7 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       newpe->tilez = newz;
       newpe->ap -= required_ap;
     } else {
-      SJC_Write("I can't let you do that, StarDave");
+      // not enough Action Points
     }
   }
 

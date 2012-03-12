@@ -26,6 +26,8 @@ size_t     spr_count;
 char      *spr_names[] = { SPRITE_ENUM(STRINGIFY) };
 int        spr_map[sprite_enum_max] = { 0 };
 
+SPRITE_T  *old_sprites;    // for reloading sprites and translating old ids
+size_t     old_spr_count;
 
 static size_t spr_alloc;
 static char   filename[100];
@@ -88,7 +90,7 @@ int load_sprites(int texnum)
 
   line_num = 0;
 
-  for( ;; ) {
+  for( ;; ) { // each line in the file
     if( mode==DEFAULT || mode==NOMORE )
       mode = READY;
 
@@ -306,10 +308,39 @@ int load_sprites(int texnum)
   return 0;
 }
 
-void unload_sprites()
+// reload all sprites
+// old sprite data is available in old_sprites
+// call unload_sprites(old_sprites,old_spr_count) soon after to avoid leaks
+void reload_sprites()
 {
+  old_sprites   = sprites;
+  old_spr_count = spr_count;
+
+  sprites   = NULL;
+  spr_count = 0;
+  spr_alloc = 0;
+
+  memset( spr_map, 0, sprite_enum_max * sizeof *spr_map );
+
+  size_t i;
+  for( i=0; i<tex_count; i++ )
+    if( textures[i].filename )
+      load_sprites(i);
 }
 
+// unload either old_sprites (after reloading all sprites) or sprites (when shutting down)
+void unload_sprites(SPRITE_T *sprites,size_t spr_count)
+{
+  size_t i;
+  for( i=0; i<spr_count; i++ ) {
+    free(sprites[i].name);
+    free(sprites[i].more);
+  }
+  free(sprites);
+  sprites = NULL;
+  spr_count = 0;
+  // does not reset spr_alloc! (there's no old_spr_alloc)
+}
 
 int find_sprite_by_name(const char *name)
 {
@@ -320,7 +351,6 @@ int find_sprite_by_name(const char *name)
       return (int)i;
   return 0;
 }
-
 
 static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base)
 {

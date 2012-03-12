@@ -37,16 +37,18 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   GHOST_t   *gh = ob->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
 
-  if( gh->client==me )
-  {
+  if( gh->client==me ) {
     myghost     = objid;
     mycontext   = ob->context;
   }
 
+  static V v2_dimetric[2] = {{-64,-72,-64},{64,  0, 64}};
+  static V v2_ortho[2]    = {{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}};
+
   if( co->projection == DIMETRIC     )
-    memcpy( gh->hull, (V[2]){{-64,-72,-64},{64,  0, 64}}, sizeof (V[2]) );
+    memcpy( gh->hull, v2_dimetric, sizeof (V[2]) );
   if( co->projection == ORTHOGRAPHIC )
-    memcpy( gh->hull, (V[2]){{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}}, sizeof (V[2]) );
+    memcpy( gh->hull, v2_ortho,    sizeof (V[2]) );
 
   v_camx = POINT2NATIVE_X(&gh->pos);
   v_camy = POINT2NATIVE_Y(&gh->pos);

@@ -1,11 +1,11 @@
-.default  size 46 24  anchor cen bot
+.default  size 46 24  anchor mid cen
 
-.grid  cols 5  pos 0 0  size 46 24  anchor 23 24
+.grid  cols 5  pos 0 0  size 46 24  floor
   grass1
   grass2
   pave1
   pave2
-  dirt1  anchor 23 12
+  dirt1
   dirt2
   sand1
   crust1
@@ -44,22 +44,23 @@
 .end
 
 flower  pos 276 0  size 18 28
-dirt1-column1 230 0 46 72 cen bot
-dirt1-column2 230 0 46 36 cen 36
-adobe-wall1 230 72 46 72 cen bot
-adobe-wall2 230 72 46 36 cen 36
-adobe-wall3 230 144 46 72 cen bot
-adobe-wall4 230 144 46 36 cen 36
-adobe-wall5 230 216 46 72 cen bot
-adobe-wall6 230 216 46 36 cen 36
-adobe-wall7 230 288 46 72 cen bot
-adobe-wall8 230 288 46 36 cen 36
-adobe-wall9 276 216 46 72 cen bot
-adobe-wall10 276 216 46 36 cen 36
-adobe-wall11 276 288 46 72 cen bot
-adobe-wall12 276 288 46 36 cen 36
-lightadobe-wall-sw1 276 48 28 84 cen bot
-lightadobe-wall-sw2 276 132 28 84 cen bot
-lightadobe-wall-sw3 304 132 28 84 cen bot
 
+.default  anchor cen bot-12  bump -23
+dirt1-column1       230   0 46 72
+dirt1-column2       230   0 46 36
+adobe-wall1         230  72 46 72
+adobe-wall2         230  72 46 36
+adobe-wall3         230 144 46 72
+adobe-wall4         230 144 46 36
+adobe-wall5         230 216 46 72
+adobe-wall6         230 216 46 36
+adobe-wall7         230 288 46 72
+adobe-wall8         230 288 46 36
+adobe-wall9         276 216 46 72
+adobe-wall10        276 216 46 36 ^ ^ bump 0
+adobe-wall11        276 288 46 72
+adobe-wall12        276 288 46 36
+lightadobe-wall-sw1 276  48 28 84
+lightadobe-wall-sw2 276 132 28 84
+lightadobe-wall-sw3 304 132 28 84 cen bot-12
 

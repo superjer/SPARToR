@@ -35,9 +35,9 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
   for( i=0; i<SPRITECOUNT; i++ )
     if( sprs[i] )
-      sprblit( sprs[i], c, d, d+12 );
+      sprblit( sprs[i], c, d );
 
-  sprblit( &SM(shadow), c, d, d+11 );
+  sprblit( &SM(shadow), c, d );
 }
 
 void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

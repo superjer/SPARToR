@@ -269,8 +269,15 @@ int load_context(const char *name,int context,int loadfr)
   co->x = x;
   co->y = y;
   co->z = z;
-  if( co->map  ) free(co->map ); //FIXME remove hack_map someday and don't free this stuff here
-  if( co->dmap ) free(co->dmap);
+
+  // FIXME: MEM LEAK!
+  // Using resprite shortly after unloading a context WOULD cause a crash
+  // Garbage collection of old contexts is NOT implemented yet, so they just leak for now
+  // FIXME: MEM LEAK!
+
+  // if( co->map  ) free(co->map ); //FIXME remove hack_map someday and don't free this stuff here
+  // if( co->dmap ) free(co->dmap);
+
   co->map  = hack_map  = map;
   co->dmap = hack_dmap = dmap;
 

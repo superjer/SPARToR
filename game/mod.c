@@ -18,6 +18,9 @@
 #include "sprite_helpers.h"
 
 
+int m_showdepth = 0; // whether to show the depth buffer values of drawn sprites
+
+
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
                        {"/slugtunnel.png" ,0},
@@ -106,7 +109,7 @@ void mod_setup(Uint32 setupfr)
 
   //make the mother object
   fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
-  *(MOTHER_t *)fr[setupfr].objs[0].data = (MOTHER_t){0};
+  memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
 
   //make default context object (map)
   fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
@@ -235,12 +238,14 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
+        if( !spr_count ) return -1;
         myspr = (myspr + spr_count - 1) % spr_count;
         mytex = sprites[myspr].texnum;
         return -1;
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
+        if( !spr_count ) return -1;
         myspr = (myspr + 1) % spr_count;
         mytex = sprites[myspr].texnum;
         return -1;
@@ -413,6 +418,15 @@ int mod_command(char *q)
     magic_c.cmd = CMDT_0CON;
     putcmd(-1,-1,-1);
     return 0;
+  }else if( strcmp(q,"depth")==0 ){
+    m_showdepth = !m_showdepth;
+    return 0;
+  }else if( strcmp(q,"resprite")==0 ){
+    reload_sprites();
+    renumber_sprites();
+    SJC_Write("Was %d sprites, now %d sprites.",old_spr_count,spr_count);
+    unload_sprites(old_sprites,old_spr_count);
+    return 0;
   }
 
   return 1;
@@ -541,6 +555,8 @@ void mod_postdraw(Uint32 vidfr)
   SPRITE_T *dspr = spr;
 
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
+    if( !spr ) continue;
+
     if( (spr->flags & TOOL_MASK) == TOOL_PSTE && gh && gh->clipboard_data && (upz-dnz||upy-dny||upx-dnx) ) {
       int x = (i-dnx+shx) % clipx;
       int y = (j-dny+shy) % clipy;
@@ -614,10 +630,12 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glColor4f(1,1,1,1);
-  SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
-                "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-  SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+  if( myspr < (int)spr_count ) {
+    SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+                  "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+    SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+    SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+  }
 
   glPopAttrib();
 }
@@ -671,17 +689,16 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   SJGL_SetTex( spr->texnum );
 
   int c = TILE2NATIVE_X(co,x,y,z);
-  int d = TILE2NATIVE_Y(co,x,y,z);
-  int r = d;
+  int d = TILE2NATIVE_Y(co,x,y,z) + co->tileuh/2;
 
-  if( spr->ancy > co->tileuh ) // for sprites that pop out of the flat plane
-    r += co->tileuh / 2;
+  sprblit( spr, c, d );
 
-  r = 0; // TODO: remove once sprite ordering works in all projection modes
-
-  // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
-  // which always in the southernmost corner
-  SJGL_Blit( &spr->rec, c - spr->ancx, d + co->tileuh - spr->ancy, r );
+  if( m_showdepth ) {
+    glDisable(GL_DEPTH_TEST);
+    SJF_DrawText(c,d,SJF_LEFT,"%d%c",DEPTH_OF(d),spr->flags&SPRF_FLOOR?'f':'\0');
+    glEnable(GL_DEPTH_TEST);
+    SJGL_SetTex(-1); // notify SJGL that the texture has changed
+  }
 }
 
 

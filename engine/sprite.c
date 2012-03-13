@@ -26,6 +26,8 @@ size_t     spr_count;
 char      *spr_names[] = { SPRITE_ENUM(STRINGIFY) };
 int        spr_map[sprite_enum_max] = { 0 };
 
+SPRITE_T  *old_sprites;    // for reloading sprites and translating old ids
+size_t     old_spr_count;
 
 static size_t spr_alloc;
 static char   filename[100];
@@ -40,18 +42,28 @@ static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base);
 static int fail(const char *msg);
 static int tokenize(char *s);
 static int read_anchor(int i,SPRITE_T *arg);
+static void read_num(int *num, const char *token);
 
 
-void sprblit( SPRITE_T *spr, int x, int y, int z )
+void sprblit( SPRITE_T *spr, int x, int y )
 {
+  if( !spr ) return;
+
+  int zlo = DEPTH_OF(y) + spr->bump;
+  int zhi;
+
+  if( spr->flags & SPRF_FLOOR )
+    zhi = zlo - spr->rec.h;
+  else
+    zhi = zlo + spr->rec.h;
+
   SJGL_SetTex( spr->texnum );
-  SJGL_Blit( &spr->rec, x-spr->ancx, y-spr->ancy, z );
+  SJGL_BlitSkew( &spr->rec, x-spr->ancx, y-spr->ancy, zlo, zhi );
 }
 
 
 int load_sprites(int texnum)
 {
-
   if( strlen(textures[texnum].filename) > 95 ) {
     SJC_Write("load_sprites: filename too long: %s", textures[texnum].filename);
     return -1;
@@ -74,13 +86,13 @@ int load_sprites(int texnum)
   int piping    =  0;
   int also      =  0;
   int gridstart = -1;
-  SPRITE_T defs = {0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
+  SPRITE_T defs = {0, 0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
   SPRITE_T gdefs;
   SPRITE_T prev_spr = defs;
 
   line_num = 0;
 
-  for( ;; ) {
+  for( ;; ) { // each line in the file
     if( mode==DEFAULT || mode==NOMORE )
       mode = READY;
 
@@ -176,13 +188,13 @@ int load_sprites(int texnum)
 
     while( ++i < count ) {
       if( isdigit(tokens[i][0]) || tokens[i][0]=='-' ) {
-        if( count-i != 2 && count-i != 4 && count-i != 6 )
-          return fail("Expecting 2, 4 or 6 numeric args, when no name found");
+        if( count-i != 2 && count-i != 4 && count-i < 6 )
+          return fail("Expecting 2, 4 or 6+ values, when no name found");
 
-        targ->rec.x = atoi(tokens[  i]);
-        targ->rec.y = atoi(tokens[++i]);  if( i>=count-1 ) break;
-        targ->rec.w = atoi(tokens[++i]);
-        targ->rec.h = atoi(tokens[++i]);  if( i>=count-1 ) break;
+        read_num(&targ->rec.x, tokens[  i]);
+        read_num(&targ->rec.y, tokens[++i]);  if( i>=count-1 ) break;
+        read_num(&targ->rec.w, tokens[++i]);
+        read_num(&targ->rec.h, tokens[++i]);  if( i>=count-1 ) break;
 
         i = read_anchor(i+1,targ);
 
@@ -190,15 +202,21 @@ int load_sprites(int texnum)
         if( count-i < 3 )
           return fail("Expecting 2 args for 'pos'");
 
-        targ->rec.x = atoi(tokens[++i]);
-        targ->rec.y = atoi(tokens[++i]);
+        read_num(&targ->rec.x, tokens[++i]);
+        read_num(&targ->rec.y, tokens[++i]);
 
       } else if( !strcmp(tokens[i],"size") ) {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'size'");
 
-        targ->rec.w = atoi(tokens[++i]);
-        targ->rec.h = atoi(tokens[++i]);
+        read_num(&targ->rec.w, tokens[++i]);
+        read_num(&targ->rec.h, tokens[++i]);
+
+      } else if( !strcmp(tokens[i],"bump") ) {
+        if( count-i < 2 )
+          return fail("Expecting 1 arg for 'bump'");
+
+        read_num(&targ->bump, tokens[++i]);
 
       } else if( !strcmp(tokens[i],"anchor") ) {
         if( count-i < 3 )
@@ -250,6 +268,9 @@ int load_sprites(int texnum)
       } else if( !strcmp(tokens[i],"flipy") ) {
         targ->flags |= SPRF_FLIPY;
 
+      } else if( !strcmp(tokens[i],"floor") ) {
+        targ->flags |= SPRF_FLOOR;
+
       } else {
         SJC_Write("tokens %d: %s",i,tokens[i]);
         return fail("Unknown property name");
@@ -289,10 +310,39 @@ int load_sprites(int texnum)
   return 0;
 }
 
-void unload_sprites()
+// reload all sprites
+// old sprite data is available in old_sprites
+// call unload_sprites(old_sprites,old_spr_count) soon after to avoid leaks
+void reload_sprites()
 {
+  old_sprites   = sprites;
+  old_spr_count = spr_count;
+
+  sprites   = NULL;
+  spr_count = 0;
+  spr_alloc = 0;
+
+  memset( spr_map, 0, sprite_enum_max * sizeof *spr_map );
+
+  size_t i;
+  for( i=0; i<tex_count; i++ )
+    if( textures[i].filename )
+      load_sprites(i);
 }
 
+// unload either old_sprites (after reloading all sprites) or sprites (when shutting down)
+void unload_sprites(SPRITE_T *sprites,size_t spr_count)
+{
+  size_t i;
+  for( i=0; i<spr_count; i++ ) {
+    free(sprites[i].name);
+    free(sprites[i].more);
+  }
+  free(sprites);
+  sprites = NULL;
+  spr_count = 0;
+  // does not reset spr_alloc! (there's no old_spr_alloc)
+}
 
 int find_sprite_by_name(const char *name)
 {
@@ -303,7 +353,6 @@ int find_sprite_by_name(const char *name)
       return (int)i;
   return 0;
 }
-
 
 static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base)
 {
@@ -357,39 +406,63 @@ static int tokenize(char *s)
 static int read_anchor(int i,SPRITE_T *targ)
 {
   int flipme = 0;
-
-  targ->ancx = 0;
-  targ->ancy = 0;
-  targ->flags &= ~SPRF_ALIGNMASK;
+  int xcaret = 0;
+  int ycaret = 0;
 
   char *p = tokens[i];
-  if( isdigit(*p) || *p=='-'  ) { targ->ancx = atoi(p);                }
-  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP; flipme = 1; }
-  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT;             }
-  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID; flipme = 1; }
-  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN;             }
-  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT; flipme = 1; }
-  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT;             }
+
+  if( *p!='^' ) targ->ancx = 0;
+
+  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->ancx = atoi(p);                }
+  else if( *p=='^'            ) {                                  xcaret = targ->ancx;                 }
+  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP; flipme = 1; }
+  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT;             }
+  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID; flipme = 1; }
+  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN;             }
+  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT; flipme = 1; }
+  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT;             }
 
   while( *p && *p!='-' && *p!='+' )
     p++;
-  if( *p ) targ->ancx = atoi(p);
+  if( *p ) targ->ancx = atoi(p) + xcaret;
 
   p = tokens[++i];
-  if( isdigit(*p) || *p=='-'  ) { targ->ancy = atoi(p);                }
-  else if( !strncmp(p,"to",2) ) { targ->flags |= SPRF_TOP;             }
-  else if( !strncmp(p,"le",2) ) { targ->flags |= SPRF_LFT; flipme = 1; }
-  else if( !strncmp(p,"mi",2) ) { targ->flags |= SPRF_MID;             }
-  else if( !strncmp(p,"ce",2) ) { targ->flags |= SPRF_CEN; flipme = 1; }
-  else if( !strncmp(p,"bo",2) ) { targ->flags |= SPRF_BOT;             }
-  else if( !strncmp(p,"ri",2) ) { targ->flags |= SPRF_RGT; flipme = 1; }
+
+  if( *p!='^' ) targ->ancy = 0;
+
+  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->ancy = atoi(p);                }
+  else if( *p=='^'            ) {                                  ycaret = targ->ancy;                 }
+  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP;             }
+  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT; flipme = 1; }
+  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID;             }
+  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN; flipme = 1; }
+  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT;             }
+  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT; flipme = 1; }
 
   while( *p && *p!='-' && *p!='+' )
     p++;
-  if( *p ) targ->ancy = atoi(p);
+  if( *p ) targ->ancy = atoi(p) + ycaret;
   
   if( flipme ) SWAP( targ->ancx, targ->ancy, int );
 
   return i;
 }
 
+
+// Read a number from token into num, like atoi
+// But if it starts with ^, add the number to num
+// It is OK if there's no number after the ^
+static void read_num(int *num, const char *token)
+{
+  if( *token!='^' ) {
+    *num = atoi(token);
+    return;
+  }
+
+  token++;
+
+  if( *token!='+' && *token!='-' )
+    return;
+
+  *num += atoi(token);
+}

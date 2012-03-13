@@ -27,33 +27,33 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
   //girl hair
   if     ( pl->model!=4 ) ;
-  else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7, d );
-  else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7, d );
+  else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7 );
+  else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7 );
 
   //player sprite
   if( pl->goingd ) {
-    if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d, d);
-    else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d, d);
-    else                   sprblit( &SM(ctblue_duck_l), c, d, d);
+    if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d );
+    else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d );
+    else                   sprblit( &SM(ctblue_duck_l), c, d );
   } else {
-    if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d, d);
-    else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d, d);
-    else                   sprblit( &SM(ctblue_l),      c, d, d);
+    if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d );
+    else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d );
+    else                   sprblit( &SM(ctblue_l),      c, d );
   }
 
   // knife or gun
-  if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44, d );
-  else if( pl->stabbing>0 ) sprblit( &SM(knife_down), c, d+10, d );
+  if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44 );
+  else if( pl->stabbing>0 ) sprblit( &SM(knife_down), c, d+10 );
   else {
     int gb = pl->gunback;
     int gd = pl->gundown/5;
 
-    if     ( pl->goingu && pl->facingr ) sprblit( &SM(mp5_up_r),   c+20-gb, d-25+gd, d );
-    else if( pl->goingu                ) sprblit( &SM(mp5_up_l),   c-20+gb, d-25+gd, d );
-    else if( pl->goingd && pl->facingr ) sprblit( &SM(mp5_down_r), c+20-gb, d-10+gd, d );
-    else if( pl->goingd                ) sprblit( &SM(mp5_down_l), c-20+gb, d-10+gd, d );
-    else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd, d );
-    else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd, d );
+    if     ( pl->goingu && pl->facingr ) sprblit( &SM(mp5_up_r),   c+20-gb, d-25+gd );
+    else if( pl->goingu                ) sprblit( &SM(mp5_up_l),   c-20+gb, d-25+gd );
+    else if( pl->goingd && pl->facingr ) sprblit( &SM(mp5_down_r), c+20-gb, d-10+gd );
+    else if( pl->goingd                ) sprblit( &SM(mp5_down_l), c-20+gb, d-10+gd );
+    else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd );
+    else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd );
   }
 }
 

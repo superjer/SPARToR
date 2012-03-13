@@ -38,7 +38,7 @@
   ctgirl_duck_f
 .end
 
-.grid  cols 6  pos 0 150  size 24 25
+.grid  cols 6  pos 0 150  size 24 25  bump 30
   mp5_r       anchor right  7
   mp5_l       anchor left   7
   mp5_down_r  anchor right 23
@@ -47,15 +47,15 @@
   mp5_up_l    anchor 2  top
 .end
 
-bullet 144 150 4 4 mid cen
-knife_down 148 150 5 27 bot cen
-knife_up   153 150 5 27 top cen
+bullet 144 150 4 4 mid cen bump 50
+knife_down 148 150 5 27 bot cen bump 50
+knife_up   153 150 5 27 top cen bump 500
 
 .grid  pos 0 177  size 20 16  anchor bot cen
-  slug_r
   slug_l
-  slug_ouch_r
+  slug_r
   slug_ouch_l
+  slug_ouch_r
 .end
 
 ghost 80 177 15 16 left top

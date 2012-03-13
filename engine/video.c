@@ -133,7 +133,7 @@ void render()
   glViewport(pad_left,h-NATIVEH*scale-pad_top,NATIVEW*scale,NATIVEH*scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,NATIVEW,NATIVEH,0,-NATIVEH*3-1,NATIVEH*3+1);
+  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   int camx = NATIVEW/2-(int)v_camx;
@@ -246,7 +246,7 @@ void render()
   glViewport(0,0,w,h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,w,h,0,-1,1);
+  glOrtho(0,w,h,0,NEARVAL,FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
@@ -396,18 +396,15 @@ void setvideosoon(int w,int h,int go_full,int delay)
   soon = delay;
 }
 
-
 int screen2native_x(int x)
 {
   return (x - pad_left)/scale + v_camx - NATIVEW/2;
 }
 
-
 int screen2native_y(int y)
 {
   return (y - pad_top )/scale + v_camy - NATIVEH/2;
 }
-
 
 int make_sure_texture_is_loaded(const char *texfile)
 {
@@ -460,5 +457,3 @@ int make_sure_texture_is_loaded(const char *texfile)
     return j;
   }
 }
-
-

@@ -17,6 +17,9 @@
 #include "sjdl.h"
 #include "main.h"
 #include "sprite.h"
+#include "sprite_helpers.h"
+#include "console.h"
+#include "helpers.h"
 #include <limits.h>
 
 
@@ -97,4 +100,35 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
   return spr;
 }
 
+void renumber_sprites()
+{
+  if( !sprites || !old_sprites ) {
+    SJC_Write("Can't renumber sprites!");
+    return;
+  }
 
+  CB **blocks = NULL;
+
+  // find and renumber ALL sprites, past and future
+  int i, j, k;
+  for( i=0; i<maxframes; i++ ) {
+    for( j=0; j<maxobjs; j++ ) {
+      if( fr[i].objs[j].type == OBJT_CONTEXT ) {
+        CONTEXT_t *co = fr[i].objs[j].data;
+        CB *map  = co->map;
+        CB *dmap = co->dmap;
+        int volume = co->x * co->y * co->z;
+
+        if( pointlis_add( (void***)&blocks, map ) )
+          for( k=0; k<volume; k++ )
+            co->map[k].spr = find_sprite_by_name(old_sprites[co->map[k].spr].name);
+
+        if( pointlis_add( (void***)&blocks, dmap ) )
+          for( k=0; k<volume; k++ )
+            co->dmap[k].spr = find_sprite_by_name(old_sprites[co->dmap[k].spr].name);
+      }
+    }
+  }
+
+  free(blocks);
+}

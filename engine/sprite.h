@@ -24,18 +24,23 @@ enum { TOOL_NUL = 1,
        SPRF_TOP = 0x100,
        SPRF_MID = 0x200,
        SPRF_BOT = 0x400,
-       SPRF_LFT = 0x800,
+       SPRF_ALIGNYMASK = SPRF_TOP | SPRF_MID | SPRF_BOT,
+       SPRF_LFT = 0x0800,
        SPRF_CEN = 0x1000,
        SPRF_RGT = 0x2000,
+       SPRF_ALIGNXMASK = 0x3800,
        SPRF_ALIGNMASK = 0x3F00,
        SPRF_FLIPX = 0x4000,
-       SPRF_FLIPY = 0x8000 };
+       SPRF_FLIPY = 0x8000,
+       SPRF_FLOOR = 0x10000 };
 
 typedef struct {
-  int    texnum;
-  char  *name;
-  REC    rec;
-  int    ancx,ancy; // anchor position
+  int      texnum;
+  int      bump;
+  char    *name;
+  REC      rec;
+  int      ancx; // anchor position
+  int      ancy;
   unsigned flags;
   struct {
     int gridwide;
@@ -55,10 +60,14 @@ extern size_t     spr_count;
 extern char      *spr_names[];
 extern int        spr_map[];
 
+extern SPRITE_T  *old_sprites;
+extern size_t     old_spr_count;
 
-void sprblit( SPRITE_T *spr, int x, int y, int z );
+
+void sprblit( SPRITE_T *spr, int x, int y );
 int load_sprites(int texnum);
-void unload_sprites();
+void reload_sprites();
+void unload_sprites(SPRITE_T *sprites,size_t spr_count);
 int find_sprite_by_name(const char *name);
 
 

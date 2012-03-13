@@ -18,8 +18,11 @@ void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   SLUG_t *sl = o->data;
   int c = POINT2NATIVE_X(&sl->pos);
   int d = POINT2NATIVE_Y(&sl->pos);
-  SJGL_SetTex( sys_tex[TEX_PLAYER].num );
-  SJGL_Blit( &(REC){(sl->vel.x>0?20:0)+(sl->dead?40:0),177,20,16}, c-10, d-8, sl->pos.y );
+
+  if( sl->vel.x>0 )
+    sprblit( sl->dead ? &SM(slug_ouch_r) : &SM(slug_r), c, d );
+  else
+    sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), c, d );
 }
 
 void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -36,11 +39,11 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     if(fr[b].objs[i].type==OBJT_PLAYER) {
       PLAYER_t *pl = fr[b].objs[i].data;
       int up_stabbed = pl->stabbing<0
-                    && fabsf(sl->pos.x - pl->pos.x                )<=12.0f
-                    && fabsf(sl->pos.y - pl->pos.y - pl->hull[0].y)<=8.0f ;
+                    && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
+                    && fabsf(sl->pos.y + sl->hull[1].y - pl->pos.y - pl->hull[0].y)<=8.0f ;
       int dn_stabbed = pl->stabbing>0
-                    && fabsf(sl->pos.x - pl->pos.x                )<=12.0f
-                    && fabsf(sl->pos.y - pl->pos.y - pl->hull[1].y)<=4.0f ;
+                    && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
+                    && fabsf(sl->pos.y + sl->hull[0].y - pl->pos.y - pl->hull[1].y)<=4.0f ;
       if( up_stabbed ) {
         pl->vel.y = sl->vel.y;
         sl->vel.y = -5.0f;

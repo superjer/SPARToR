@@ -72,8 +72,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     MKOBJ( sl, SLUG, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
     sl->pos     = (V){(hotfr%2)*368+8,0,0};
     sl->vel     = (V){(hotfr%2)?-0.5f:0.5f,0,0};
-    sl->hull[0] = (V){-8,-4,-8};
-    sl->hull[1] = (V){ 8, 8, 8};
+    sl->hull[0] = (V){-8,-12,-8};
+    sl->hull[1] = (V){ 8,  0, 8};
     sl->model   = 0;
     sl->dead    = 0;
   }

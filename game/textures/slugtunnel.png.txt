@@ -1,4 +1,4 @@
-.default  size 16 16  anchor cen bot
+.default  size 16 16  anchor cen mid  bump -100
 
 tnl-redfloor-single 0 0
 tnl-weight-gold 16 0
@@ -16,7 +16,7 @@ tnl-black 32 0
   tnl-spacer-y-3
 .end
 
-tnl_weight_silver 48 48
+tnl_weight_silver  pos 48 48  bump 20
 
 .grid  cols 7  pos 64 0
   tnl-circle-cut

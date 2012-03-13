@@ -247,12 +247,14 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
+        if( !spr_count ) return -1;
         myspr = (myspr + spr_count - 1) % spr_count;
         mytex = sprites[myspr].texnum;
         return -1;
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
+        if( !spr_count ) return -1;
         myspr = (myspr + 1) % spr_count;
         mytex = sprites[myspr].texnum;
         return -1;
@@ -663,7 +665,7 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glColor4f(1,1,1,1);
-  if( myspr < spr_count ) {
+  if( myspr < (int)spr_count ) {
     SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
                   "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
     SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );

@@ -47,6 +47,8 @@ static void read_num(int *num, const char *token);
 
 void sprblit( SPRITE_T *spr, int x, int y )
 {
+  if( !spr ) return;
+
   int zlo = DEPTH_OF(y) + spr->bump;
   int zhi;
 

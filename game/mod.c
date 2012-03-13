@@ -559,6 +559,8 @@ void mod_postdraw(Uint32 vidfr)
   SPRITE_T *dspr = spr;
 
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
+    if( !spr ) continue;
+
     if( (spr->flags & TOOL_MASK) == TOOL_PSTE && gh && gh->clipboard_data && (upz-dnz||upy-dny||upx-dnx) ) {
       int x = (i-dnx+shx) % clipx;
       int y = (j-dny+shy) % clipy;
@@ -632,10 +634,12 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glColor4f(1,1,1,1);
-  SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
-                "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-  SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-  SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+  if( myspr < spr_count ) {
+    SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+                  "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
+    SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+    SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+  }
 
   glPopAttrib();
 }

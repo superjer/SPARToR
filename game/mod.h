@@ -16,6 +16,7 @@
 #include "projection.h"
 #include "mod_private.h"
 #include "obj_.h"
+#include "sprite.h"
 #include <math.h>
 
 

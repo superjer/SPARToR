@@ -18,6 +18,9 @@
 #include "sprite_helpers.h"
 
 
+int m_showdepth = 0; // whether to show the depth buffer values of drawn sprites
+
+
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
                        {"/slugtunnel.png" ,0},
@@ -115,7 +118,7 @@ void mod_setup(Uint32 setupfr)
 
   //make the mother object
   fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
-  *(MOTHER_t *)fr[setupfr].objs[0].data = (MOTHER_t){0,{0,0,0,0,0,0}};
+  memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
 
   //make default context object (map)
   fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
@@ -422,6 +425,9 @@ int mod_command(char *q)
     magic_c.cmd = CMDT_0CON;
     putcmd(-1,-1,-1);
     return 0;
+  }else if( strcmp(q,"depth")==0 ){
+    m_showdepth = !m_showdepth;
+    return 0;
   }
 
   return 1;
@@ -710,15 +716,16 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   SJGL_SetTex( spr->texnum );
 
   int c = TILE2NATIVE_X(co,x,y,z);
-  int d = TILE2NATIVE_Y(co,x,y,z);
-  int r = d;
+  int d = TILE2NATIVE_Y(co,x,y,z) + co->tileuh/2;
 
-  if( spr->ancy > co->tileuh ) // for sprites that pop out of the flat plane
-    r += co->tileuh / 2;
+  sprblit( spr, c, d );
 
-  // the sprite has an explicit anchor point, which is aligned with the anchor point of the tile,
-  // which always in the southernmost corner
-  SJGL_Blit( &spr->rec, c - spr->ancx, d + co->tileuh - spr->ancy, r );
+  if( m_showdepth ) {
+    glDisable(GL_DEPTH_TEST);
+    SJF_DrawText(c,d,SJF_LEFT,"%d%c",DEPTH_OF(d),spr->flags&SPRF_FLOOR?'f':'\0');
+    glEnable(GL_DEPTH_TEST);
+    SJGL_SetTex(-1); // notify SJGL that the texture has changed
+  }
 }
 
 

@@ -27,6 +27,11 @@ connect         connect <host> [[:]port]
                 Connect to a server. E.g. connect 127.0.0.1:31103
 
 
+depth           depth
+
+                Display depth buffer values.
+
+
 dimetric        dimetric
 
                 Switch the current context to render mode dimetric. See also

@@ -1,7 +1,6 @@
 *.dll
 *.[oa]
 *.swp
-*.sh
 cscope.*
 tags
 spartor_linux

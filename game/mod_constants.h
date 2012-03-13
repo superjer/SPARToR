@@ -8,6 +8,8 @@
 
 #define NATIVEW    480
 #define NATIVEH    300
+#define NEARVAL    (-99999)
+#define FARVAL     ( 99999)
 #define GAMENAME   "deadking"
 #define CBDATASIZE 4     //context block (CB) payload size
 #define MAXCMDDATA 64    //maximum size of extra command data
@@ -19,6 +21,9 @@
 #define TEX_AMIGO  3
 #define TEX_PERSON 4
 #define TEX_HUD    5
+
+
+#define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH/2)
 
 
 //obj types
@@ -33,7 +38,6 @@ enum { ENGINE_OBJT_LIST()
        OBJT_AMIGO,
        OBJT_AMIGOSWORD,
        OBJT_MAX };
-
 
 enum DIR8 { NODIR=0, E, NE, N, NW, W, SW, S, SE };
 

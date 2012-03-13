@@ -23,7 +23,7 @@
 #define TEX_HUD    5
 
 
-#define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH/2)
+#define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH)
 
 
 //obj types

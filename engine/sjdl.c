@@ -71,9 +71,39 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
   int x2 = ( s->w > 0 ? x+s->w : x-s->w );
   int y2 = ( s->h > 0 ? y+s->h : y-s->h );
 
+  int rhi=0, ghi=0, bhi=0;
+  int rlo=0, glo=0, blo=0;
+
+  if( m_showdepth ) {
+    int grad;
+    int sect;
+
+    #define GET_COLOR(z,r,g,b)                                   \
+      grad = z + 512;                                            \
+      sect = (grad / 256 + 70) % 7;                              \
+      grad = grad % 256;                                         \
+                                                                \
+      switch( sect ) {                                           \
+        case 0: r = grad;                                 break; \
+        case 1: r = 255;        b = grad;                 break; \
+        case 2: r = 255 - grad; b = 255;                  break; \
+        case 3:                 b = 255;        g = grad; break; \
+        case 4:                 b = 255 - grad; g = 255;  break; \
+        case 5: r = grad;                       g = 255;  break; \
+        case 6: r = 255;        b = grad;       g = 255;  break; \
+      }
+
+    GET_COLOR(zlo,rlo,glo,blo);
+    GET_COLOR(zhi,rhi,ghi,bhi);
+
+    glBindTexture(GL_TEXTURE_2D,0);
+  }
+
   glBegin(GL_QUADS);
+  if( m_showdepth ) glColor3ub(rhi,ghi,bhi);
   glTexCoord2i(s->x     , s->y     ); glVertex3i(x , y , zhi);
   glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2, y , zhi);
+  if( m_showdepth ) glColor3ub(rlo,glo,blo);
   glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x2, y2, zlo);
   glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x , y2, zlo);
   glEnd();

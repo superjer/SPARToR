@@ -383,18 +383,15 @@ void setvideosoon(int w,int h,int go_full,int delay)
   soon = delay;
 }
 
-
 int screen2native_x(int x)
 {
   return (x - pad_left)/scale + v_camx - NATIVEW/2;
 }
 
-
 int screen2native_y(int y)
 {
   return (y - pad_top )/scale + v_camy - NATIVEH/2;
 }
-
 
 int make_sure_texture_is_loaded(const char *texfile)
 {
@@ -447,5 +444,3 @@ int make_sure_texture_is_loaded(const char *texfile)
     return j;
   }
 }
-
-

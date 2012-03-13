@@ -116,6 +116,12 @@ report          report
                 Show a report of all the game objects.
 
 
+resprite        resprite
+
+                Reload all sprite information from texture definition files
+                ( game/textures/*.png.txt )
+                for all currently loaded textures.
+
 save            save <mapname>
 
                 Saves the current context to mapname.txt. If it already exists,

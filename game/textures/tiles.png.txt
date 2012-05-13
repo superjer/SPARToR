@@ -64,9 +64,13 @@ lightadobe-wall-sw1 276  48 28 84
 lightadobe-wall-sw2 276 132 28 84
 lightadobe-wall-sw3 304 132 28 84 cen bot-12
 placeholder-wall    322 216 46 72
-placeholder-ftwall  368 216 48 72 
-placeholder-blwall  416 228 22 59 cen-12 bot-11
-placeholder-brwall  438 228 22 59 cen+12 bot-11
-placeholder-tlwall  460 216 22 72 cen-12 bot-13 
-placeholder-trwall  482 216 22 72 cen+12 bot-13 
+placeholder-ftwall  368 216 48 72 ^ ^ bump 0
+placeholder-tlwall  416 216 23 72 cen-11 bot-24
+placeholder-trwall  439 216 23 72 cen+12 bot-24
+placeholder-blwall  462 216 23 72 cen-11 bot-13 
+placeholder-brwall  485 216 23 72 cen+12 bot-13 
+placeholder-thwall  322 288 48 72 cen bot-23
+placeholder-bhwall  370 288 48 72 cen bot-12
+placeholder-rhwall  418 288 24 72 cen+12 bot-12
+placeholder-lhwall  442 288 24 72 cen-12 bot-12
 

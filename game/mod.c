@@ -369,6 +369,16 @@ int mod_command(char *q)
     setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
     return 0;
 
+  }else if( strcmp(q,"undo")==0 ){
+    size_t n = 0;
+    memset(&magic_c,0,sizeof magic_c);
+    packbytes(magic_c.data,'u',&n,1);
+    magic_c.datasz = n;
+    magic_c.flags |= CMDF_DATA;
+    magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    putcmd(-1,-1,-1);
+    return 0;
+
   }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
     int x = safe_atoi(strtok(NULL," "));
@@ -392,7 +402,7 @@ int mod_command(char *q)
     packbytes(magic_c.data,  z,&n,4);
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
-    magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
+    magic_c.cmd = CMDT_0CON;
     putcmd(-1,-1,-1);
     return 0;
 

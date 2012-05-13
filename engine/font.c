@@ -19,8 +19,8 @@
 
 
 SJF_t SJF = {0,8,12,128,
-  {14, 7, 7,14,14,14,14,14,14,14,14,14,14,14,14,14,   //non-printable
-   14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,   //non-printable
+  { 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<space> - </>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<0> - <?>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<@> - <O>
@@ -30,26 +30,26 @@ SJF_t SJF = {0,8,12,128,
 {
 "                                                                                                                                "
 "                                                                                                                                "
-" OOOO            OOOOO   OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO   "
-" O  O            OOOOO   O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O     OOO    OOOOO   O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O     OOO    OOOOO   O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O     OOO    OOOOO   O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O            OOOOO   O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" OOOO            OOOOO   OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO   "
+" OOOO            OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
+" O  O            OOOOO   O   O   O  OO   O   O   O   O   O   O   O O O   O   O   OOO O   O O O   O OOO   O O O   O   O   O   O  "
+" O  O     OOO    OOOOO   O OOO   O O O   O OOO   O OOO   O OOO   O O O   OO OO   OOO O   O O O   O OOO   O   O   O O O   O O O  "
+" O  O     OOO    OOOOO   O OOO   O O O   O   O   O  OO   O O O   O   O   OO OO   OOO O   O  OO   O OOO   O   O   O O O   O O O  "
+" O  O     OOO    OOOOO   O OOO   O O O   O OOO   O OOO   O O O   O O O   OO OO   O O O   O O O   O OOO   O O O   O O O   O O O  "
+" O  O            OOOOO   O   O   O  OO   O   O   O OOO   O   O   O O O   O   O   O   O   O O O   O   O   O O O   O O O   O   O  "
+" OOOO            OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
 "                                                                                                                                "
 "                                                                                                                                "
 "                                                                                                                                "
 // -------------------------------------------------------------------------------------------------------------------------------
 "                                                                                                                                "
 "                                                                                                                                "
-" OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO   "
-" O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O    O  O   "
-" OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO    OOOO   "
+" OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
+" O   O   O   O   O   O   O   O   O   O   O O O   O O O   O O O   O O O   O O O   O   O   O  OO   O OOO   OO  O   OO OO   OOOOO  "
+" O O O   O O O   O O O   O OOO   OO OO   O O O   O O O   O O O   O O O   O O O   OOO O   O OOO   O OOO   OOO O   O O O   OOOOO  "
+" O   O   O O O   O   O   O   O   OO OO   O O O   O O O   O   O   OO OO   O   O   OO OO   O OOO   OO OO   OOO O   OOOOO   OOOOO  "
+" O OOO   O   O   O  OO   OOO O   OO OO   O O O   O O O   O   O   O O O   OOO O   O OOO   O OOO   OOO O   OOO O   OOOOO   OOOOO  "
+" O OOO   OO OO   O O O   O   O   OO OO   O   O   OO OO   O O O   O O O   O   O   O   O   O  OO   OOO O   OO  O   OOOOO   O   O  "
+" OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
 "                                                                                                                                "
 "                                                                                                                                "
 "                                                                                                                                "

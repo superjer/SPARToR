@@ -36,6 +36,7 @@ void mod_setup(Uint32 setupfr);
 void mod_recvobj(OBJ_t *o);
 void mod_setvideo(int w,int h);
 void mod_quit();
+void mod_showbinds();
 void mod_keybind(int device,int sym,int press,char cmd);
 int  mod_mkcmd(FCMD_t *c,int device,int sym,int press);
 int  mod_command(char *q);

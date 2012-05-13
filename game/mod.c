@@ -16,6 +16,8 @@
 #include "sjglob.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
+#include "command.h"
+#include "keynames.h"
 
 
 int m_showdepth = 0; // whether to show the depth buffer values of drawn sprites
@@ -48,7 +50,8 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT ,CMDT_0LEFT },
                             {"edit-texdn" ,CMDT_1EPGDN,CMDT_0EPGDN},
                             {"edit-lay0"  ,CMDT_1ELAY0,CMDT_0ELAY0},
                             {"edit-lay1"  ,CMDT_1ELAY1,CMDT_0ELAY1},
-                            {"edit-lay2"  ,CMDT_1ELAY2,CMDT_0ELAY2}};
+                            {"edit-lay2"  ,CMDT_1ELAY2,CMDT_0ELAY2},
+                            {"edit-undo"  ,CMDT_1EUNDO,CMDT_0EUNDO}};
 int numinputnames = COUNTOF(inputnames);
 
 
@@ -67,9 +70,10 @@ CB    *hack_dmap;
 
 static int    binds_size = 0;
 static struct {
-  short hash;
-  char  cmd;
-  char  _pad;
+  unsigned short sym;
+  unsigned char device;
+  unsigned char press;
+  unsigned char  cmd;
 }            *binds;
 static int    editmode = 0;
 static int    myspr    = 0;
@@ -84,37 +88,7 @@ static int sprite_at(int texnum, int x, int y);
 void mod_setup(Uint32 setupfr)
 {
   //default key bindings
-  #define MAYBE_BIND(dev,sym,cmd)         \
-    mod_keybind(dev,sym,0,CMDT_0 ## cmd); \
-    mod_keybind(dev,sym,1,CMDT_1 ## cmd);
-  MAYBE_BIND(INP_KEYB,SDLK_LEFT    ,LEFT ); MAYBE_BIND(INP_KEYB,SDLK_a       ,LEFT ); //keyboard
-  MAYBE_BIND(INP_KEYB,SDLK_RIGHT   ,RIGHT); MAYBE_BIND(INP_KEYB,SDLK_d       ,RIGHT);
-  MAYBE_BIND(INP_KEYB,SDLK_UP      ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_w       ,UP   );
-  MAYBE_BIND(INP_KEYB,SDLK_DOWN    ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_s       ,DOWN );
-  MAYBE_BIND(INP_KEYB,SDLK_a       ,SEL  ); MAYBE_BIND(INP_KEYB,SDLK_SPACE   ,SEL  );
-  MAYBE_BIND(INP_KEYB,SDLK_s       ,BACK );
-
-  // keypad directions!
-  MAYBE_BIND(INP_KEYB,SDLK_KP7     ,NW   ); MAYBE_BIND(INP_KEYB,SDLK_KP8     ,UP   ); MAYBE_BIND(INP_KEYB,SDLK_KP9     ,NE   );
-  MAYBE_BIND(INP_KEYB,SDLK_KP4     ,LEFT );                                           MAYBE_BIND(INP_KEYB,SDLK_KP6     ,RIGHT);
-  MAYBE_BIND(INP_KEYB,SDLK_KP1     ,SW   ); MAYBE_BIND(INP_KEYB,SDLK_KP2     ,DOWN ); MAYBE_BIND(INP_KEYB,SDLK_KP3     ,SE   );
-
-  MAYBE_BIND(INP_JAXN,0            ,LEFT ); MAYBE_BIND(INP_JAXN,3            ,LEFT ); //joystick or gamepad
-  MAYBE_BIND(INP_JAXP,0            ,RIGHT); MAYBE_BIND(INP_JAXP,3            ,RIGHT);
-  MAYBE_BIND(INP_JAXN,1            ,UP   ); MAYBE_BIND(INP_JAXN,4            ,UP   );
-  MAYBE_BIND(INP_JAXP,1            ,DOWN ); MAYBE_BIND(INP_JAXP,4            ,DOWN );
-  MAYBE_BIND(INP_JBUT,1            ,SEL  );
-  MAYBE_BIND(INP_JBUT,2            ,BACK );
-
-  MAYBE_BIND(INP_MBUT,1            ,EPANT); //editing controls...
-  MAYBE_BIND(INP_MBUT,4            ,EPREV);
-  MAYBE_BIND(INP_MBUT,5            ,ENEXT);
-  MAYBE_BIND(INP_KEYB,SDLK_PAGEDOWN,EPGDN);
-  MAYBE_BIND(INP_KEYB,SDLK_PAGEUP  ,EPGUP);
-  MAYBE_BIND(INP_KEYB,SDLK_0       ,ELAY0);
-  MAYBE_BIND(INP_KEYB,SDLK_1       ,ELAY1);
-  MAYBE_BIND(INP_KEYB,SDLK_2       ,ELAY2);
-  #undef MAYBE_BIND
+  exec_commands("defaults");
 
   //make the mother object
   fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
@@ -200,20 +174,61 @@ void mod_quit()
 }
 
 
+void mod_showbinds()
+{
+  int i,j;
+
+  for(i=0; i<binds_size; i++) {
+    if( !binds[i].cmd )
+      continue;
+
+    char plusminus = binds[i].press ? '+' : '-';
+
+    const char *devname = "?";
+    int device = MIN( INP_MAX, binds[i].device );
+    if( binds[i].device==INP_KEYB )
+      devname = "";
+    else
+      devname = inputdevicenames[device];
+
+    char kbuf[10] = "badkey";
+    const char *symname = kbuf;
+    int sym = binds[i].sym;
+    if( device==INP_KEYB && sym<KEYNAMECOUNT && keynames[sym] )
+      symname = keynames[sym];
+    else
+      sprintf(kbuf,"%d",sym);
+
+    char cbuf[10] = "badcmd";
+    int cmd = binds[i].cmd;
+    const char *cmdname = cbuf;
+    for(j=0; j<numinputnames; j++)
+      if( inputnames[j].presscmd==cmd || inputnames[j].releasecmd==cmd )
+        cmdname = inputnames[j].name;
+    if( !cmdname )
+      sprintf(cbuf,"%d",cmd);
+
+    SJC_Write("bind %s%s %c%s",devname,symname,plusminus,cmdname);
+  }
+}
+
+
 void mod_keybind(int device,int sym,int press,char cmd)
 {
   int i;
-  short hash = press<<15 | device<<8 | sym;
 
   for(i=0; i<binds_size; i++)
-    if( binds[i].hash==hash || binds[i].hash==0 )
+    if( binds[i].device==0 ||
+        (binds[i].sym==sym && binds[i].device==device && binds[i].press==press) )
       break;
   if(i==binds_size) {
     binds = realloc(binds,sizeof(*binds)*(binds_size+32));
     memset(binds+binds_size,0,sizeof(*binds)*32);
     binds_size += 32;
   }
-  binds[i].hash = hash;
+  binds[i].sym = sym;
+  binds[i].device = device;
+  binds[i].press = press;
   binds[i].cmd = cmd;
 }
 
@@ -222,7 +237,6 @@ void mod_keybind(int device,int sym,int press,char cmd)
 int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
 {
   int i;
-  short hash = press<<15 | device<<8 | sym;
   CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
 
   // apply magic command?
@@ -236,7 +250,7 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
   }
 
   for(i=0; i<binds_size; i++)
-    if( binds[i].hash==hash ) {
+    if( binds[i].sym==sym && binds[i].device==device && binds[i].press==press ) {
       memset( c, 0, sizeof *c );
       c->cmd = binds[i].cmd;
 
@@ -284,6 +298,16 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       if( c->cmd==CMDT_1ELAY0 ) { ylayer = 0; showlayer = 1; return -1; }
       if( c->cmd==CMDT_1ELAY1 ) { ylayer = 1; showlayer = 1; return -1; }
       if( c->cmd==CMDT_1ELAY2 ) { ylayer = 2; showlayer = 1; return -1; }
+
+      if( c->cmd==CMDT_0EUNDO )
+        return -1;
+
+      if( c->cmd==CMDT_1EUNDO ) {
+        size_t n = 0;
+        packbytes(c->data,'u',&n,1);
+        c->datasz = n;
+        c->flags |= CMDF_DATA; //indicate presence of extra cmd data
+      }
 
       if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT ) { //edit-paint command
         int dnx = downx;
@@ -369,16 +393,6 @@ int mod_command(char *q)
     setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
     return 0;
 
-  }else if( strcmp(q,"undo")==0 ){
-    size_t n = 0;
-    memset(&magic_c,0,sizeof magic_c);
-    packbytes(magic_c.data,'u',&n,1);
-    magic_c.datasz = n;
-    magic_c.flags |= CMDF_DATA;
-    magic_c.cmd = CMDT_0CON; // secret command type for doing crap like this!
-    putcmd(-1,-1,-1);
-    return 0;
-
   }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
     int x = safe_atoi(strtok(NULL," "));
@@ -402,7 +416,7 @@ int mod_command(char *q)
     packbytes(magic_c.data,  z,&n,4);
     magic_c.datasz = n;
     magic_c.flags |= CMDF_DATA;
-    magic_c.cmd = CMDT_0CON;
+    magic_c.cmd = CMDT_0CON; // console command
     putcmd(-1,-1,-1);
     return 0;
 

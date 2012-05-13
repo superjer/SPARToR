@@ -19,7 +19,10 @@
 #include "net.h"
 #include "video.h"
 #include "command.h"
+#include "keynames.h"
 
+
+char *inputdevicenames[] = {"baddevice","keyb","joy","axisp","axisn","mouse"};
 
 int i_mousex = 0;
 int i_mousey = 0;
@@ -51,6 +54,8 @@ void inputinit()
     if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
       SJC_Write("Error: could not restart the JOYSTICK SubSystem!");
   }
+
+  init_keynames();
 
   int i, numjoysticks;
   if( (numjoysticks=SDL_NumJoysticks())>0 ) {
@@ -232,13 +237,14 @@ void kwikbind(int device,int sym)
   mod_keybind( device, sym, 0, kwik_releasecmd );
   mod_keybind( device, sym, 1, kwik_presscmd );
   kwik = 0;
+  const char *keyname = sym<KEYNAMECOUNT ? keynames[sym] : NULL;
   switch( device ) {
-    case INP_KEYB: SJC_Write("Key #%d selected"                ,sym); break;
-    case INP_JBUT: SJC_Write("Joy button #%d selected"         ,sym); break;
-    case INP_JAXP: SJC_Write("Axis #%d (+) selected"           ,sym); break;
-    case INP_JAXN: SJC_Write("Axis #%d (-) selected"           ,sym); break;
-    case INP_MBUT: SJC_Write("Mouse button #%d selected"       ,sym); break;
-    default:       SJC_Write("Unkown device input #%d selected",sym); break;
+    case INP_KEYB: SJC_Write("Key #%d \"%s\" selected",  sym,keyname); break;
+    case INP_JBUT: SJC_Write("Joy button #%d selected"          ,sym); break;
+    case INP_JAXP: SJC_Write("Axis #%d (+) selected"            ,sym); break;
+    case INP_JAXN: SJC_Write("Axis #%d (-) selected"            ,sym); break;
+    case INP_MBUT: SJC_Write("Mouse button #%d selected"        ,sym); break;
+    default:       SJC_Write("Unkown device input #%d selected" ,sym); break;
   }
 }
 

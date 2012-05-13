@@ -69,8 +69,9 @@ placeholder-tlwall  416 216 23 72 cen-11 bot-24
 placeholder-trwall  439 216 23 72 cen+12 bot-24
 placeholder-blwall  462 216 23 72 cen-11 bot-13 
 placeholder-brwall  485 216 23 72 cen+12 bot-13 
-placeholder-thwall  322 288 48 72 cen bot-23
-placeholder-bhwall  370 288 48 72 cen bot-12
-placeholder-rhwall  418 288 24 72 cen+12 bot-12
-placeholder-lhwall  442 288 24 72 cen-12 bot-12
+placeholder-thwall  322 288 48 72 cen bot-12
+placeholder-bhwall  370 288 48 72 cen bot-23
+placeholder-rhwall  418 288 24 72 cen-11 bot-12
+placeholder-lhwall  442 288 24 72 cen+11 bot-12
+
 

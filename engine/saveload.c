@@ -290,14 +290,17 @@ int load_context(const char *name,int context,int loadfr)
 // allocate the map, dmap for a new context, copying data from a reference context if not NULL
 const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, int z)
 {
-  if( x<1 || x>9000 )  return "x is out of range";
-  if( y<1 || y>9000 )  return "y is out of range";
-  if( z<1 || z>9000 )  return "z is out of range";
+  if( x<1 || x>9000 || y<1 || y>9000 || z<1 || z>9000 ) {
+    if( !ref ) return "No reference and bounds out-of-range!";
+    x = ref->x;
+    y = ref->y;
+    z = ref->z;
+  }
 
-  if( ref )
-    *co = *ref;
-  else
-    memset( co, 0, sizeof *co );
+  memset( co, 0, sizeof *co );
+
+  if( ref ) *co = *ref;
+
   co->x = x;
   co->y = y;
   co->z = z;
@@ -325,4 +328,30 @@ const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, in
   }
 
   return NULL;
+}
+
+void destroy_context(CONTEXT_t *co)
+{
+  //free(co->map); FIXME: leak! change when gc for contexts is done
+  //free(co->dmap);
+  co->map = co->dmap = NULL;
+}
+
+#define UNDOLEVELS 75
+static CONTEXT_t constack[UNDOLEVELS];
+
+void push_context(CONTEXT_t *co)
+{
+  destroy_context( constack + UNDOLEVELS-1 );
+  memmove( constack+1, constack, sizeof *constack * (UNDOLEVELS-1) );
+  create_context( constack, co, 0, 0, 0 );
+}
+
+void pop_context(CONTEXT_t *co)
+{
+  if( !constack->map ) { SJC_Write("No context to pop!"); return; }
+  destroy_context(co);
+  *co = *constack;
+  memmove( constack, constack+1, sizeof *constack * (UNDOLEVELS-1) );
+  constack[UNDOLEVELS-1].map = NULL;
 }

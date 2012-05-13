@@ -673,6 +673,8 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   }
 
   glPopAttrib();
+
+  SJF_DrawText(i_mousex+7,i_mousey+15,SJF_LEFT,"%d",ylayer);
 }
 
 

@@ -71,7 +71,6 @@ void inputinit()
   started = 1;
 }
 
-
 void putcmd(int device,int sym,int press)
 {
   if( cbread%250==(cbwrite+1)%250 ) // full
@@ -83,7 +82,6 @@ void putcmd(int device,int sym,int press)
   cbwrite = (cbwrite+1)%250;
 }
 
-
 FCMD_t *getnextcmd()
 {
   if( cbread==cbwrite )
@@ -92,7 +90,6 @@ FCMD_t *getnextcmd()
   cbread = (cbread+1)%250;
   return c;
 }
-
 
 void setactive(Uint8 gain,Uint8 state)
 {
@@ -103,7 +100,6 @@ void setactive(Uint8 gain,Uint8 state)
   if( state & SDL_APPACTIVE )
     i_minimized = !gain;
 }
-
 
 void kbinput(int press,SDL_keysym keysym)
 {
@@ -146,7 +142,6 @@ void kbinput(int press,SDL_keysym keysym)
     putcmd( INP_KEYB,sym,press );
 }
 
-
 void joyinput(int press,SDL_JoyButtonEvent jbutton)
 {
   if( i_watch && press )
@@ -157,7 +152,6 @@ void joyinput(int press,SDL_JoyButtonEvent jbutton)
   else
     putcmd( INP_JBUT,jbutton.button,press );
 }
-
 
 void axisinput(SDL_JoyAxisEvent jaxis)
 {
@@ -187,7 +181,6 @@ void axisinput(SDL_JoyAxisEvent jaxis)
   if( val>-10000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
 }
 
-
 void mouseinput(int press,SDL_MouseButtonEvent mbutton)
 {
   if( i_watch && press )
@@ -201,13 +194,11 @@ void mouseinput(int press,SDL_MouseButtonEvent mbutton)
     putcmd( INP_MBUT,mbutton.button,press );
 }
 
-
 void mousemove(SDL_MouseMotionEvent mmotion)
 {
   i_mousex = mmotion.x;
   i_mousey = mmotion.y;
 }
-
 
 void readinput()
 {
@@ -223,7 +214,6 @@ void readinput()
     }
   }
 }
-
 
 void input_bindsoon(int presscmd,int releasecmd)
 {

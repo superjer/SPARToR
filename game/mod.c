@@ -274,16 +274,6 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       if( c->cmd==CMDT_1ELAY1 ) { ylayer = 1; showlayer = 1; return -1; }
       if( c->cmd==CMDT_1ELAY2 ) { ylayer = 2; showlayer = 1; return -1; }
 
-      if( c->cmd==CMDT_0EUNDO )
-        return -1;
-
-      if( c->cmd==CMDT_1EUNDO ) {
-        size_t n = 0;
-        packbytes(c->data,'u',&n,1);
-        c->datasz = n;
-        c->flags |= CMDF_DATA; //indicate presence of extra cmd data
-      }
-
       if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT ) { //edit-paint command
         int dnx = downx;
         int dny = downy;

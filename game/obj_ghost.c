@@ -123,11 +123,6 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
       break; }
 
-    case 'u': {
-      pop_context(co);
-
-      break; }
-
     default:
       SJC_Write("Unknown edit command!");
       break;
@@ -135,6 +130,10 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
     break; }
+
+  case CMDT_0EUNDO:
+    pop_context(co);
+    break;
 
   case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
     ghost_paint( c, gh, co );

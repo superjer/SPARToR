@@ -23,6 +23,7 @@ OBJS = engine/main.o \
        engine/projection.o \
        engine/sjglob.o \
        engine/helpers.o \
+       engine/keynames.o \
        engine/mt19937ar/mt19937ar.o
 FLAGS = --std=c99 -g -Wall -Wextra -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
 INC = -Iengine -Igame

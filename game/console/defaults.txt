@@ -31,4 +31,4 @@ bind pageup edit-texup
 bind 0 edit-lay0
 bind 1 edit-lay1
 bind 2 edit-lay2
-bind z edit-undo
+bind backspace edit-undo

@@ -196,10 +196,10 @@ static void parse_dev_sym( int *devnum, int *sym, char *dev_sym )
       return;
 
   *sym = atoi(dev_sym);
-  if( sym )
+  if( *sym )
     return;
 
-  for( *devnum=0; *devnum<INP_MAX; (*devnum)++ ) {
+  for( *devnum=0; *devnum<=INP_MAX; (*devnum)++ ) {
     char *p = inputdevicenames[*devnum];
     int plen = strlen(p);
     if( 0==strncmp(p,dev_sym,plen) ) {

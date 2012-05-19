@@ -5,17 +5,13 @@ UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Same for all platforms, probably
 CC = gcc
-
 OBJDIR = objects
-
 SRCS = $(wildcard engine/*.c)
 SRCS += $(wildcard engine/mt19937ar/*.c)
-
 include game/Makefile-include
-
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
-GITCOMMIT := $(shell sh -c "git branch -v | grep -o '^\*\s[A-Za-z0-9_-]\+\s\+[0-9a-f]\+' | sed 's/\s\+/ /g'")
+GITCOMMIT := $(shell sh -c "git branch -v | grep '^\*' | sed 's/\s\+/ /g' | cut -d' ' -f2,3")
 
 FLAGS = --std=c99 -g -Wall -Wextra -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
 FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
@@ -44,9 +40,9 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	OBJSRES = game/icon.o
 	WINDRES = windres
 	FLAGS += -mwindows
-	LIBS = -L/local/lib -Lplatforms/win/glew-1.5.8/lib \
-	       -lmingw32 -lSDLmain -lSDL -lSDL_net -lSDL_image -lglew32s -lopengl32 -lglu32 -lm
-	INC += -I/usr/local/include/SDL -Iplatforms/win/glew-1.5.8/include
+	LIBS = -L/usr/local/lib -L/usr/lib \
+	       -lmingw32 -lSDLmain -lSDL -lSDL_net -lSDL_image -lglew32 -lopengl32 -lglu32 -lm
+	INC += -I/usr/local/include/SDL -I/usr/include
 	POSTCC = cp platforms/win/*.dll .
 endif
 

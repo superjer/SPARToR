@@ -38,18 +38,18 @@ include game/Makefile-include
 
 
 ifeq ($(UNAME),Linux)
-	EXE_NAME = spartor_linux
+	EXE_NAME = spartor
 	FLAGS += `sdl-config --cflags`
 	LIBS = -lm -lSDL -lSDL_net -lSDL_image -lGL -lGLU -lGLEW
 endif
 ifeq ($(UNAME),Darwin)
-	EXE_NAME = platforms/mac/spartor_mac.app/Contents/MacOS/spartor_mac
+	EXE_NAME = platforms/mac/spartor.app/Contents/MacOS/spartor
 	FLAGS += `sdl-config --cflags`
 	LIBS = -lm `sdl-config --libs` -lSDL_net -lSDL_image -framework OpenGL -lGLEW
-	POSTCC = cp -R -f platforms/mac/spartor_mac.app .
+	POSTCC = cp -R -f platforms/mac/spartor.app .
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))
-	EXE_NAME = spartor_win32.exe
+	EXE_NAME = spartor.exe
 	OBJSRES = game/icon.o
 	WINDRES = windres
 	FLAGS += -mwindows

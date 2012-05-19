@@ -97,12 +97,13 @@ int main(int argc,char **argv)
   if( SDLNet_Init()<0 )                             { fprintf(stderr,"SDLNet_Init: %s\n",SDL_GetError());  exit(-2); }
   if( IMG_Init(IMG_INIT_PNG)!=IMG_INIT_PNG )        { fprintf(stderr,"IMG_Init: %s\n",SDL_GetError());     exit(-3); }
 
-  SDL_WM_SetCaption("SPARToR " VERSION,NULL);
+  SDL_WM_SetCaption("SPARToR " VERSION " " GITCOMMIT,NULL);
   SDL_Surface *iconsurf = IMG_Load("game/images/icon.png");
   SDL_WM_SetIcon(iconsurf,NULL);
   SDL_FreeSurface(iconsurf);
 
-  SJC_Write("SPARToR v%s  Copyright (C) 2010-2012 Jer Wilson",VERSION);
+  SJC_Write("SPARToR " VERSION " " GITCOMMIT);
+  SJC_Write("Copyright (C) 2010-2012 Jer Wilson");
   SJC_Write("Please visit github.com/superjer for updates and source code.");
   SJC_Write("");
   SJC_Write(" --->  \\#F80Type 'help' for help.\\#FFF  <---");

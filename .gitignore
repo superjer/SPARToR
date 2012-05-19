@@ -1,12 +1,12 @@
 *.dll
 *.[oa]
 *.swp
+objects/
 cscope.*
 tags
-spartor_linux
-spartor_win32.exe
-spartor_mac
-spartor_mac.app
+spartor
+spartor.exe
+spartor.app
 stdout.txt
 stderr.txt
 .DS_Store

@@ -5,36 +5,27 @@ UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Same for all platforms, probably
 CC = gcc
-OBJS = engine/main.o \
-       engine/font.o \
-       engine/console.o \
-       engine/command.o \
-       engine/net.o \
-       engine/host.o \
-       engine/client.o \
-       engine/input.o \
-       engine/video.o \
-       engine/audio.o \
-       engine/sjdl.o \
-       engine/patt.o \
-       engine/saveload.o \
-       engine/sprite.o \
-       engine/sprite_helpers.o \
-       engine/projection.o \
-       engine/sjglob.o \
-       engine/helpers.o \
-       engine/keynames.o \
-       engine/mt19937ar/mt19937ar.o
+
+OBJDIR = objects
+
+SRCS = $(wildcard engine/*.c)
+SRCS += $(wildcard engine/mt19937ar/*.c)
+
+include game/Makefile-include
+
+OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+GITCOMMIT := $(shell sh -c "git branch -v | grep -o '^\*\s[A-Za-z0-9_-]\+\s\+[0-9a-f]\+' | sed 's/\s\+/ /g'")
+
 FLAGS = --std=c99 -g -Wall -Wextra -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
+FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
+
 INC = -Iengine -Igame
 
 # Only useful on certain platforms
 OBJSRES =
 WINDRES =
 POSTCC =
-
-# Game / Mod stuff
-include game/Makefile-include
 
 
 ifeq ($(UNAME),Linux)
@@ -59,13 +50,16 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	POSTCC = cp platforms/win/*.dll .
 endif
 
+all: clean $(EXE_NAME)
+
+quick: $(EXE_NAME)
 
 $(EXE_NAME): $(OBJS) $(OBJSRES)
 	$(CC) -o $@ $(OBJS) $(OBJSRES) $(FLAGS) $(INC) $(LIBS) $(XLIBS)
 	$(POSTCC)
-	-rm $(OBJS) $(OBJSRES)
 
-$(OBJS):
+$(OBJDIR)/%.o: %.c
+	mkdir -p `dirname $@`
 	$(CC) -o $@ -c $(FLAGS) $(INC) $*.c
 
 .rc.o:
@@ -74,5 +68,8 @@ $(OBJS):
 	$(WINDRES) $^ -o $@
 
 clean:
-	-rm $(OBJS) $(OBJSRES)
+	-$(RM) $(OBJS) $(OBJSRES)
 
+distclean:
+	-$(RM) -r $(OBJDIR)
+	-$(RM) $(OBJSRES) $(EXE_NAME)

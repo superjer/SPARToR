@@ -1,13 +1,4 @@
 GAMENAME = deadking
 
-OBJS += game/mod.o
-OBJS += game/obj_amigo.o
-OBJS += game/obj_amigosword.o
-OBJS += game/obj_bullet.o
-OBJS += game/obj_dummy.o
-OBJS += game/obj_ghost.o
-OBJS += game/obj_mother.o
-OBJS += game/obj_player.o
-OBJS += game/obj_slug.o
-OBJS += game/obj_person.o
+SRCS += $(wildcard game/*.c)
 

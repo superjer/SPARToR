@@ -14,6 +14,7 @@
 #include "saveload.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
+#include "saveload.h"
 
 
 static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co );
@@ -80,16 +81,19 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     switch( letter ) {
     case 'o': // orthographic
+      push_context(co);
       co->projection = ORTHOGRAPHIC;
       SJC_Write("Setting context projection to ORTHOGRAPHIC");
       break;
 
     case 'd': // dimetric
+      push_context(co);
       co->projection = DIMETRIC;
       SJC_Write("Setting context projection to DIMETRIC");
       break;
 
     case 'b': { // bounds
+      push_context(co);
       int x = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
       int y = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
       int z = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
@@ -105,6 +109,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       break; }
 
     case 'z': { // blocksize
+      push_context(co);
       co->bsx = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
       co->bsy = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
       co->bsz = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
@@ -112,6 +117,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       break; }
 
     case 't': { // tilespacing
+      push_context(co);
       co->tileuw = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
       co->tileuh = (int)unpackbytes(c->data,MAXCMDDATA,&n,4);
 
@@ -124,6 +130,10 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     // do NOT free co->map, co->dmap, it will get GC'd as it rolls off the buffer! really!
     break; }
+
+  case CMDT_0EUNDO:
+    pop_context(co);
+    break;
 
   case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
     ghost_paint( c, gh, co );
@@ -175,6 +185,8 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
 
   if( tool_num == TOOL_PSTE && !gh->clipboard_data ) { SJC_Write("Clipboard is empty"); return; }
 
+  push_context(co);
+
   for( k=dnz; k<=upz; k++ ) for( j=dny; j<=upy; j++ ) for( i=dnx; i<=upx; i++ ) {
     int pos = k*co->y*co->x + j*co->x + i;
 
@@ -218,7 +230,7 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
       int x = (i-dnx+shx) % clipx;
       int y = (j-dny+shy) % clipy;
       int z = (k-dnz+shz) % clipz;
-      co->dmap[pos] =gh->clipboard_data[ x + y*clipx + z*clipy*clipx ];
+      co->dmap[pos] = gh->clipboard_data[ x + y*clipx + z*clipy*clipx ];
       break; }
 
     case TOOL_OBJ:
@@ -232,7 +244,6 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
     case TOOL_VIS:
       co->map[pos].flags |= CBF_VIS; // hack for making a loaded-from-file tile visible (format change mess)
       break;
-
     }
   }
 }

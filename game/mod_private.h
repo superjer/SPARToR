@@ -72,7 +72,9 @@ enum { CMDT_NONE = 0,
        CMDT_1ELAY1,
        CMDT_0ELAY1,
        CMDT_1ELAY2,
-       CMDT_0ELAY2 };
+       CMDT_0ELAY2,
+       CMDT_1EUNDO,
+       CMDT_0EUNDO };
 
 
 extern int    myghost;

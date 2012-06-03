@@ -9,6 +9,10 @@
 
 #define VERSION "0.12.05.13"
 
+#ifndef GITCOMMIT
+#define GITCOMMIT "* no commit"
+#endif
+
 #define TICKSAFRAME 30
 
 //macros

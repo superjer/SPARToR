@@ -11,6 +11,9 @@
 #define INP_JAXP 3 //joystick axis, positive
 #define INP_JAXN 4 //joystick axis, negative
 #define INP_MBUT 5 //mouse button
+#define INP_MAX  5 //max device type
+
+extern char *inputdevicenames[];
 
 
 extern int i_mousex; //last seen mouse position

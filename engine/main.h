@@ -7,7 +7,7 @@
 #include "SDL_image.h"
 #include "mod_constants.h"
 
-#define VERSION "0.1p"
+#define VERSION "0.12.05.13"
 
 #define TICKSAFRAME 30
 

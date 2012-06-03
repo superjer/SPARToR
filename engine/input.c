@@ -19,7 +19,10 @@
 #include "net.h"
 #include "video.h"
 #include "command.h"
+#include "keynames.h"
 
+
+char *inputdevicenames[] = {"baddevice","keyb","joy","axisp","axisn","mouse"};
 
 int i_mousex = 0;
 int i_mousey = 0;
@@ -52,6 +55,8 @@ void inputinit()
       SJC_Write("Error: could not restart the JOYSTICK SubSystem!");
   }
 
+  init_keynames();
+
   int i, numjoysticks;
   if( (numjoysticks=SDL_NumJoysticks())>0 ) {
     joysticks = realloc(joysticks, sizeof(*joysticks)*numjoysticks);
@@ -66,7 +71,6 @@ void inputinit()
   started = 1;
 }
 
-
 void putcmd(int device,int sym,int press)
 {
   if( cbread%250==(cbwrite+1)%250 ) // full
@@ -78,7 +82,6 @@ void putcmd(int device,int sym,int press)
   cbwrite = (cbwrite+1)%250;
 }
 
-
 FCMD_t *getnextcmd()
 {
   if( cbread==cbwrite )
@@ -87,7 +90,6 @@ FCMD_t *getnextcmd()
   cbread = (cbread+1)%250;
   return c;
 }
-
 
 void setactive(Uint8 gain,Uint8 state)
 {
@@ -98,7 +100,6 @@ void setactive(Uint8 gain,Uint8 state)
   if( state & SDL_APPACTIVE )
     i_minimized = !gain;
 }
-
 
 void kbinput(int press,SDL_keysym keysym)
 {
@@ -141,7 +142,6 @@ void kbinput(int press,SDL_keysym keysym)
     putcmd( INP_KEYB,sym,press );
 }
 
-
 void joyinput(int press,SDL_JoyButtonEvent jbutton)
 {
   if( i_watch && press )
@@ -152,7 +152,6 @@ void joyinput(int press,SDL_JoyButtonEvent jbutton)
   else
     putcmd( INP_JBUT,jbutton.button,press );
 }
-
 
 void axisinput(SDL_JoyAxisEvent jaxis)
 {
@@ -182,7 +181,6 @@ void axisinput(SDL_JoyAxisEvent jaxis)
   if( val>-10000 &&  (*stat&NEG_ON) ) { *stat&=~NEG_ON;                                putcmd( INP_JAXN,ax,0 ); }
 }
 
-
 void mouseinput(int press,SDL_MouseButtonEvent mbutton)
 {
   if( i_watch && press )
@@ -196,13 +194,11 @@ void mouseinput(int press,SDL_MouseButtonEvent mbutton)
     putcmd( INP_MBUT,mbutton.button,press );
 }
 
-
 void mousemove(SDL_MouseMotionEvent mmotion)
 {
   i_mousex = mmotion.x;
   i_mousey = mmotion.y;
 }
-
 
 void readinput()
 {
@@ -219,7 +215,6 @@ void readinput()
   }
 }
 
-
 void input_bindsoon(int presscmd,int releasecmd)
 {
   kwik_presscmd = presscmd;
@@ -232,13 +227,14 @@ void kwikbind(int device,int sym)
   mod_keybind( device, sym, 0, kwik_releasecmd );
   mod_keybind( device, sym, 1, kwik_presscmd );
   kwik = 0;
+  const char *keyname = sym<KEYNAMECOUNT ? keynames[sym] : NULL;
   switch( device ) {
-    case INP_KEYB: SJC_Write("Key #%d selected"                ,sym); break;
-    case INP_JBUT: SJC_Write("Joy button #%d selected"         ,sym); break;
-    case INP_JAXP: SJC_Write("Axis #%d (+) selected"           ,sym); break;
-    case INP_JAXN: SJC_Write("Axis #%d (-) selected"           ,sym); break;
-    case INP_MBUT: SJC_Write("Mouse button #%d selected"       ,sym); break;
-    default:       SJC_Write("Unkown device input #%d selected",sym); break;
+    case INP_KEYB: SJC_Write("Key #%d \"%s\" selected",  sym,keyname); break;
+    case INP_JBUT: SJC_Write("Joy button #%d selected"          ,sym); break;
+    case INP_JAXP: SJC_Write("Axis #%d (+) selected"            ,sym); break;
+    case INP_JAXN: SJC_Write("Axis #%d (-) selected"            ,sym); break;
+    case INP_MBUT: SJC_Write("Mouse button #%d selected"        ,sym); break;
+    default:       SJC_Write("Unkown device input #%d selected" ,sym); break;
   }
 }
 

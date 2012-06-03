@@ -140,10 +140,13 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   float velz = (posz - newpe->pos.z)/4;
   float mag = sqrtf(velx*velx + velz*velz);
 
-  if( mag>0.1 || (newpe->walkcounter/4) % 2 ) // entangled_walkcounter
+  if( mag>0.1 || (newpe->walkcounter/4) % 2 ) { // entangled_walkcounter
     newpe->walkcounter++;
-  else
+	newpe->stopcounter = 0;
+  } else {
     newpe->walkcounter = 0;
+	newpe->stopcounter++;
+  }
 
   // just snap if close
   if( fabsf(velx)<0.5 && fabsf(velz)<0.5 ) {
@@ -254,9 +257,9 @@ static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
 static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
   SPRITE_T *defspr = &SM(gyllioc_idle_s);
-
-  switch( (pe->walkcounter/4) % 4 ) {
-    default: switch( pe->dir ) {                      // standing
+  
+  if( pe->stopcounter > 10 ) {
+    switch( pe->dir ) {
       case W : sprs[0] = &SM(gyllioc_idle_w);  break;
       case E : sprs[0] = &SM(gyllioc_idle_e);  break;
       case N : sprs[0] = &SM(gyllioc_idle_n);  break;
@@ -266,7 +269,46 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
       case SW: sprs[0] = &SM(gyllioc_idle_sw); break;
       case SE: sprs[0] = &SM(gyllioc_idle_se); break;
       default: sprs[0] = defspr;               break;
-    } break;
+    }
+  } else {
+    switch( (pe->walkcounter/4) % 4 ) {
+      case 0:
+      case 2:	switch( pe->dir ) {                      // stopping
+        case W : sprs[0] = &SM(gyllioc_stop_w);  break;
+        case E : sprs[0] = &SM(gyllioc_stop_e);  break;
+        case N : sprs[0] = &SM(gyllioc_stop_n);  break;
+        case S : sprs[0] = &SM(gyllioc_stop_s);  break;
+        case NW: sprs[0] = &SM(gyllioc_stop_nw); break;
+        case NE: sprs[0] = &SM(gyllioc_stop_ne); break;
+        case SW: sprs[0] = &SM(gyllioc_stop_sw); break;
+        case SE: sprs[0] = &SM(gyllioc_stop_se); break;
+        default: sprs[0] = defspr;               break;
+      } break;
+
+	    case 1: switch( pe->dir ) {                      // walking 1
+        case W : sprs[0] = &SM(gyllioc_walk1_w);                                    break;
+        case E : sprs[0] = &SM(gyllioc_walk1_e);                                    break;
+        case N : sprs[0] = &SM(gyllioc_walk1_n);                                    break;
+        case S : sprs[0] = &SM(gyllioc_walk1_s);                                    break;
+        case NW: sprs[0] = &SM(gyllioc_walk1_nw);                                   break;
+        case NE: sprs[0] = &SM(gyllioc_walk1_ne);                                   break;
+        case SW: sprs[0] = &SM(gyllioc_walk1_sw);                                   break;
+        case SE: sprs[0] = &SM(gyllioc_walk1_se);                                   break;
+        default: sprs[0] = defspr;                                                  break;
+      } break;
+
+      case 3: switch( pe->dir ) {                      // walking 2
+        case W : sprs[0] = &SM(gyllioc_walk2_w);                                    break;
+        case E : sprs[0] = &SM(gyllioc_walk2_e);                                    break;
+        case N : sprs[0] = &SM(gyllioc_walk2_n);                                    break;
+        case S : sprs[0] = &SM(gyllioc_walk2_s);                                    break;
+        case NW: sprs[0] = &SM(gyllioc_walk2_nw);                                   break;
+        case NE: sprs[0] = &SM(gyllioc_walk2_ne);                                   break;
+        case SW: sprs[0] = &SM(gyllioc_walk2_sw);                                   break;
+        case SE: sprs[0] = &SM(gyllioc_walk2_se);                                   break;
+        default: sprs[0] = defspr;                                                  break;
+      } break;
+	  }
   }
 }
 

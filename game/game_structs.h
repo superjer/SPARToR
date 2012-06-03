@@ -46,6 +46,7 @@ STRUCT()
     int tilez;
     enum DIR8 dir;
     int walkcounter;
+	int stopcounter;
     int character;
     int armed;
     int hp;

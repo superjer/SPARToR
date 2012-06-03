@@ -21,9 +21,9 @@
   .also
     gyllioc_stop_ne  flipx
   gyllioc_stop_n
-  gyllioc_stop_w
+  gyllioc_stop_w  anchor ^-3 ^
   .also
-    gyllioc_stop_e  flipx
+    gyllioc_stop_e  flipx  anchor ^+6 ^
 .end
 
 .grid  cols 18 pos 0 102  size 25 52  anchor cen bot

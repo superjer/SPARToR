@@ -105,6 +105,8 @@ X(gyllioc_walk1_w),\
 X(gyllioc_walk1_e),\
 X(gyllioc_walk2_w),\
 X(gyllioc_walk2_e),\
+X(gyllioc_fall),\
+X(gyllioc_incap),\
 X(wheat1),\
 X(wheat2),\
 X(wheattrampled1),\

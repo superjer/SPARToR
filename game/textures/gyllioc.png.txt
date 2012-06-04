@@ -59,6 +59,9 @@
   .
 .end
 
+gyllioc_fall pos 125 0  size 52 38
+gyllioc_incap pos 177 0  size 51 37
+
 
 
 

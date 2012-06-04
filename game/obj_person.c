@@ -61,6 +61,7 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       newpe->ap += 100;
       if( newpe->ap > newpe->max_ap )
         newpe->ap = newpe->max_ap;
+      newpe->hp -= 10;
     }
 
     // check for input if player controlled
@@ -142,11 +143,14 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   if( mag>0.1 || (newpe->walkcounter/4) % 2 ) { // entangled_walkcounter
     newpe->walkcounter++;
-	newpe->stopcounter = 0;
+	  newpe->stopcounter = 0;
   } else {
     newpe->walkcounter = 0;
-	newpe->stopcounter++;
+	  newpe->stopcounter++;
   }
+  
+  if( newpe->hp > 0 ) newpe->incapcounter = 0;
+  else                newpe->incapcounter++;
 
   // just snap if close
   if( fabsf(velx)<0.5 && fabsf(velz)<0.5 ) {
@@ -258,7 +262,10 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
 {
   SPRITE_T *defspr = &SM(gyllioc_idle_s);
   
-  if( pe->stopcounter > 10 ) {
+  if( pe->hp <= 0 ) {
+    if( pe->incapcounter < 10 ) sprs[0] = &SM(gyllioc_fall);
+    else                        sprs[0] = &SM(gyllioc_incap);
+  } else if( pe->stopcounter > 10 ) {
     switch( pe->dir ) {
       case W : sprs[0] = &SM(gyllioc_idle_w);  break;
       case E : sprs[0] = &SM(gyllioc_idle_e);  break;

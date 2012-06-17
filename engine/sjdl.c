@@ -82,7 +82,7 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
       grad = z + 512;                                            \
       sect = (grad / 256 + 70) % 7;                              \
       grad = grad % 256;                                         \
-                                                                \
+                                                                 \
       switch( sect ) {                                           \
         case 0: r = grad;                                 break; \
         case 1: r = 255;        b = grad;                 break; \
@@ -100,17 +100,45 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
   }
 
   glBegin(GL_QUADS);
+
   if( m_showdepth ) glColor3ub(rhi,ghi,bhi);
   glTexCoord2i(s->x     , s->y     ); glVertex3i(x , y , zhi);
   glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2, y , zhi);
   if( m_showdepth ) glColor3ub(rlo,glo,blo);
   glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x2, y2, zlo);
   glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x , y2, zlo);
+
   glEnd();
 
   return 0;
 }
 
+int SJGL_Box3D(REC *s, int x, int y, int z)
+{
+  int x2 = x-24;
+  int y2 = y+48;
+  int z2 = z-24;
+
+  glBegin(GL_TRIANGLE_FAN);
+
+  // center
+  glTexCoord2i(s->x+23  , s->y+24     ); glVertex3i(x ,y ,z );
+
+  //top
+  glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y ,z );
+  glTexCoord2i(s->x+23  , s->y        ); glVertex3i(x2,y ,z2);
+  glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x ,y ,z2);
+
+  //right
+  glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
+  glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
+
+  //left
+  glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
+  glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y ,z );
+
+  glEnd();
+}
 
 //sets a pixel on an sdl surface
 void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)

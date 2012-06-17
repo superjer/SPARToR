@@ -15,6 +15,10 @@ extern int v_center;
 extern int v_camx;
 extern int v_camy;
 
+extern int v_eyex;
+extern int v_eyey;
+extern int v_eyez;
+
 extern int v_w;
 extern int v_h;
 

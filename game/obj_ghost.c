@@ -54,6 +54,10 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   v_camx = POINT2NATIVE_X(&gh->pos);
   v_camy = POINT2NATIVE_Y(&gh->pos);
 
+  v_eyex = gh->pos.x;
+  v_eyey = gh->pos.y-100;
+  v_eyez = gh->pos.z;
+
   switch( fr[b].cmds[gh->client].cmd ) {
     case CMDT_1CAMLEFT:  gh->goingl = 1; break;
     case CMDT_0CAMLEFT:  gh->goingl = 0; break;

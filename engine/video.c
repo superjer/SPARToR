@@ -142,8 +142,9 @@ void render()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  int camx = NATIVEW/2-(int)v_camx;
-  int camy = NATIVEH/2-(int)v_camy;
+  //old dimetric mode:
+  //int camx = NATIVEW/2-(int)v_camx;
+  //int camy = NATIVEH/2-(int)v_camy;
   //glTranslatef(camx,camy,0);
   gluLookAt(v_eyex+1,v_eyey-1,v_eyez+1,
             v_eyex  ,v_eyey  ,v_eyez  ,

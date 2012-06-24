@@ -113,31 +113,53 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
   return 0;
 }
 
-int SJGL_Box3D(REC *s, int x, int y, int z)
+int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
 {
-  int x2 = x-24;
-  int y2 = y+48;
-  int z2 = z-24;
+  y += spr->bump;
 
-  glBegin(GL_TRIANGLE_FAN);
+  REC *s = &spr->rec;
+  int x2 = x - 24;
+  int y0 = y - spr->flange;
+  int y2 = y0 + s->h - 24;
+  int z2 = z - 24;
+  int syfl = s->y + spr->flange;
 
-  // center
-  glTexCoord2i(s->x+23  , s->y+24     ); glVertex3i(x ,y ,z );
+  //      c        c
+  //    / | \      | flange
+  //   d  a  e     a           a
+  //   |/   \|                 |
+  //   b     f     b-----f 23  | 24
+  //   |\   /|                 |
+  //   k  g  n                 g
+  //    \ | /
+  //      m
 
-  //top
-  glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y ,z );
-  glTexCoord2i(s->x+23  , s->y        ); glVertex3i(x2,y ,z2);
-  glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x ,y ,z2);
+  #define d_ glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y0,z );
+  #define c_ glTexCoord2i(s->x+23  , s->y        ); glVertex3i(x2,y0,z2);
+  #define e_ glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x ,y0,z2);
+  #define g_ glTexCoord2i(s->x+23  , syfl+24     ); glVertex3i(x ,y ,z );
+  #define b_ glTexCoord2i(s->x     , syfl+12     ); glVertex3i(x2,y ,z );
+  #define a_ glTexCoord2i(s->x+23  , syfl        ); glVertex3i(x2,y ,z2);
+  #define f_ glTexCoord2i(s->x+s->w, syfl+12     ); glVertex3i(x ,y ,z2);
+  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
+  #define m_ glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
+  #define k_ glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
 
-  //right
-  glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
-  glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
+  glBegin(GL_TRIANGLE_FAN);   g_ b_ f_ n_ m_ k_ b_   glEnd();
+  glBegin(GL_TRIANGLE_FAN);   a_ b_ d_ c_ e_ f_ b_   glEnd();
 
-  //left
-  glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
-  glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y ,z );
+  #undef a_
+  #undef b_
+  #undef c_
+  #undef d_
+  #undef e_
+  #undef f_
+  #undef g_
+  #undef k_
+  #undef m_
+  #undef n_
 
-  glEnd();
+  return 0;
 }
 
 //sets a pixel on an sdl surface

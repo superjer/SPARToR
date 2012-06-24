@@ -40,15 +40,15 @@ desert-bush1 72 58 30 30
 desert-largerock1  0 167 54 72
 desert-largerock2  54 167 94 55
 
-wheat1  63 0 47 45 ^ ^-12
-wheat2  111 1 48 44 ^ ^-12
+wheat1  63  0 47 45 ^ ^-12 flange 8 bump -12
+wheat2  111 1 48 44 ^ ^-12 flange 8 bump -12
 
-wheattrampled1  159 0 46 27 ^ ^-12 floor bump 1
-wheattrampled2  205 2 48 25 ^ ^-12 floor bump 1
+wheattrampled1  159 0 46 27 ^ ^-12 floor bump -1
+wheattrampled2  205 2 48 25 ^ ^-12 floor bump -1
 
-pine1  343 0 52 93
-pine2  395 2 63 91
-pine3  459 3 53 90
+pine1  343 0 52 93 bump -64
+pine2  395 2 63 91 bump -64
+pine3  459 3 53 90 bump -64
 
 barrel1  253 0 20 27
 barrel2  273 1 19 26

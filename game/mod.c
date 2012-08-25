@@ -695,7 +695,11 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   //sprblit( spr, c, d );
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
-  SJGL_Box3D( spr, x*24, y, z*24 );
+
+  if( spr->flags&SPRF_FLOOR )
+    SJGL_Box3D( spr, x*24, y, z*24 );
+  else
+    SJGL_Wall3D( spr, x*24, y, z*24 );
 
   if( m_showdepth ) {
     glDisable(GL_DEPTH_TEST);

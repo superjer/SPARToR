@@ -162,6 +162,35 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
   return 0;
 }
 
+int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
+{
+  y += spr->bump;
+
+  REC *s = &spr->rec;
+  int x2 = x - 24;
+  int y2 = y + s->h;
+  int z2 = z - 24;
+
+  //   b-----f
+  //   |     |
+  //   k-----n
+
+  #define b_ glTexCoord2i(s->x     , s->y        ); glVertex3i(x2,y ,z );
+  #define f_ glTexCoord2i(s->x+s->w, s->y        ); glVertex3i(x ,y ,z2);
+  #define k_ glTexCoord2i(s->x     , s->y+s->h   ); glVertex3i(x2,y2,z );
+  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h   ); glVertex3i(x ,y2,z2);
+
+  glBegin(GL_TRIANGLE_FAN);   b_ f_ n_ k_    glEnd();
+
+  #undef b_
+  #undef f_
+  #undef k_
+  #undef n_
+
+  return 0;
+}
+
+
 //sets a pixel on an sdl surface
 void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)
 {

@@ -1,4 +1,4 @@
-.default  size 46 24  anchor mid cen
+.default  size 46 24  anchor mid cen  floor
 
 .grid  cols 5  pos 0 0  size 46 24  floor
   grass1

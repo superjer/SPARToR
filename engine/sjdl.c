@@ -164,21 +164,32 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
 
 int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
 {
-  y += spr->bump;
+  x -= spr->ancx;
+  y -= spr->ancy;
+  z -= spr->ancx;
 
   REC *s = &spr->rec;
-  int x2 = x - 24;
+
+  x -= s->w/2;
+  z -= s->w/2;
+
+  int x2 = x + s->w;
   int y2 = y + s->h;
-  int z2 = z - 24;
+  int z2 = z + s->w;
 
   //   b-----f
   //   |     |
   //   k-----n
 
-  #define b_ glTexCoord2i(s->x     , s->y        ); glVertex3i(x2,y ,z );
-  #define f_ glTexCoord2i(s->x+s->w, s->y        ); glVertex3i(x ,y ,z2);
-  #define k_ glTexCoord2i(s->x     , s->y+s->h   ); glVertex3i(x2,y2,z );
-  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h   ); glVertex3i(x ,y2,z2);
+  if( spr->bump ) {
+    glPolygonOffset(1.0,spr->bump);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+  }
+
+  #define b_ glTexCoord2i(s->x     , s->y     ); glVertex3i(x2,y ,z );
+  #define f_ glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x ,y ,z2);
+  #define k_ glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x2,y2,z );
+  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x ,y2,z2);
 
   glBegin(GL_TRIANGLE_FAN);   b_ f_ n_ k_    glEnd();
 
@@ -186,6 +197,9 @@ int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
   #undef f_
   #undef k_
   #undef n_
+
+  if( spr->bump )
+    glDisable(GL_POLYGON_OFFSET_FILL);
 
   return 0;
 }

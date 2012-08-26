@@ -41,6 +41,7 @@
   sand-n
   sand-e
   deserttileskunge-ne
+  shadow bump -1
 .end
 
 flower  pos 276 0  size 18 28

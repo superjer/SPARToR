@@ -22,8 +22,6 @@ static void get_slug_sprites(   SPRITE_T **sprs, PERSON_t *pe);
 void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PERSON_t *pe = o->data;
-  int c = POINT2NATIVE_X(&pe->pos);
-  int d = POINT2NATIVE_Y(&pe->pos);
   int i;
   SPRITE_T *sprs[SPRITECOUNT] = {NULL};
 
@@ -35,9 +33,9 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
   for( i=0; i<SPRITECOUNT; i++ )
     if( sprs[i] )
-      sprblit( sprs[i], c, d );
+      sprblit3d( sprs[i], pe->pos.x, pe->pos.y, pe->pos.z );
 
-  sprblit( &SM(shadow), c, d );
+  sprblit3d( &SM(shadow), pe->pos.x, pe->pos.y, pe->pos.z );
 }
 
 void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

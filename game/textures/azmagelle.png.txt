@@ -142,5 +142,3 @@ azma_w_walk1_w  pos 441 0  size 34 45  anchor ^+1 ^+6
 azma_w_walk2_w  pos 475 0  size 34 45  anchor ^ ^+6
   .also
   azma_w_walk2_e  flipx
-
-shadow 0 502 20 10 cen mid floor

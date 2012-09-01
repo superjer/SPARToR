@@ -87,6 +87,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     az->dir         = S;
     az->walkcounter = 0;
     az->character   = CHR_AZMA;
+    az->armed       = 1;
     az->hp          = 77;
     az->mp          = 100;
     az->st          = 50;
@@ -114,6 +115,7 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     gy->dir         = S;
     gy->walkcounter = 0;
     gy->character   = CHR_GYLLIOC;
+    gy->armed       = 1;
     gy->hp          = 99;
     gy->mp          = 67;
     gy->st          = 50;

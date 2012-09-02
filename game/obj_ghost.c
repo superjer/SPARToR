@@ -71,10 +71,10 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   gh->vel = (V){0,0,0};
 
-  if( gh->goingl || gh->goingu ) gh->vel.x += -5;
-  if( gh->goingr || gh->goingd ) gh->vel.x +=  5;
-  if( gh->goingl || gh->goingd ) gh->vel.z +=  5;
-  if( gh->goingr || gh->goingu ) gh->vel.z += -5;
+  if( gh->goingr || gh->goingu ) gh->vel.x += -5;
+  if( gh->goingl || gh->goingd ) gh->vel.x +=  5;
+  if( gh->goingr || gh->goingd ) gh->vel.z +=  5;
+  if( gh->goingl || gh->goingu ) gh->vel.z += -5;
 
   FCMD_t *c = fr[b].cmds + gh->client;
 

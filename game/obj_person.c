@@ -100,14 +100,14 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   int newz = newpe->tilez;
   switch( dir ) {
     case NODIR: break;
-    case W : newx = newpe->tilex-1; newz = newpe->tilez+1; break;
-    case E : newx = newpe->tilex+1; newz = newpe->tilez-1; break;
+    case E : newx = newpe->tilex-1; newz = newpe->tilez+1; break;
+    case W : newx = newpe->tilex+1; newz = newpe->tilez-1; break;
     case N : newx = newpe->tilex-1; newz = newpe->tilez-1; break;
     case S : newx = newpe->tilex+1; newz = newpe->tilez+1; break;
-    case NW: newx = newpe->tilex-1;                        break;
-    case NE:                        newz = newpe->tilez-1; break;
-    case SW:                        newz = newpe->tilez+1; break;
-    case SE: newx = newpe->tilex+1;                        break;
+    case NE: newx = newpe->tilex-1;                        break;
+    case NW:                        newz = newpe->tilez-1; break;
+    case SE:                        newz = newpe->tilez+1; break;
+    case SW: newx = newpe->tilex+1;                        break;
   }
 
   if( dir ) newpe->dir = dir;

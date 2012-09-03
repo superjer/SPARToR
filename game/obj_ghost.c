@@ -43,7 +43,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     mycontext   = ob->context;
   }
 
-  static V v2_dimetric[2] = {{-64,-72,-64},{64,  0, 64}};
+  static V v2_dimetric[2] = {{-64,0,-64},{64,72,64}};
   static V v2_ortho[2]    = {{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}};
 
   if( co->projection == DIMETRIC     )
@@ -55,7 +55,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   v_camy = POINT2NATIVE_Y(&gh->pos);
 
   v_eyex = gh->pos.x;
-  v_eyey = gh->pos.y-100;
+  v_eyey = gh->pos.y;
   v_eyez = gh->pos.z;
 
   switch( fr[b].cmds[gh->client].cmd ) {

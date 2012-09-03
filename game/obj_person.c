@@ -31,9 +31,15 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
     case CHR_SLUG:    get_slug_sprites(   sprs,pe); break;
   }
 
+  unsigned char amt = 255 - pe->hitcounter*9;
+  if( pe->hitcounter ) glColor3ub(255,amt,amt);
+  else                 glColor3ub(255,255,255);
+
   for( i=0; i<SPRITECOUNT; i++ )
     if( sprs[i] )
       sprblit3d( sprs[i], pe->pos.x, pe->pos.y, pe->pos.z );
+
+  glColor3ub(255,255,255);
 
   sprblit3d( &SM(shadow), pe->pos.x, pe->pos.y, pe->pos.z );
 }
@@ -114,20 +120,37 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   // move only if in-bounds
   if( dir && newx>=0 && newz>=0 && newx<co->x && newz<co->z ) {
+    int i;
     int required_ap;
-    
+    PERSON_t *obstructor = NULL;
+
+    // FIXME make it easier to check for obstructions
+    for( i=0; i<maxobjs; i++ ) {
+      if( fr[b].objs[i].type==OBJT_PERSON ) {
+	PERSON_t *pe = fr[b].objs[i].data;
+	if( pe->tilex!=newx || pe->tilez!=newz )
+	  continue;
+	obstructor = pe;
+	break;
+      }
+    }
+
     switch( (newpe->tilex==newx ? 0 : 1) + (newpe->tilez==newz ? 0 : 1) ) {
       case 2: required_ap = 14; break;
       case 1: required_ap = 10; break;
       default: SJC_Write("How many directions do you really need to move at one time, jeeez!");
     }
 
-    if( newpe->ap >= required_ap ) {
+    if( newpe->ap < required_ap ) {
+      // not enough Action Points
+    } else if( obstructor ) {
+      obstructor->hp--;
+      obstructor->hitcounter = 20;
+      newpe->ap -= required_ap;
+    } else {
       newpe->tilex = newx;
       newpe->tilez = newz;
       newpe->ap -= required_ap;
-    } else {
-      // not enough Action Points
     }
   }
 
@@ -142,6 +165,9 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newpe->walkcounter++;
   else
     newpe->walkcounter = 0;
+
+  if( --newpe->hitcounter < 0 )
+    newpe->hitcounter = 0;
 
   // just snap if close
   if( fabsf(velx)<0.5 && fabsf(velz)<0.5 ) {

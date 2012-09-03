@@ -1,78 +1,68 @@
-.default  size 46 24  anchor mid cen  floor
+.default  size 48 23  anchor mid cen  floor
 
-.grid  cols 5  pos 0 0  size 46 24  floor
-  grass1
-  grass2
-  pave1
-  pave2
-  dirt1
-  dirt2
-  sand1
-  crust1
-  crust2
-  stone1
-  stone2
-  grass3
-  crust-grass-sw
-  wood-plank
-  deserttile1
-  grass-sw
-  grass-ne
-  grass-nw
-  grass-se
-  deserttile2
-  stone-sw
-  stone-ne
-  stone-nw
-  stone-se
-  deserttile3
-  crust-wall-sw
-  sand2
-  sand3
-  .
-  deserttile-broken1
-  sand-sw
-  sand-ne
-  sand-nw
-  sand-se
-  deserttileskunge-nw
-  sand-s
-  sand-w
-  sand-n
-  sand-e
-  deserttileskunge-ne
-  shadow bump -1
+.grid  cols 10  pos 0 0  size 48 73
+wall-woodbasic
+wall-wood1
+wall-wood2
+wall-wood3
+wall-woodcornersouth
+wall-woodcornerwest
+wall-woodcornereast
+wall-stonebasic
+wall-stone1
+wall-stonecorner
+wall-logbasic
+wall-log1
+wall-log2
+wall-log3
+wall-granite
+.
+.
+.
+.
+.
 .end
 
-flower  pos 276 0  size 18 28
-
-.default  anchor cen bot-12  bump -24
-dirt1-column1       230   0 46 72
-dirt1-column2       230   0 46 36
-adobe-wall1         230  72 46 72
-adobe-wall2         230  72 46 36
-adobe-wall3         230 144 46 72
-adobe-wall4         230 144 46 36
-adobe-wall5         230 216 46 72
-adobe-wall6         230 216 46 36
-adobe-wall7         230 288 46 72
-adobe-wall8         230 288 46 36
-adobe-wall9         276 216 46 72
-adobe-wall10        276 216 46 36
-adobe-wall11        276 288 46 72
-adobe-wall12        276 288 46 36
-lightadobe-wall-sw1 276  48 28 84
-lightadobe-wall-sw2 276 132 28 84
-lightadobe-wall-sw3 304 132 28 84 cen bot-12
-placeholder-wall    322 216 46 72
-placeholder-ftwall  368 216 48 72 ^ ^ bump 0
-placeholder-tlwall  416 216 23 72 cen-11 bot-24
-placeholder-trwall  439 216 23 72 cen+12 bot-24
-placeholder-blwall  462 216 23 72 cen-11 bot-13 
-placeholder-brwall  485 216 23 72 cen+12 bot-13 
-placeholder-thwall  322 288 48 72 cen bot-12
-placeholder-bhwall  370 288 48 72 cen bot-23
-placeholder-rhwall  418 288 24 72 cen-11 bot-12
-placeholder-lhwall  442 288 24 72 cen+11 bot-12
-
-
+.grid  cols 10  pos 0 146  size 48 23  floor
+floor-grass1
+floor-grassflagbordersw
+floor-grassflagbordernw
+floor-grassflagborderne
+floor-grassflagborderse
+floor-grassflagbordern
+floor-grassflagborderw
+floor-grassflagborders
+floor-grassflagbordere
+.
+floor-flag1
+floor-flag2
+.
+.
+.
+.
+.
+.
+.
+.
+floor-rough1
+floor-rough2
+floor-rough3
+.
+.
+.
+.
+.
+.
+.
+floor-dirt1
+floor-dirt2
+floor-dirt3
+.
+.
+.
+.
+.
+.
+.
+shadow bump -1
+.end

@@ -1,0 +1,52 @@
+.default  size 17 43  anchor cen bot
+
+.grid  cols 5
+  fia_idle_s
+  fia_idle_se
+  .also
+    fia_idle_sw  flipx
+  fia_idle_nw
+  .also
+    fia_idle_ne  flipx
+  fia_idle_n
+  fia_idle_w
+  .also
+    fia_idle_e  flipx
+.end
+
+.grid  cols 15 pos 0 43  size 17 43  anchor cen bot
+  fia_walk1_s size 17 44
+  fia_walk2_s size 17 44 
+  fia_walk1_se size 34 ^
+    .also
+    fia_walk1_sw flipx 
+  .
+  fia_walk2_se size 34 ^
+    .also
+    fia_walk2_sw flipx
+  .
+  fia_walk1_nw
+    .also
+    fia_walk1_ne flipx
+  fia_walk2_nw size 34 ^
+    .also
+    fia_walk2_ne flipx
+  .
+  fia_walk1_n 
+  fia_walk2_n 
+  fia_walk1_w size 34 ^
+    .also
+    fia_walk1_e flipx
+  .
+  fia_walk2_w size 34 ^
+    .also
+    fia_walk2_e flipx
+  .
+.end
+
+fia_fall pos 0 132  size 28 40
+fia_incap pos 37 164  size 45 12
+
+
+
+

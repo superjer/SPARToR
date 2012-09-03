@@ -1,4 +1,4 @@
-.default  size 23 51  anchor cen bot
+.default  size 25 51  anchor cen bot
 
 .grid  cols 5
   gyllioc_idle_s
@@ -12,4 +12,56 @@
   gyllioc_idle_w
   .also
     gyllioc_idle_e  flipx
+
+  gyllioc_stop_s
+  gyllioc_stop_se
+  .also
+    gyllioc_stop_sw  flipx
+  gyllioc_stop_nw
+  .also
+    gyllioc_stop_ne  flipx
+  gyllioc_stop_n
+  gyllioc_stop_w  anchor ^-3 ^
+  .also
+    gyllioc_stop_e  flipx  anchor ^+6 ^
 .end
+
+.grid  cols 18 pos 0 102  size 25 52  anchor cen bot
+  gyllioc_walk1_s
+  gyllioc_walk2_s
+  gyllioc_walk1_se size 50 ^
+    .also
+    gyllioc_walk1_sw flipx 
+  .
+  gyllioc_walk2_se size 50 ^
+    .also
+    gyllioc_walk2_sw flipx
+  .
+  gyllioc_walk1_nw size 50 ^
+    .also
+    gyllioc_walk1_ne flipx
+  .
+  gyllioc_walk2_nw size 50 ^
+    .also
+    gyllioc_walk2_ne flipx
+  .
+  gyllioc_walk1_n size 50 ^
+  .
+  gyllioc_walk2_n size 50 ^
+  .
+  gyllioc_walk1_w size 50 ^
+    .also
+    gyllioc_walk1_e flipx
+  .
+  gyllioc_walk2_w size 50 ^
+    .also
+    gyllioc_walk2_e flipx
+  .
+.end
+
+gyllioc_fall pos 125 0  size 52 38
+gyllioc_incap pos 177 0  size 51 37
+
+
+
+

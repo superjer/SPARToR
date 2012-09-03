@@ -6,5 +6,6 @@
 
 uint32_t patt();
 void spatt(uint32_t seed);
+unsigned long sqrti(unsigned long x);
 
 #endif

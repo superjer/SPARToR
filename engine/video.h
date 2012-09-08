@@ -29,14 +29,17 @@ extern float v_fovy;
 extern int v_w;
 extern int v_h;
 
+extern GLdouble v_modeltrix[16];
+extern GLdouble v_projtrix[16];
+extern int v_viewport[4];
+
 
 void videoinit();
 void render();
 void setvideo(int w,int h,int go_full,int quiet);
 void setvideosoon(int w,int h,int go_full,int delay);
-int  screen2native_x(int x);
-int  screen2native_y(int y);
 V get_screen_ray(double x,double y);
+V get_screen_pos(double x,double y,double z);
 int  make_sure_texture_is_loaded(const char *texfile);
 
 #endif

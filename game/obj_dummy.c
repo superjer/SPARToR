@@ -15,10 +15,7 @@
 void obj_dummy_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   DUMMY_t *du = o->data;
-  int c = POINT2NATIVE_X(&du->pos);
-  int d = POINT2NATIVE_Y(&du->pos);
-
-  sprblit( &SM(tnl_weight_silver), c, d );
+  sprblit( &SM(tnl_weight_silver), du->pos.x, du->pos.y );
 }
 
 void obj_dummy_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

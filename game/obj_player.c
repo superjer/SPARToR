@@ -22,8 +22,8 @@ int    setmodel = -1;
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
-  int c = POINT2NATIVE_X(&pl->pos);
-  int d = POINT2NATIVE_Y(&pl->pos);
+  int c = pl->pos.x;
+  int d = pl->pos.y;
 
   //girl hair
   if     ( pl->model!=4 ) ;
@@ -94,8 +94,8 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   gh->vel.z = newme->pos.z - gh->pos.z;
 
   if( ((GHOST_t *)fr[b].objs[newme->ghost].data)->client==me ) { //local client match
-    v_camx = POINT2NATIVE_X(&gh->pos);
-    v_camy = POINT2NATIVE_Y(&gh->pos);
+    v_camx = gh->pos.x;
+    v_camy = gh->pos.y;
     if( setmodel>-1 ) { //FIXME -- just for fun, will not sync!
       newme->model = setmodel;
       setmodel = -1;

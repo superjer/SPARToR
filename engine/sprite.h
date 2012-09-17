@@ -2,6 +2,7 @@
 #ifndef SPARTOR_SPRITE_H_
 #define SPARTOR_SPRITE_H_
 
+#include "basictypes.h"
 #include "spr_enum.h"
 
 #define SPR_IDENTIFIER(X) SPR__ ## X
@@ -37,6 +38,7 @@ enum { TOOL_NUL = 1,
 typedef struct {
   int      texnum;
   int      bump;
+  int      flange;
   char    *name;
   REC      rec;
   int      ancx; // anchor position
@@ -65,6 +67,7 @@ extern size_t     old_spr_count;
 
 
 void sprblit( SPRITE_T *spr, int x, int y );
+void sprblit3d( SPRITE_T *spr, int x, int y, int z );
 int load_sprites(int texnum);
 void reload_sprites();
 void unload_sprites(SPRITE_T *sprites,size_t spr_count);

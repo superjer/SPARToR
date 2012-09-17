@@ -25,9 +25,6 @@
 #define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH)
 
 
-#define DEPTH_OF(nativey) ((nativey) - v_camy + NATIVEH)
-
-
 //obj types
 enum { ENGINE_OBJT_LIST()
        OBJT_MOTHER,

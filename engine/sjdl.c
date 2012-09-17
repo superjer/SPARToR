@@ -82,7 +82,7 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
       grad = z + 512;                                            \
       sect = (grad / 256 + 70) % 7;                              \
       grad = grad % 256;                                         \
-                                                                \
+                                                                 \
       switch( sect ) {                                           \
         case 0: r = grad;                                 break; \
         case 1: r = 255;        b = grad;                 break; \
@@ -100,13 +100,109 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
   }
 
   glBegin(GL_QUADS);
+
   if( m_showdepth ) glColor3ub(rhi,ghi,bhi);
   glTexCoord2i(s->x     , s->y     ); glVertex3i(x , y , zhi);
   glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2, y , zhi);
   if( m_showdepth ) glColor3ub(rlo,glo,blo);
   glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x2, y2, zlo);
   glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x , y2, zlo);
+
   glEnd();
+
+  return 0;
+}
+
+int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
+{
+  y += spr->bump;
+
+  REC *s = &spr->rec;
+  int x2 = x - 24;
+  int y0 = y - spr->flange;
+  int y2 = y0 + s->h - 24;
+  int z2 = z - 24;
+  int syfl = s->y + spr->flange;
+
+  //      c        c
+  //    / | \      | flange
+  //   d  a  e     a           a
+  //   |/   \|                 |
+  //   b     f     b-----f 23  | 24
+  //   |\   /|                 |
+  //   k  g  n                 g
+  //    \ | /
+  //      m
+
+  #define d_ glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y0,z );
+  #define c_ glTexCoord2i(s->x+23  , s->y        ); glVertex3i(x2,y0,z2);
+  #define e_ glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x ,y0,z2);
+  #define g_ glTexCoord2i(s->x+23  , syfl+24     ); glVertex3i(x ,y ,z );
+  #define b_ glTexCoord2i(s->x     , syfl+12     ); glVertex3i(x2,y ,z );
+  #define a_ glTexCoord2i(s->x+23  , syfl        ); glVertex3i(x2,y ,z2);
+  #define f_ glTexCoord2i(s->x+s->w, syfl+12     ); glVertex3i(x ,y ,z2);
+  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
+  #define m_ glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
+  #define k_ glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
+
+  glBegin(GL_TRIANGLE_FAN);   g_ b_ f_ n_ m_ k_ b_   glEnd();
+  glBegin(GL_TRIANGLE_FAN);   a_ b_ d_ c_ e_ f_ b_   glEnd();
+
+  #undef a_
+  #undef b_
+  #undef c_
+  #undef d_
+  #undef e_
+  #undef f_
+  #undef g_
+  #undef k_
+  #undef m_
+  #undef n_
+
+  return 0;
+}
+
+int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
+{
+  //FIXME: how to respect ancx without breaking things??!?!
+  //x += spr->ancx;
+  y -= spr->ancy;
+  //z -= spr->ancx;
+
+  REC *s = &spr->rec;
+
+  int w = abs(s->w);
+  int h = abs(s->h);
+  x -= w/2;
+  z -= w/2;
+
+  int x2 = x + w;
+  int y2 = y + h;
+  int z2 = z + w;
+
+  //   b-----f
+  //   |     |
+  //   k-----n
+
+  if( spr->bump ) {
+    glPolygonOffset(0.0,spr->bump);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+  }
+
+  #define b_ glTexCoord2i(s->x     , s->y     ); glVertex3i(x2,y ,z );
+  #define f_ glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x ,y ,z2);
+  #define k_ glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x2,y2,z );
+  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x ,y2,z2);
+
+  glBegin(GL_TRIANGLE_FAN);   b_ f_ n_ k_    glEnd();
+
+  #undef b_
+  #undef f_
+  #undef k_
+  #undef n_
+
+  if( spr->bump )
+    glDisable(GL_POLYGON_OFFSET_FILL);
 
   return 0;
 }

@@ -16,13 +16,11 @@
 void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   SLUG_t *sl = o->data;
-  int c = POINT2NATIVE_X(&sl->pos);
-  int d = POINT2NATIVE_Y(&sl->pos);
 
   if( sl->vel.x>0 )
-    sprblit( sl->dead ? &SM(slug_ouch_r) : &SM(slug_r), c, d );
+    sprblit( sl->dead ? &SM(slug_ouch_r) : &SM(slug_r), sl->pos.x, sl->pos.y );
   else
-    sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), c, d );
+    sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), sl->pos.x, sl->pos.y );
 }
 
 void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

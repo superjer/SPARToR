@@ -172,6 +172,8 @@ void command(const char *s)
                 n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
       SJC_Write("  pos %d %d  size %d %d  anchor %d %d",
                 sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
+      SJC_Write("  floor %d  flange %d  bump %d",
+                sprites[n].flags&SPRF_FLOOR,sprites[n].flange,sprites[n].bump);
       if( sprites[n].more )
         SJC_Write("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
                   sprites[n].more->gridwide,sprites[n].more->gridlast,

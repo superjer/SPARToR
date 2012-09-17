@@ -164,25 +164,28 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
 
 int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
 {
-  x -= spr->ancx;
+  //FIXME: how to respect ancx without breaking things??!?!
+  //x += spr->ancx;
   y -= spr->ancy;
-  z -= spr->ancx;
+  //z -= spr->ancx;
 
   REC *s = &spr->rec;
 
-  x -= s->w/2;
-  z -= s->w/2;
+  int w = abs(s->w);
+  int h = abs(s->h);
+  x -= w/2;
+  z -= w/2;
 
-  int x2 = x + s->w;
-  int y2 = y + s->h;
-  int z2 = z + s->w;
+  int x2 = x + w;
+  int y2 = y + h;
+  int z2 = z + w;
 
   //   b-----f
   //   |     |
   //   k-----n
 
   if( spr->bump ) {
-    glPolygonOffset(1.0,spr->bump);
+    glPolygonOffset(0.0,spr->bump);
     glEnable(GL_POLYGON_OFFSET_FILL);
   }
 

@@ -17,8 +17,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   int i, j;
   int slot0;
 
-  MOTHER_t *mo = ob->data;
-
   for(i=0;i<maxclients;i++) {
     if( !(fr[b].cmds[i].flags & CMDF_NEW) )
       continue;

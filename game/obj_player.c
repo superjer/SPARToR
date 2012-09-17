@@ -22,11 +22,8 @@ int    setmodel = -1;
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   PLAYER_t *pl = o->data;
-  V shadow = pl->pos;
-  shadow.y = co->bsy*co->y;
   int c = POINT2NATIVE_X(&pl->pos);
   int d = POINT2NATIVE_Y(&pl->pos);
-  int r = POINT2NATIVE_Y(&shadow);
 
   //girl hair
   if     ( pl->model!=4 ) ;

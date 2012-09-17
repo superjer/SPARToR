@@ -61,6 +61,17 @@ void sprblit( SPRITE_T *spr, int x, int y )
   SJGL_BlitSkew( &spr->rec, x-spr->ancx, y-spr->ancy, zlo, zhi );
 }
 
+void sprblit3d( SPRITE_T *spr, int x, int y, int z )
+{
+  if( !spr ) return;
+
+  SJGL_SetTex( spr->texnum );
+
+  if( spr->flags & SPRF_FLOOR )
+    SJGL_Box3D( spr, x, y, z );
+  else
+    SJGL_Wall3D( spr, x, y, z );
+}
 
 int load_sprites(int texnum)
 {

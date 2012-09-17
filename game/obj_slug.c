@@ -15,8 +15,8 @@
 void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
   SLUG_t *sl = o->data;
-  int c = POINT2NATIVE_X(&sl->pos);
-  int d = POINT2NATIVE_Y(&sl->pos);
+  int c = sl->pos.x;
+  int d = sl->pos.y;
   SJGL_SetTex( sys_tex[TEX_PLAYER].num );
   SJGL_Blit( &(REC){(sl->vel.x>0?20:0)+(sl->dead?40:0),177,20,16}, c-10, d-8, sl->pos.y );
 }

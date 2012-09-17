@@ -29,7 +29,7 @@ size_t tex_count;
 
 int v_drawhulls  = 0; // make hulls on objects visible
 int v_showstats  = 0; // show timing stats
-int v_oscillo    = 1; // show oscilloscope of the sound output
+int v_oscillo    = 0; // show oscilloscope of the sound output
 int v_fullscreen = 0;
 int v_center     = 1; // whether to center the scaled game rendering
 

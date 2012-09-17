@@ -86,7 +86,7 @@ int load_sprites(int texnum)
   int piping    =  0;
   int also      =  0;
   int gridstart = -1;
-  SPRITE_T defs = {0, 0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
+  SPRITE_T defs = {0, 0, 0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
   SPRITE_T gdefs;
   SPRITE_T prev_spr = defs;
 
@@ -217,6 +217,13 @@ int load_sprites(int texnum)
           return fail("Expecting 1 arg for 'bump'");
 
         read_num(&targ->bump, tokens[++i]);
+
+      } else if( !strcmp(tokens[i],"flange") ) {
+        if( count-i < 2 )
+          return fail("Expecting 1 arg for 'flange'");
+
+        read_num(&targ->flange, tokens[++i]);
+        targ->flags |= SPRF_FLOOR;
 
       } else if( !strcmp(tokens[i],"anchor") ) {
         if( count-i < 3 )

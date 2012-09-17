@@ -255,13 +255,28 @@ static void bind( char *dev_sym, char *press_cmdname )
 void exec_commands( char *name )
 {
   char path[PATH_MAX];
-  int printed = snprintf( path, PATH_MAX, "game/console/%s.txt", name );
+  int printed;
+  FILE *f;
+  char line[1000];
+
+  printed = snprintf( path, PATH_MAX, "game/console/%s.txt", name );
   if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
 
-  FILE *f = fopen(path, "r");
+  f = fopen(path, "r");
   if( !f ) { SJC_Write("Couldn't open %s",path); return; }
 
-  char line[1000];
+  while( fgets(line,1000,f) )
+    command(line);
+
+  fclose(f);
+
+  // FIXME LAME HACK FOR NOW
+  printed = snprintf( path, PATH_MAX, "user/console/%s.txt", name );
+  if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
+
+  f = fopen(path, "r");
+  if( !f ) { SJC_Write("Couldn't open %s",path); return; }
+
   while( fgets(line,1000,f) )
     command(line);
 

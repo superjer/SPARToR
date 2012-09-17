@@ -2,6 +2,7 @@
 #ifndef SPARTOR_SPRITE_H_
 #define SPARTOR_SPRITE_H_
 
+#include "basictypes.h"
 #include "spr_enum.h"
 
 #define SPR_IDENTIFIER(X) SPR__ ## X
@@ -37,6 +38,7 @@ enum { TOOL_NUL = 1,
 typedef struct {
   int      texnum;
   int      bump;
+  int      flange;
   char    *name;
   REC      rec;
   int      ancx; // anchor position

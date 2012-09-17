@@ -48,6 +48,10 @@ float v_fovy     = 60.0f;
 int v_w;
 int v_h;
 
+GLdouble v_modeltrix[16];
+GLdouble v_projtrix[16];
+int v_viewport[4];
+
 static int screen_w  = NATIVEW;
 static int screen_h  = NATIVEH;
 static int prev_w    = NATIVEW;
@@ -167,6 +171,11 @@ void render()
             v_targx,v_targy,v_targz,
             0      ,-1     ,0      );
 
+  // store values for unprojecting, etc.
+  glGetDoublev(GL_MODELVIEW_MATRIX,v_modeltrix);
+  glGetDoublev(GL_PROJECTION_MATRIX,v_projtrix);
+  glGetIntegerv(GL_VIEWPORT,v_viewport);
+
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
 
@@ -205,7 +214,7 @@ void render()
         else if( flags & CBF_PLAT  ) { y2 = y1 + 4; }
         else continue;
 
-        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i(x,y,z);
         #define SOL_R  SOL_VERTEX(1  ,0  ,0  ,x1, y1, z1);
         #define SOL_RG SOL_VERTEX(1  ,0.2,0  ,x1, y1, z2);
         #define SOL_W  SOL_VERTEX(1  ,0.2,0.2,x2, y1, z2);
@@ -235,7 +244,7 @@ void render()
         int y2 = pos->y + hull[1].y;
         int z2 = pos->z + hull[1].z;
 
-        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i(x,y,z);
         #define HULL_R  HULL_VERTEX(1,0,0,x , y , z );
         #define HULL_RG HULL_VERTEX(1,1,0,x , y , z2);
         #define HULL_W  HULL_VERTEX(1,1,1,x2, y , z2);
@@ -258,7 +267,9 @@ void render()
 
       if( o->flags & OBJF_POS ) {
         V *pos  = flex(o,pos);
-        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_CENTER, "%d", i);
+        V screenpos = get_screen_pos(pos->x,pos->y,pos->z);
+
+        SJF_DrawText(screenpos.x, screenpos.y-10, SJF_CENTER, "%d", i);
       }
     }
 
@@ -418,42 +429,44 @@ void setvideosoon(int w,int h,int go_full,int delay)
   soon = delay;
 }
 
-int screen2native_x(int x)
-{
-  return (x - pad_left)/scale + v_camx - NATIVEW/2;
-}
-
-int screen2native_y(int y)
-{
-  return (y - pad_top )/scale + v_camy - NATIVEH/2;
-}
-
-// find ray from mouse into screen in world space
+// find ray from point on screen (mouse?) into world space
 V get_screen_ray(double x,double y)
 {
-  GLdouble modeltrix[16], projtrix[16];
-  int viewport[4];
   double farx,fary,farz,nearx,neary,nearz;
   V ray;
 
   //or find point matching depth buffer?
   //glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
 
-  glGetDoublev(GL_MODELVIEW_MATRIX,modeltrix);
-  glGetDoublev(GL_PROJECTION_MATRIX,projtrix);
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  gluUnProject(         x,         y,      1.0,
-                modeltrix,  projtrix, viewport,
-                    &farx,     &fary,    &farz );
-  gluUnProject(         x,         y,      0.0,
-                modeltrix,  projtrix, viewport,
-                   &nearx,    &neary,   &nearz );
+  gluUnProject(           x,           y,        1.0,
+                v_modeltrix,  v_projtrix, v_viewport,
+                      &farx,       &fary,      &farz );
+  gluUnProject(           x,           y,        0.0,
+                v_modeltrix,  v_projtrix, v_viewport,
+                     &nearx,      &neary,     &nearz );
 
   ray.x = farx - nearx;
   ray.y = fary - neary;
   ray.z = farz - nearz;
 
   return ray;
+}
+
+// find position on screen of in-world point
+V get_screen_pos(double x,double y,double z)
+{
+  double winx,winy,winz;
+  V out;
+
+  gluProject(           x,           y,          z,
+              v_modeltrix,  v_projtrix, v_viewport,
+                    &winx,       &winy,      &winz );
+
+  out.x = winx;
+  out.y = winy;
+  out.z = winz;
+
+  return out;
 }
 
 int make_sure_texture_is_loaded(const char *texfile)

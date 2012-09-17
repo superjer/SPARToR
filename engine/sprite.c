@@ -49,7 +49,7 @@ void sprblit( SPRITE_T *spr, int x, int y )
 {
   if( !spr ) return;
 
-  int zlo = DEPTH_OF(y) + spr->bump;
+  int zlo = /*DEPTH_OF(y) +*/ spr->bump;
   int zhi;
 
   if( spr->flags & SPRF_FLOOR )

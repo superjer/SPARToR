@@ -81,6 +81,7 @@ static int    mytex    = 0;
 static FCMD_t magic_c;      // magical storage for an extra command, triggered from console
 
 
+static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z );
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
 
@@ -326,18 +327,9 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
           return -1;
         }
 
-        int posx = screen2native_x(i_mousex);
-        int posy = screen2native_y(i_mousey);
-
-        if( co->projection == DIMETRIC ) {
-          posx += co->tileuw/2; // tiles are centered in width
-          posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
-        }
-
         //map to game coordinates
-        int tilex = NATIVE2TILE_X(co,posx,posy);
-        int tiley = NATIVE2TILE_Y(co,posx,posy);
-        int tilez = NATIVE2TILE_Z(co,posx,posy);
+        int tilex,tiley,tilez;
+        screen_unproject( i_mousex, i_mousey, co->y * co->bsy, &tilex, &tiley, &tilez );
 
         if( co->projection == DIMETRIC     ) tiley = ylayer;
         if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
@@ -495,11 +487,6 @@ void mod_predraw(Uint32 vidfr)
   //draw context
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data; // FIXME: is mycontext always set here?
 
-  if( co->projection == ORTHOGRAPHIC )
-    PROJECTION_MODE(ORTHO);
-  else
-    PROJECTION_MODE(DIMETRIC);
-
   for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ ) {
     int pos = co->x*co->y*k + co->x*j + i;
 
@@ -551,26 +538,15 @@ void mod_huddraw(Uint32 vidfr)
 void mod_postdraw(Uint32 vidfr)
 {
   int i,j,k;
-  int posx = screen2native_x(i_mousex);
-  int posy = screen2native_y(i_mousey);
-
-  //V ray = get_screen_ray(posx,posy);
-  //SJC_Write("%f %f %f",ray.x,ray.y,ray.z);
 
   if( !editmode || !i_hasmouse ) return;
 
   GHOST_t   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?
   CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
 
-  if( co->projection == DIMETRIC ) {
-    posx += co->tileuw/2; // tiles are centered in width
-    posy -= co->bsy*co->y; // tiles are drawn at the bottom of the cube
-  }
-
   //map to game coordinates
-  int upx = NATIVE2TILE_X(co,posx,posy);
-  int upy = NATIVE2TILE_Y(co,posx,posy);
-  int upz = NATIVE2TILE_Z(co,posx,posy);
+  int upx,upy,upz;
+  screen_unproject( i_mousex, i_mousey, co->y * co->bsy, &upx, &upy, &upz );
 
   int dnx = downx>=0 ? downx : upx;
   int dny = downy>=0 ? downy : upy;
@@ -723,18 +699,20 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
   } //end switch ob->type
 }
 
+static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z )
+{
+  V ray = get_screen_ray(screenx,v_h-screeny);
+
+  *x = (int)ceilf( (v_eyex + (height-v_eyey) * ray.x / ray.y) / 24 );
+  *y = (int)0;
+  *z = (int)ceilf( (v_eyez + (height-v_eyey) * ray.z / ray.y) / 24 );
+}
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
   if( co->projection == DIMETRIC )
     y = co->y * co->bsy; // layers are all anchored at the bottom of the context
 
-  SJGL_SetTex( spr->texnum );
-
-  int c = TILE2NATIVE_X(co,x,y,z);
-  int d = TILE2NATIVE_Y(co,x,y,z) + co->tileuh/2;
-
-  //sprblit( spr, c, d );
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
 
@@ -744,8 +722,9 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
     SJGL_Wall3D( spr, x*24, y, z*24 );
 
   if( m_showdepth ) {
+    V screenpos = get_screen_pos(x,y,z);
     glDisable(GL_DEPTH_TEST);
-    SJF_DrawText(c,d,SJF_LEFT,"%d%c",DEPTH_OF(d),spr->flags&SPRF_FLOOR?'f':'\0');
+    SJF_DrawText(screenpos.x, screenpos.y, SJF_LEFT, "%d%c", (int)screenpos.z, spr->flags&SPRF_FLOOR?'f':'\0');
     glEnable(GL_DEPTH_TEST);
     SJGL_SetTex(-1); // notify SJGL that the texture has changed
   }

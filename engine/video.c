@@ -19,6 +19,7 @@
 #include "main.h"
 #include "console.h"
 #include "font.h"
+#include "patt.h"
 
 
 TEX_T *textures;
@@ -36,6 +37,10 @@ int v_camy       = 0;
 int v_eyex       = 0;
 int v_eyey       = 0;
 int v_eyez       = 0;
+
+int v_targx      = 0;
+int v_targy      = 0;
+int v_targz      = 0;
 
 int v_eyedist    = 1;
 float v_fovy     = 60.0f;
@@ -140,10 +145,11 @@ void render()
   glLoadIdentity();
 
   // compute eyedist such that we can see the same amount of stuff
-  v_eyedist = 50.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
+  float diagdist = 45.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
+  v_eyedist = sqrtf( 3*diagdist*diagdist );
 
   //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
-  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,10,4000);
+  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,10+v_eyedist,4000+v_eyedist*2);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -153,9 +159,14 @@ void render()
   //int camy = NATIVEH/2-(int)v_camy;
   //glTranslatef(camx,camy,0);
 
-  gluLookAt(v_eyex+v_eyedist,v_eyey-v_eyedist,v_eyez+v_eyedist,
-            v_eyex          ,v_eyey          ,v_eyez          ,
-            0               ,-1              ,0               );
+  v_eyex = v_targx + v_eyedist;
+  v_eyey = v_targy - v_eyedist;
+  v_eyez = v_targz + v_eyedist;
+
+  gluLookAt(v_eyex ,v_eyey ,v_eyez ,
+            v_targx,v_targy,v_targz,
+            0      ,-1     ,0      );
+
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
 
@@ -415,6 +426,34 @@ int screen2native_x(int x)
 int screen2native_y(int y)
 {
   return (y - pad_top )/scale + v_camy - NATIVEH/2;
+}
+
+// find ray from mouse into screen in world space
+V get_screen_ray(double x,double y)
+{
+  GLdouble modeltrix[16], projtrix[16];
+  int viewport[4];
+  double farx,fary,farz,nearx,neary,nearz;
+  V ray;
+
+  //or find point matching depth buffer?
+  //glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+
+  glGetDoublev(GL_MODELVIEW_MATRIX,modeltrix);
+  glGetDoublev(GL_PROJECTION_MATRIX,projtrix);
+  glGetIntegerv(GL_VIEWPORT,viewport);
+  gluUnProject(         x,         y,      1.0,
+                modeltrix,  projtrix, viewport,
+                    &farx,     &fary,    &farz );
+  gluUnProject(         x,         y,      0.0,
+                modeltrix,  projtrix, viewport,
+                   &nearx,    &neary,   &nearz );
+
+  ray.x = farx - nearx;
+  ray.y = fary - neary;
+  ray.z = farz - nearz;
+
+  return ray;
 }
 
 int make_sure_texture_is_loaded(const char *texfile)

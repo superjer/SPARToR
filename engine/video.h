@@ -19,6 +19,10 @@ extern int v_eyex;
 extern int v_eyey;
 extern int v_eyez;
 
+extern int v_targx;
+extern int v_targy;
+extern int v_targz;
+
 extern int v_eyedist;
 extern float v_fovy;
 
@@ -32,6 +36,7 @@ void setvideo(int w,int h,int go_full,int quiet);
 void setvideosoon(int w,int h,int go_full,int delay);
 int  screen2native_x(int x);
 int  screen2native_y(int y);
+V get_screen_ray(double x,double y);
 int  make_sure_texture_is_loaded(const char *texfile);
 
 #endif

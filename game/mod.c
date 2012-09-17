@@ -554,6 +554,9 @@ void mod_postdraw(Uint32 vidfr)
   int posx = screen2native_x(i_mousex);
   int posy = screen2native_y(i_mousey);
 
+  //V ray = get_screen_ray(posx,posy);
+  //SJC_Write("%f %f %f",ray.x,ray.y,ray.z);
+
   if( !editmode || !i_hasmouse ) return;
 
   GHOST_t   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?

@@ -33,6 +33,10 @@ int v_center     = 1; // whether to center the scaled game rendering
 int v_camx       = 0;
 int v_camy       = 0;
 
+int v_eyex       = 0;
+int v_eyey       = 0;
+int v_eyez       = 0;
+
 int v_w;
 int v_h;
 
@@ -131,13 +135,19 @@ void render()
   glViewport(pad_left,h-NATIVEH*scale-pad_top,NATIVEW*scale,NATIVEH*scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+
+  //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+  gluPerspective(60,(GLdouble)NATIVEW/NATIVEH,10,4000);
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
   int camx = NATIVEW/2-(int)v_camx;
   int camy = NATIVEH/2-(int)v_camy;
-  glTranslatef(camx,camy,0);
-
+  //glTranslatef(camx,camy,0);
+  gluLookAt(v_eyex+1,v_eyey-1,v_eyez+1,
+            v_eyex  ,v_eyey  ,v_eyez  ,
+            0       ,-1      ,0       );
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
 
@@ -237,7 +247,13 @@ void render()
   }
 
   // translate back for HUD
-  glTranslatef(-camx,-camy,0);
+  //glTranslatef(-camx,-camy,0);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
   mod_huddraw(vidfr);
 
   // viewport and matrixes for outerdraw

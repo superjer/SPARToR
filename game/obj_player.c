@@ -58,9 +58,6 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
     else if(               pl->facingr ) sprblit( &SM(mp5_r),      c+20-gb, d-19+gd );
     else                                 sprblit( &SM(mp5_l),      c-20+gb, d-19+gd );
   }
-
-  // draw shadow
-  sprblit( &SM(shadow), c, r );
 }
 
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )

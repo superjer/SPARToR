@@ -31,7 +31,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     MKOBJ( gh, GHOST,  1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT );
     int ghostslot = slot0;
     MKOBJ( pl, PLAYER, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_PVEL|OBJF_PLAT|OBJF_CLIP );
-    MKOBJ( pe, PERSON, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
 
     SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, slot0 );
 
@@ -66,35 +65,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     pl->turning        = 0;
     pl->stabbing       = 0;
     pl->hovertime      = 0;
-
-    pe->pos         = (V){150,0,150};
-    pe->vel         = (V){0,0,0};
-    pe->hull[0]     = (V){-5,-34,-5};
-    pe->hull[1]     = (V){ 5,  0, 5};
-    pe->model       = 0;
-    pe->ghost       = ghostslot;
-    pe->tilex       = 1;
-    pe->tilez       = 1;
-    pe->dir         = S;
-    pe->walkcounter = 0;
-    pe->hp          = 77;
-    pe->mp          = 100;
-    pe->st          = 50;
-    pe->ap          = 32;
-    pe->pn          = 0;
-    pe->ml          = 0;
-    pe->to          = 100;
-    pe->xp          = 3;
-    pe->max_hp      = 100;
-    pe->max_mp      = 100;
-    pe->max_st      = 100;
-    pe->max_ap      =  32;
-    pe->max_pn      = 100;
-    pe->max_ml      = 100;
-    pe->max_to      = 100;
-    pe->max_xp      = 100;
-
-    mo->party[0] = slot0;
   } //end for i<maxclients
 
   //create a slug every now and then

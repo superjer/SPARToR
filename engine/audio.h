@@ -3,6 +3,11 @@
 #define SPARTOR_AUDIO_H_
 
 
+extern int *a_waveform;
+extern int  a_waveform_len;
+extern int  a_musictest;
+
+
 void audioinit();
 void audiodestroy();
 void play(const char *file);

@@ -20,14 +20,16 @@
 #include "console.h"
 #include "font.h"
 #include "patt.h"
+#include "audio.h"
 
 
 TEX_T *textures;
 size_t tex_count;
 
 
-int v_drawhulls  = 0;
-int v_showstats  = 0;
+int v_drawhulls  = 0; // make hulls on objects visible
+int v_showstats  = 0; // show timing stats
+int v_oscillo    = 1; // show oscilloscope of the sound output
 int v_fullscreen = 0;
 int v_center     = 1; // whether to center the scaled game rendering
 
@@ -45,7 +47,7 @@ int v_targz      = 0;
 int v_eyedist    = 1;
 float v_fovy     = 60.0f;
 
-int v_w;
+int v_w;              // width, height of video output
 int v_h;
 
 GLdouble v_modeltrix[16];
@@ -358,6 +360,17 @@ void render()
     SJF_DrawText(w-20,60,SJF_RIGHT,"unaccounted_time %4d", unaccounted_time/denom);
     SJF_DrawText(w-20,70,SJF_RIGHT,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
     SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
+  }
+
+  //display audio waveform
+  if( v_oscillo ) {
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glColor4f(0,1,0,1);
+    glBegin(GL_LINE_STRIP);
+    int *wf = a_waveform;
+    if( wf ) for( i=0; i<a_waveform_len; i++ )
+      glVertex3i( i * v_w / a_waveform_len, (-wf[i]*3 + 32768) * v_h / 65536, 0 );
+    glEnd();
   }
 
   SDL_GL_SwapBuffers();

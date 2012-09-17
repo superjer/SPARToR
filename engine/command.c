@@ -180,6 +180,20 @@ void command(const char *s)
                   sprites[n].more->piping,sprites[n].more->stretch,
                   sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
 
+    }else if( strcmp(q,"fovy")==0 ) {
+      char *num = strtok(NULL," ");
+      if( num==NULL ) {
+        SJC_Write("fovy is %f, eyedist is %d",v_fovy,v_eyedist);
+        break;
+      }
+      float n = atof(num);
+      if( n < 0.0001f || n > 90.0f ) {
+        SJC_Write("Value out of range (0.0001-90)");
+        break;
+      }
+      v_fovy = n;
+      break;
+
     }else if( mod_command(q) ) {
       SJC_Write("Huh?");
 

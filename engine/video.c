@@ -37,6 +37,9 @@ int v_eyex       = 0;
 int v_eyey       = 0;
 int v_eyez       = 0;
 
+int v_eyedist    = 1;
+float v_fovy     = 60.0f;
+
 int v_w;
 int v_h;
 
@@ -136,8 +139,11 @@ void render()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
+  // compute eyedist such that we can see the same amount of stuff
+  v_eyedist = 50.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
+
   //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
-  gluPerspective(60,(GLdouble)NATIVEW/NATIVEH,10,4000);
+  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,10,4000);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -146,9 +152,10 @@ void render()
   //int camx = NATIVEW/2-(int)v_camx;
   //int camy = NATIVEH/2-(int)v_camy;
   //glTranslatef(camx,camy,0);
-  gluLookAt(v_eyex+1,v_eyey-1,v_eyez+1,
-            v_eyex  ,v_eyey  ,v_eyez  ,
-            0       ,-1      ,0       );
+
+  gluLookAt(v_eyex+v_eyedist,v_eyey-v_eyedist,v_eyez+v_eyedist,
+            v_eyex          ,v_eyey          ,v_eyez          ,
+            0               ,-1              ,0               );
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
 

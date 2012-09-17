@@ -19,6 +19,9 @@ extern int v_eyex;
 extern int v_eyey;
 extern int v_eyez;
 
+extern int v_eyedist;
+extern float v_fovy;
+
 extern int v_w;
 extern int v_h;
 

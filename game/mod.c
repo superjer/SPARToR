@@ -261,6 +261,10 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
+        v_fovy += 0.5f; //FIXME move somewhere else
+        if( v_fovy > 90.0f )
+          v_fovy = 90.0f;
+
         if( !spr_count ) return -1;
         myspr = (myspr + spr_count - 1) % spr_count;
         mytex = sprites[myspr].texnum;
@@ -268,6 +272,10 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
+        v_fovy -= 0.5f; //FIXME move somewhere else
+        if( v_fovy < 0.1f )
+          v_fovy = 0.1f;
+
         if( !spr_count ) return -1;
         myspr = (myspr + 1) % spr_count;
         mytex = sprites[myspr].texnum;

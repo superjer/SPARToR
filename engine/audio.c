@@ -325,8 +325,8 @@ static void music_test( int *buf, int len )
       else if( t <= e->sustain ) ;
       else if( t <= e->release ) veloc *= (e->release-t)/(e->release-e->sustain);
 
-      double tr_freq = e->start_freq * pow(TWELFTH_ROOT,e->tremolo_steps);
-      double vi_freq = e->start_freq * pow(TWELFTH_ROOT,e->vibrato_steps);
+      //double tr_freq = e->start_freq * pow(TWELFTH_ROOT,e->tremolo_steps);
+      //double vi_freq = e->start_freq * pow(TWELFTH_ROOT,e->vibrato_steps);
 
       e->tremolo_period += e->tremolo_speed;
       e->tremolo_speed  += e->tremolo_accel;

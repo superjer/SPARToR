@@ -82,7 +82,6 @@ int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)
       grad = z + 512;                                            \
       sect = (grad / 256 + 70) % 7;                              \
       grad = grad % 256;                                         \
-                                                                 \
       switch( sect ) {                                           \
         case 0: r = grad;                                 break; \
         case 1: r = 255;        b = grad;                 break; \

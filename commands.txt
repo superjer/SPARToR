@@ -88,6 +88,16 @@ load            load <mapname>
 
                 Loads mapname.txt
 
+musictest       musictest
+
+                Toggle playing random notes with different waveforms. Also
+                toggles oscillo.
+
+
+oscillo         oscillo
+
+                Toggle display of an oscilloscope-like view of the sound output.
+
 
 orthographic    orthographic
 

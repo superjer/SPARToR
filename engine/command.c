@@ -22,6 +22,7 @@
 #include "host.h"
 #include "client.h"
 #include "video.h"
+#include "audio.h"
 #include "input.h"
 #include "saveload.h"
 #include "sprite.h"
@@ -94,7 +95,13 @@ void command(const char *s)
 
     }else if( strcmp(q,"stats")==0 ) {
       v_showstats = v_showstats ? 0 : 1;
-
+    
+    }else if( strcmp(q,"oscillo")==0 ) {
+      v_oscillo = v_oscillo ? 0 : 1;
+   
+    }else if( strcmp(q,"musictest")==0 ) {
+      v_oscillo = a_musictest = a_musictest ? 0 : 1;
+   
     }else if( strcmp(q,"fullscreen")==0 || strncmp(q,"window",6)==0 ) {
       char *sw = strtok(NULL," x");
       char *sh = strtok(NULL," ");

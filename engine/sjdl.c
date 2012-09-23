@@ -125,11 +125,11 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
 
   //      c        c
   //    / | \      | flange
-  //   d  a  e     a           a
-  //   |/   \|                 |
-  //   b     f     b-----f 23  | 24
-  //   |\   /|                 |
-  //   k  g  n                 g
+  //   d  a  e     a           a        p--a--q
+  //   |/   \|                 |        |/   \|
+  //   b     f     b-----f 23  | 24     b     f
+  //   |\   /|                 |        |\   /|
+  //   k  g  n                 g        r--g--s
   //    \ | /
   //      m
 
@@ -143,9 +143,21 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
   #define n_ glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
   #define m_ glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
   #define k_ glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
+  #define p_ glTexCoord2i(s->x     , s->y     ); glVertex3i(x2-12,y,z -12);
+  #define q_ glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x -12,y,z2-12);
+  #define s_ glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x +12,y,z -12);
+  #define r_ glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x -12,y,z +12);
 
-  glBegin(GL_TRIANGLE_FAN);   g_ b_ f_ n_ m_ k_ b_   glEnd();
-  glBegin(GL_TRIANGLE_FAN);   a_ b_ d_ c_ e_ f_ b_   glEnd();
+  // upper part
+  glBegin(GL_TRIANGLE_FAN);
+  if( spr->flange ) { a_ b_ d_ c_ e_ f_ b_ }
+  else              { b_ f_ q_ p_ }
+  glEnd();
+
+  glBegin(GL_TRIANGLE_FAN);
+  if( s->h > spr->flange+24 ) { g_ b_ f_ n_ m_ k_ b_ }
+  else                        { b_ f_ s_ r_ }
+  glEnd();
 
   #undef a_
   #undef b_
@@ -157,6 +169,10 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
   #undef k_
   #undef m_
   #undef n_
+  #undef p_
+  #undef q_
+  #undef s_
+  #undef r_
 
   return 0;
 }

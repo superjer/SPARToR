@@ -186,7 +186,7 @@ int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
 
   REC *s = &spr->rec;
 
-  int w = abs(s->w);
+  int w = abs(s->w) * 70 / 99;
   int h = abs(s->h);
   x -= w/2;
   z -= w/2;

@@ -20,9 +20,6 @@
 #include "keynames.h"
 
 
-int m_showdepth = 0; // whether to show the depth buffer values of drawn sprites
-
-
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
                        {"/persons.png"    ,0},
@@ -416,9 +413,7 @@ int mod_command(char *q)
     magic_c.cmd = CMDT_0CON;
     putcmd(-1,-1,-1);
     return 0;
-  }else if( strcmp(q,"depth")==0 ){
-    m_showdepth = !m_showdepth;
-    return 0;
+
   }else if( strcmp(q,"resprite")==0 ){
     reload_sprites();
     renumber_sprites();
@@ -679,24 +674,13 @@ static void screen_unproject( int screenx, int screeny, int height, int *x, int 
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
 {
-  if( co->projection == DIMETRIC )
-    y = co->y * co->bsy; // layers are all anchored at the bottom of the context
-
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
 
   if( spr->flags&SPRF_FLOOR )
-    SJGL_Box3D( spr, x*24, y, z*24 );
+    SJGL_Box3D( spr, x*24, y*24, z*24 );
   else
-    SJGL_Wall3D( spr, x*24, y, z*24 );
-
-  if( m_showdepth ) {
-    V screenpos = get_screen_pos(x,y,z);
-    glDisable(GL_DEPTH_TEST);
-    SJF_DrawText(screenpos.x, screenpos.y, SJF_LEFT, "%d%c", (int)screenpos.z, spr->flags&SPRF_FLOOR?'f':'\0');
-    glEnable(GL_DEPTH_TEST);
-    SJGL_SetTex(-1); // notify SJGL that the texture has changed
-  }
+    SJGL_Wall3D( spr, x*24, y*24, z*24 );
 }
 
 

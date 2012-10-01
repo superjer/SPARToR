@@ -70,16 +70,17 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   mo->party[1] = gyslot;
 
   memset(gh,0,sizeof *gh);
-  gh->client         = client_nr;
-  gh->avatar         = slot0;
+  gh->client      = client_nr;
+  gh->avatar      = slot0;
+  gh->pos         = (V){340,0,340};
 
   memset(az,0,sizeof *az);
   az->pos         = (V){150,0,150};
   az->vel         = (V){0,0,0};
   az->hull[0]     = (V){-5,-34,-5};
   az->hull[1]     = (V){ 5,  0, 5};
-  az->tilex       = 1;
-  az->tilez       = 1;
+  az->tilex       = 11;
+  az->tilez       = 11;
   az->dir         = S;
   az->character   = CHR_AZMA;
   az->armed       = 1;
@@ -105,8 +106,8 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   gy->vel         = (V){0,0,0};
   gy->hull[0]     = (V){-5,-34,-5};
   gy->hull[1]     = (V){ 5,  0, 5};
-  gy->tilex       = 3;
-  gy->tilez       = 5;
+  gy->tilex       = 13;
+  gy->tilez       = 15;
   gy->dir         = S;
   gy->character   = CHR_GYLLIOC;
   gy->armed       = 1;
@@ -131,8 +132,8 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->pos         = (V){150,0,150};
   en->hull[0]     = (V){-5,-34,-5};
   en->hull[1]     = (V){ 5,  0, 5};
-  en->tilex       = 5;
-  en->tilez       = 5;
+  en->tilex       = 15;
+  en->tilez       = 15;
   en->dir         = S;
   en->character   = CHR_SLUG;
   en->armed       = 1;

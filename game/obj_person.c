@@ -65,7 +65,6 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       newpe->ap += 100;
       if( newpe->ap > newpe->max_ap )
         newpe->ap = newpe->max_ap;
-      newpe->hp -= 10;
     }
 
     // check for input if player controlled
@@ -86,9 +85,9 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       }
     } else { // npc
       if( newpe->ap >= 10 )
-	dir = patt()%8 + 1;
+        dir = patt()%8 + 1;
       else
-	stop = 1;
+        stop = 1;
     }
 
     if( stop ) {
@@ -128,11 +127,11 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     // FIXME make it easier to check for obstructions
     for( i=0; i<maxobjs; i++ ) {
       if( fr[b].objs[i].type==OBJT_PERSON ) {
-	PERSON_t *pe = fr[b].objs[i].data;
-	if( pe->tilex!=newx || pe->tilez!=newz )
-	  continue;
-	obstructor = pe;
-	break;
+        PERSON_t *pe = fr[b].objs[i].data;
+        if( pe->tilex!=newx || pe->tilez!=newz )
+          continue;
+        obstructor = pe;
+        break;
       }
     }
 
@@ -163,11 +162,13 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   float mag = sqrtf(velx*velx + velz*velz);
 
   if( mag>0.1 || (newpe->walkcounter/4) % 2 ) { // entangled_walkcounter
+    if( newpe->stopcounter > 0 )
+      newpe->walkcounter = 6;
     newpe->walkcounter++;
-	  newpe->stopcounter = 0;
+    newpe->stopcounter = 0;
   } else {
     newpe->walkcounter = 0;
-	  newpe->stopcounter++;
+    newpe->stopcounter++;
   }
   
   if( newpe->hp > 0 ) newpe->incapcounter = 0;
@@ -304,7 +305,7 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
   } else {
     switch( (pe->walkcounter/4) % 4 ) {
       case 0:
-      case 2:	switch( pe->dir ) {                      // stopping
+      case 2: switch( pe->dir ) {                      // stopping
         case W : sprs[0] = &SM(gyllioc_stop_w);  break;
         case E : sprs[0] = &SM(gyllioc_stop_e);  break;
         case N : sprs[0] = &SM(gyllioc_stop_n);  break;
@@ -316,7 +317,7 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
         default: sprs[0] = defspr;               break;
       } break;
 
-	    case 1: switch( pe->dir ) {                      // walking 1
+      case 1: switch( pe->dir ) {                      // walking 1
         case W : sprs[0] = &SM(gyllioc_walk1_w);                                    break;
         case E : sprs[0] = &SM(gyllioc_walk1_e);                                    break;
         case N : sprs[0] = &SM(gyllioc_walk1_n);                                    break;
@@ -339,7 +340,7 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
         case SE: sprs[0] = &SM(gyllioc_walk2_se);                                   break;
         default: sprs[0] = defspr;                                                  break;
       } break;
-	  }
+    }
   }
 }
 

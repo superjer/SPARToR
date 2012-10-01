@@ -79,6 +79,4 @@ enum { CMDT_NONE = 0,
 
 extern int    myghost;
 extern int    mycontext;
-extern int    downx;
-extern int    downy;
 

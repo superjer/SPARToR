@@ -54,6 +54,7 @@ int numinputnames = COUNTOF(inputnames);
 
 int    myghost;     //obj number of local player ghost
 int    mycontext;
+
 int    downx = -1; //position of mousedown at beginning of edit cmd
 int    downy = -1;
 int    downz = -1;
@@ -326,7 +327,7 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
 
         //map to game coordinates
         int tilex,tiley,tilez;
-        screen_unproject( i_mousex, i_mousey, co->y * co->bsy, &tilex, &tiley, &tilez );
+        screen_unproject( i_mousex, i_mousey, ylayer * co->bsy, &tilex, &tiley, &tilez );
 
         if( co->projection == DIMETRIC     ) tiley = ylayer;
         if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
@@ -541,7 +542,7 @@ void mod_postdraw(Uint32 vidfr)
 
   //map to game coordinates
   int upx,upy,upz;
-  screen_unproject( i_mousex, i_mousey, co->y * co->bsy, &upx, &upy, &upz );
+  screen_unproject( i_mousex, i_mousey, ylayer * co->bsy, &upx, &upy, &upz );
 
   int dnx = downx>=0 ? downx : upx;
   int dny = downy>=0 ? downy : upy;
@@ -699,7 +700,7 @@ static void screen_unproject( int screenx, int screeny, int height, int *x, int 
   V ray = get_screen_ray(screenx,v_h-screeny);
 
   *x = (int)ceilf( (v_eyex + (height-v_eyey) * ray.x / ray.y) / 24 );
-  *y = (int)0;
+  *y = (int)ylayer;
   *z = (int)ceilf( (v_eyez + (height-v_eyey) * ray.z / ray.y) / 24 );
 }
 
@@ -708,10 +709,14 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
 
+  x *= co->bsx;
+  y *= co->bsy;
+  z *= co->bsz;
+
   if( spr->flags&SPRF_FLOOR )
-    SJGL_Box3D( spr, x*24, y*24, z*24 );
+    SJGL_Box3D( spr, x, y, z );
   else
-    SJGL_Wall3D( spr, x*24, y*24, z*24 );
+    SJGL_Wall3D( spr, x, y, z );
 }
 
 

@@ -50,6 +50,13 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
                             {"edit-lay0"  ,CMDT_1ELAY0   ,CMDT_0ELAY0   },
                             {"edit-lay1"  ,CMDT_1ELAY1   ,CMDT_0ELAY1   },
                             {"edit-lay2"  ,CMDT_1ELAY2   ,CMDT_0ELAY2   },
+                            {"edit-lay3"  ,CMDT_1ELAY3   ,CMDT_0ELAY3   },
+                            {"edit-lay4"  ,CMDT_1ELAY4   ,CMDT_0ELAY4   },
+                            {"edit-lay5"  ,CMDT_1ELAY5   ,CMDT_0ELAY5   },
+                            {"edit-lay6"  ,CMDT_1ELAY6   ,CMDT_0ELAY6   },
+                            {"edit-lay7"  ,CMDT_1ELAY7   ,CMDT_0ELAY7   },
+                            {"edit-lay8"  ,CMDT_1ELAY8   ,CMDT_0ELAY8   },
+                            {"edit-lay9"  ,CMDT_1ELAY9   ,CMDT_0ELAY9   },
                             {"edit-undo"  ,CMDT_1EUNDO   ,CMDT_0EUNDO   }};
 int numinputnames = COUNTOF(inputnames);
 
@@ -273,13 +280,23 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
       }
 
-      if( c->cmd==CMDT_0ELAY0 || c->cmd==CMDT_0ELAY1 || c->cmd==CMDT_0ELAY2 ) {
+      int layerkeyup =
+        c->cmd==CMDT_0ELAY0 || c->cmd==CMDT_0ELAY1 || c->cmd==CMDT_0ELAY2 || c->cmd==CMDT_0ELAY3 || c->cmd==CMDT_0ELAY4 ||
+        c->cmd==CMDT_0ELAY5 || c->cmd==CMDT_0ELAY6 || c->cmd==CMDT_0ELAY7 || c->cmd==CMDT_0ELAY8 || c->cmd==CMDT_0ELAY9;
+      if( layerkeyup ) {
         showlayer = 0;
         return -1;
       }
       if( c->cmd==CMDT_1ELAY0 ) { ylayer = 0; showlayer = 1; return -1; }
       if( c->cmd==CMDT_1ELAY1 ) { ylayer = 1; showlayer = 1; return -1; }
       if( c->cmd==CMDT_1ELAY2 ) { ylayer = 2; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY3 ) { ylayer = 3; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY4 ) { ylayer = 4; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY5 ) { ylayer = 5; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY6 ) { ylayer = 6; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY7 ) { ylayer = 7; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY8 ) { ylayer = 8; showlayer = 1; return -1; }
+      if( c->cmd==CMDT_1ELAY9 ) { ylayer = 9; showlayer = 1; return -1; }
 
       if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT ) { //edit-paint command
         int dnx = downx;

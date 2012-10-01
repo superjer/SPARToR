@@ -87,6 +87,9 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
 {
   y += spr->bump;
 
+  x += 12; // FIXME: hack for centering for now
+  z += 12;
+
   REC *s = &spr->rec;
   int x2 = x - 24;
   int y0 = y - spr->flange;

@@ -685,9 +685,9 @@ static void screen_unproject( int screenx, int screeny, int height, int *x, int 
 {
   V ray = get_screen_ray(screenx,v_h-screeny);
 
-  *x = (int)ceilf( (v_eyex + (height-v_eyey) * ray.x / ray.y) / 24 );
+  *x = (int)floorf( (v_eyex + (height-v_eyey) * ray.x / ray.y) / 24 );
   *y = (int)ylayer;
-  *z = (int)ceilf( (v_eyez + (height-v_eyey) * ray.z / ray.y) / 24 );
+  *z = (int)floorf( (v_eyez + (height-v_eyey) * ray.z / ray.y) / 24 );
 }
 
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
@@ -695,9 +695,9 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
 
-  x *= co->bsx;
-  y *= co->bsy;
-  z *= co->bsz;
+  x = x * co->bsx + co->bsx/2;
+  y = y * co->bsy;
+  z = z * co->bsz + co->bsz/2;
 
   if( spr->flags&SPRF_FLOOR )
     SJGL_Box3D( spr, x, y, z );

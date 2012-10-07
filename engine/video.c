@@ -103,7 +103,7 @@ void render()
   const SDL_VideoInfo *vidinfo;
   int x,y,w,h;
   int i;
-  Uint32 vidfr = (metafr-1);
+  Uint32 vidfr = metafr;
   Uint32 vidfrmod = vidfr%maxframes;
 
   Uint32 render_start = SDL_GetTicks();

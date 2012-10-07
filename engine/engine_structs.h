@@ -11,6 +11,7 @@ STRUCT()
 
 #define TYPE CONTEXT
 STRUCT()
+  EXPOSE(int,refcount,) // for memory management
   HIDE(
     int  bsx;           // block size
     int  bsy;

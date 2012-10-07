@@ -44,6 +44,7 @@ struct {
   ptrdiff_t hull;
   ptrdiff_t pvel;
   ptrdiff_t model;
+  ptrdiff_t refcount;
   FLEXER_EXTRAS
 } flexer[OBJT_MAX];
 
@@ -61,6 +62,7 @@ struct {
 #define OBJF_BNDZ (1<< 9) //clips against context edge Z-wise
 #define OBJF_BNDT (1<<10) //clips against context top edge
 #define OBJF_BNDB (1<<11) //clips against context bottom edge
+#define OBJF_REFC (1<<12) //refcount
 
 //CoMmanD Flags
 #define CMDF_NEW  (1<< 0) //new client connect

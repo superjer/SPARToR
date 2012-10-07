@@ -117,7 +117,12 @@ void command(const char *s)
 
     }else if( strcmp(q,"bind")==0 ) {
       char *arg0 = strtok(NULL," ");
-      char *arg1 = strtok(NULL," ");
+      char *arg1 = strtok(NULL,"\0");
+      if( arg1 ) {
+        char *s = arg1 + strlen(arg1);
+        while( --s>arg1 && isspace(*s) )
+          *s = '\0';
+      }
       bind( arg0, arg1 );
 
     }else if( strcmp(q,"slow")==0 ) {
@@ -259,6 +264,11 @@ static void bind( char *dev_sym, char *press_cmdname )
     else                             { press =-1; cmdname = press_cmdname;   }
   }
 
+  if( device && cmdname[0]=='!' ) {
+    mod_keybind( device, sym, 1, 0, cmdname+1 );
+    return;
+  }
+
   for( cmd=0; cmd<numinputnames; cmd++ )
     if( 0==strcmp(inputnames[cmd].name,cmdname) )
       break;
@@ -271,8 +281,8 @@ static void bind( char *dev_sym, char *press_cmdname )
     return;
   }
 
-  if( press!=0 ) mod_keybind( device, sym, 1, inputnames[cmd].presscmd   );
-  if( press!=1 ) mod_keybind( device, sym, 0, inputnames[cmd].releasecmd );
+  if( press!=0 ) mod_keybind( device, sym, 1, inputnames[cmd].presscmd  , NULL );
+  if( press!=1 ) mod_keybind( device, sym, 0, inputnames[cmd].releasecmd, NULL );
 }
 
 void exec_commands( char *name )

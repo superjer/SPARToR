@@ -330,19 +330,21 @@ const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, in
   return NULL;
 }
 
-void destroy_context(CONTEXT_t *co)
+void destroy_context(CONTEXT_t *co, int really)
 {
-  //free(co->map); FIXME: leak! change when gc for contexts is done
-  //free(co->dmap);
+  if( really ) {
+    free(co->map);
+    free(co->dmap);
+  }
   co->map = co->dmap = NULL;
 }
 
-#define UNDOLEVELS 75
+#define UNDOLEVELS 25
 static CONTEXT_t constack[UNDOLEVELS];
 
 void push_context(CONTEXT_t *co)
 {
-  destroy_context( constack + UNDOLEVELS-1 );
+  destroy_context( constack + UNDOLEVELS-1, 1 );
   memmove( constack+1, constack, sizeof *constack * (UNDOLEVELS-1) );
   create_context( constack, co, 0, 0, 0 );
 }
@@ -350,7 +352,7 @@ void push_context(CONTEXT_t *co)
 void pop_context(CONTEXT_t *co)
 {
   if( !constack->map ) { SJC_Write("No context to pop!"); return; }
-  destroy_context(co);
+  destroy_context( co, 1 );
   *co = *constack;
   memmove( constack, constack+1, sizeof *constack * (UNDOLEVELS-1) );
   constack[UNDOLEVELS-1].map = NULL;

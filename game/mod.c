@@ -10,7 +10,6 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-
 #include "mod.h"
 #include "saveload.h"
 #include "sjglob.h"
@@ -19,13 +18,11 @@
 #include "command.h"
 #include "keynames.h"
 
-
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
                        {"/persons.png"    ,0},
                        {"/blankhud.png"   ,0}};
 size_t num_sys_tex = COUNTOF(sys_tex);
-
 
 INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
                             {"right"      ,CMDT_1RIGHT   ,CMDT_0RIGHT   },
@@ -60,7 +57,6 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
                             {"edit-undo"  ,CMDT_1EUNDO   ,CMDT_0EUNDO   }};
 int numinputnames = COUNTOF(inputnames);
 
-
 int    myghost;     //obj number of local player ghost
 int    mycontext;
 
@@ -74,7 +70,6 @@ int    setmodel; //FIXME REMOVE! change local player model
 CB    *hack_map; //FIXME remove hack_map and _dmap someday
 CB    *hack_dmap;
 
-
 static int    binds_size = 0;
 static struct {
   unsigned short sym;
@@ -87,11 +82,10 @@ static int    myspr    = 0;
 static int    mytex    = 0;
 static FCMD_t magic_c;      // magical storage for an extra command, triggered from console
 
-
+// prototypes
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z );
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
-
 
 void mod_setup(Uint32 setupfr)
 {
@@ -127,7 +121,6 @@ void mod_setup(Uint32 setupfr)
   SJC_Write("Default controls: \\#F80A, S, Numpad Arrows, F11");
 }
 
-
 void mod_recvobj(OBJ_t *o)
 {
   CONTEXT_t *co;
@@ -142,18 +135,15 @@ void mod_recvobj(OBJ_t *o)
   }
 }
 
-
 void mod_setvideo(int w,int h)
 {
   mod_loadsurfs(0);
 }
 
-
 void mod_quit()
 {
   mod_loadsurfs(1);
 }
-
 
 void mod_showbinds()
 {
@@ -193,7 +183,6 @@ void mod_showbinds()
   }
 }
 
-
 void mod_keybind(int device,int sym,int press,char cmd)
 {
   int i;
@@ -212,7 +201,6 @@ void mod_keybind(int device,int sym,int press,char cmd)
   binds[i].press = press;
   binds[i].cmd = cmd;
 }
-
 
 // returns 0 iff a command is created to be put on the network
 int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
@@ -242,10 +230,6 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
         return -1;
 
       if( c->cmd==CMDT_1EPREV ) { //select previous tile
-        v_fovy += 0.5f; //FIXME move somewhere else
-        if( v_fovy > 90.0f )
-          v_fovy = 90.0f;
-
         if( !spr_count ) return -1;
         myspr = (myspr + spr_count - 1) % spr_count;
         mytex = sprites[myspr].texnum;
@@ -253,10 +237,6 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       }
 
       if( c->cmd==CMDT_1ENEXT ) { //select next tile
-        v_fovy -= 0.5f; //FIXME move somewhere else
-        if( v_fovy < 0.1f )
-          v_fovy = 0.1f;
-
         if( !spr_count ) return -1;
         myspr = (myspr + 1) % spr_count;
         mytex = sprites[myspr].texnum;
@@ -351,13 +331,11 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
   return -1;
 }
 
-
 int safe_atoi(const char *s)
 {
   if( !s ) return 0;
   return atoi(s);
 }
-
 
 int mod_command(char *q)
 {
@@ -443,7 +421,6 @@ int mod_command(char *q)
   return 1;
 }
 
-
 void mod_loadsurfs(int quit)
 {
   size_t i;
@@ -464,7 +441,6 @@ void mod_loadsurfs(int quit)
 
   SJglobfree( files );
 }
-
 
 void mod_predraw(Uint32 vidfr)
 {
@@ -490,7 +466,6 @@ void mod_predraw(Uint32 vidfr)
   }
 }
 
-
 void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 {
   if( !fr[vidfrmod].objs[o->context].type ) {
@@ -505,23 +480,18 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
   }
 }
 
-
 void mod_huddraw(Uint32 vidfr)
 {
-  SJGL_SetTex( sys_tex[TEX_HUD].num  );
-  SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
-  SJGL_Blit( &(REC){0,0,160,50}, 160, NATIVEH-50, 0 );
-  SJGL_Blit( &(REC){0,0,160,50}, 320, NATIVEH-50, 0 );
-
   MOTHER_t *mo = fr[vidfr%maxframes].objs[0].data;
 
-  int i;
-  for( i=0; i<6; i++ ) {
-    if( !mo->party[i] )
-      continue;
+  if( mo->active && mo->pc )
+  {
+    int x = 57;
 
-    int x = 57 + i*160;
-    PERSON_t *pe = fr[vidfr%maxframes].objs[mo->party[i]].data;
+    PERSON_t *pe = fr[vidfr%maxframes].objs[mo->active].data;
+
+    SJGL_SetTex( sys_tex[TEX_HUD].num );
+    SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
 
     #define BAR_W(stat) (pe->stat>0 ? 15+32*pe->stat/pe->max_##stat : 0)
     SJGL_Blit( &(REC){0,50+6*0,BAR_W(hp),6}, x   , NATIVEH-50+13+9*0, 0 );
@@ -533,9 +503,10 @@ void mod_huddraw(Uint32 vidfr)
     SJGL_Blit( &(REC){0,50+6*6,BAR_W(to),6}, x   , NATIVEH-50+13+9*3, 0 );
     SJGL_Blit( &(REC){0,50+6*7,BAR_W(xp),6}, x+51, NATIVEH-50+13+9*3, 0 );
     #undef BAR_W
+
+    SJF_DrawText( 3, NATIVEH-49, SJF_LEFT, "%s", pe->name );
   }
 }
-
 
 void mod_postdraw(Uint32 vidfr)
 {
@@ -590,7 +561,6 @@ void mod_postdraw(Uint32 vidfr)
 
   glPopAttrib();
 }
-
 
 void mod_outerdraw(Uint32 vidfr,int w,int h)
 {
@@ -661,7 +631,6 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
   SJF_DrawText(i_mousex+7,i_mousey+15,SJF_LEFT,"%d",ylayer);
 }
 
-
 void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
 {
   switch( ob->type ) {
@@ -705,7 +674,6 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
     SJGL_Wall3D( spr, x, y, z );
 }
 
-
 static int sprite_at(int texnum, int x, int y)
 {
   size_t i;
@@ -722,4 +690,3 @@ static int sprite_at(int texnum, int x, int y)
 
   return -1; 
 }
-

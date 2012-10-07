@@ -107,20 +107,20 @@ int SJGL_Box3D(SPRITE_T *spr, int x, int y, int z)
   //    \ | /
   //      m
 
-  #define d_ glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x2,y0,z );
+  #define d_ glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x2,y0,z );
   #define c_ glTexCoord2i(s->x+23  , s->y        ); glVertex3i(x2,y0,z2);
-  #define e_ glTexCoord2i(s->x+s->w, s->y+12     ); glVertex3i(x ,y0,z2);
+  #define e_ glTexCoord2i(s->x     , s->y+12     ); glVertex3i(x ,y0,z2);
   #define g_ glTexCoord2i(s->x+23  , syfl+24     ); glVertex3i(x ,y ,z );
-  #define b_ glTexCoord2i(s->x     , syfl+12     ); glVertex3i(x2,y ,z );
+  #define b_ glTexCoord2i(s->x+s->w, syfl+12     ); glVertex3i(x2,y ,z );
   #define a_ glTexCoord2i(s->x+23  , syfl        ); glVertex3i(x2,y ,z2);
-  #define f_ glTexCoord2i(s->x+s->w, syfl+12     ); glVertex3i(x ,y ,z2);
-  #define n_ glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x ,y2,z2);
+  #define f_ glTexCoord2i(s->x     , syfl+12     ); glVertex3i(x ,y ,z2);
+  #define n_ glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x ,y2,z2);
   #define m_ glTexCoord2i(s->x+23  , s->y+s->h   ); glVertex3i(x ,y2,z );
-  #define k_ glTexCoord2i(s->x     , s->y+s->h-12); glVertex3i(x2,y2,z );
-  #define p_ glTexCoord2i(s->x     , s->y     ); glVertex3i(x2-12,y,z -12);
-  #define q_ glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x -12,y,z2-12);
-  #define s_ glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x +12,y,z -12);
-  #define r_ glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x -12,y,z +12);
+  #define k_ glTexCoord2i(s->x+s->w, s->y+s->h-12); glVertex3i(x2,y2,z );
+  #define p_ glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2-12,y,z -12);
+  #define q_ glTexCoord2i(s->x     , s->y     ); glVertex3i(x -12,y,z2-12);
+  #define s_ glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x +12,y,z -12);
+  #define r_ glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x -12,y,z +12);
 
   // upper part
   glBegin(GL_TRIANGLE_FAN);

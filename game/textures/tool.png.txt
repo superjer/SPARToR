@@ -1,8 +1,6 @@
-.default  size 46 24  anchor mid cen  floor
+.default  size 46 24  anchor mid cen
 
-# this is a comment!
-
-.grid  cols 11  pos 0 0
+.grid  cols 11  pos 0 0  floor
   tool-null     tool nul
   tool-solid    tool sol
   tool-platform tool plat
@@ -14,4 +12,13 @@
   tool-visible  tool vis
   tool-10
   tool-11
+.end
+
+# let's just sneak sluggathor in over here:
+
+.grid  pos 0 177  size 20 16  anchor bot cen
+  slug_r  anchor cen bot
+  slug_l
+  slug_ouch_r
+  slug_ouch_l
 .end

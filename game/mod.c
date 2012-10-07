@@ -89,7 +89,7 @@ void mod_setup(Uint32 setupfr)
   memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
 
   //make default context object (map)
-  fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
+  fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, OBJF_REFC, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
   CONTEXT_t *co = fr[setupfr].objs[1].data;
   co->bsx = co->bsy = co->bsz = 16;
   co->x   = co->y   = co->z   = 15;
@@ -257,7 +257,7 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
       c->cmd = binds[i].cmd;
 
       if( !editmode )
-        return 0;
+        return c->cmd<=CMDT_1CON ? 0 : -1;
 
       if( c->cmd==CMDT_0EPREV || c->cmd==CMDT_0ENEXT ) //these shouldn't really happen and wouldn't mean anything
         return -1;

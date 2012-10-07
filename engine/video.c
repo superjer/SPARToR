@@ -45,7 +45,7 @@ int v_targy      = 0;
 int v_targz      = 0;
 
 int v_eyedist    = 1;
-float v_fovy     = 60.0f;
+float v_fovy     = 20.0f;
 
 int v_w;              // width, height of video output
 int v_h;
@@ -155,7 +155,7 @@ void render()
   v_eyedist = sqrtf( 3*diagdist*diagdist );
 
   //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
-  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,10+v_eyedist,4000+v_eyedist*2);
+  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,v_eyedist,v_eyedist*2+4000);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();

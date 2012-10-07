@@ -83,6 +83,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   az->tilez       = 11;
   az->dir         = S;
   az->character   = CHR_AZMA;
+  az->name        = "Azmagelle";
   az->armed       = 1;
   az->hp          = 77;
   az->mp          = 100;
@@ -110,6 +111,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   gy->tilez       = 15;
   gy->dir         = S;
   gy->character   = CHR_GYLLIOC;
+  gy->name        = "Gyllioc";
   gy->armed       = 1;
   gy->hp          = 99;
   gy->mp          = 67;
@@ -136,6 +138,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->tilez       = 15;
   en->dir         = S;
   en->character   = CHR_SLUG;
+  en->name        = "Sluggathor";
   en->armed       = 1;
   en->hp          = 1;
   en->mp          = 1;

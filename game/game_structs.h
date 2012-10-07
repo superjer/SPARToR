@@ -50,6 +50,7 @@ STRUCT()
     int stopcounter;
     int incapcounter;
     int character;
+    const char *name;
     int armed;
     int hp;
     int mp;

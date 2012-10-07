@@ -64,9 +64,10 @@ CB    *hack_dmap;
 static int    binds_size = 0;
 static struct {
   unsigned short sym;
-  unsigned char device;
-  unsigned char press;
+  unsigned char  device;
+  unsigned char  press;
   unsigned char  cmd;
+  char          *script;
 }            *binds;
 static int    editmode = 0;
 static int    myspr    = 0;
@@ -168,10 +169,11 @@ void mod_showbinds()
   int i,j;
 
   for(i=0; i<binds_size; i++) {
-    if( !binds[i].cmd )
+    if( !binds[i].cmd && !binds[i].script )
       continue;
 
-    char plusminus = binds[i].press ? '+' : '-';
+    char plusminus[3] = "";
+    plusminus[0] = binds[i].press ? '+' : '-';
 
     const char *devname = "?";
     int device = MIN( INP_MAX, binds[i].device );
@@ -191,17 +193,22 @@ void mod_showbinds()
     char cbuf[10] = "badcmd";
     int cmd = binds[i].cmd;
     const char *cmdname = cbuf;
-    for(j=0; j<numinputnames; j++)
+    for(j=0; j<numinputnames && cmd; j++)
       if( inputnames[j].presscmd==cmd || inputnames[j].releasecmd==cmd )
         cmdname = inputnames[j].name;
+
+    if( binds[i].script ) {
+      plusminus[1] = '!';
+      cmdname = binds[i].script;
+    }
     if( !cmdname )
       sprintf(cbuf,"%d",cmd);
 
-    SJC_Write("bind %s%s %c%s",devname,symname,plusminus,cmdname);
+    SJC_Write("bind %s%s %s%s",devname,symname,plusminus,cmdname);
   }
 }
 
-void mod_keybind(int device,int sym,int press,char cmd)
+void mod_keybind(int device,int sym,int press,char cmd,char *script)
 {
   int i;
 
@@ -218,6 +225,8 @@ void mod_keybind(int device,int sym,int press,char cmd)
   binds[i].device = device;
   binds[i].press = press;
   binds[i].cmd = cmd;
+  safe_free(binds[i].script);
+  safe_copy(binds[i].script,script);
 }
 
 // returns 0 iff a command is created to be put on the network
@@ -239,6 +248,12 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
   for(i=0; i<binds_size; i++)
     if( binds[i].sym==sym && binds[i].device==device && binds[i].press==press ) {
       memset( c, 0, sizeof *c );
+
+      if( binds[i].script ) {
+        command( binds[i].script );
+        return -1;
+      }
+
       c->cmd = binds[i].cmd;
 
       if( !editmode )

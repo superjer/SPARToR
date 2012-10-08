@@ -28,14 +28,6 @@ bind mouse4 edit-prev
 bind mouse5 edit-next
 bind pagedown edit-texdn
 bind pageup edit-texup
-bind 0 edit-lay0
-bind 1 edit-lay1
-bind 2 edit-lay2
-bind 3 edit-lay3
-bind 4 edit-lay4
-bind 5 edit-lay5
-bind 6 edit-lay6
-bind 7 edit-lay7
-bind 8 edit-lay8
-bind 9 edit-lay9
+bind kp_plus edit-laydn
+bind kp_minus edit-layup
 bind backspace edit-undo

@@ -15,6 +15,7 @@
 #include "sjglob.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
+#include "video_helpers.h"
 #include "command.h"
 #include "keynames.h"
 
@@ -561,6 +562,9 @@ void mod_postdraw(Uint32 vidfr)
     draw_sprite_on_tile( dspr, co, i, j, k );
   }
 
+  glDepthMask( GL_FALSE );
+  draw_guides(co,upx,upy,upz);
+  glDepthMask( GL_TRUE );
   glPopAttrib();
 }
 

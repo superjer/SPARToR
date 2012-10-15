@@ -36,7 +36,7 @@ void mod_quit();
 void mod_showbinds();
 void mod_keybind(int device,int sym,int press,char cmd,char *script);
 int  mod_mkcmd(FCMD_t *c,int device,int sym,int press);
-int  mod_command(char *q);
+int  mod_command(char *q,char *args);
 void mod_loadsurfs(int quit);
 void mod_predraw(Uint32 vidfr);
 void mod_draw(int objid,Uint32 vidfr,OBJ_t *o);

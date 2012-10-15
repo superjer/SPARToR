@@ -27,29 +27,31 @@
 #include "saveload.h"
 #include "sprite.h"
 #include "keynames.h"
+#include "helpers.h"
 
 static void bind( char *dev_sym, char *press_cmdname );
 
 void command(const char *s)
 {
   char *p, *q;
+  char buf[strlen(s)+1];
 
-  q = p = malloc(strlen(s)+1);
-  strcpy(p,s);
+  strcpy(buf,s);
+  q = p = buf;
 
   while( *q ) {
     if( isspace(*q) ) *q = ' ';
     q++;
   }
 
-  q = strtok(p," ");
+  q = tok(p," ");
 
   do {
     if( q==NULL ) {
       ;
 
     }else if( strcmp(q,"exec")==0 ) {
-      char *file = strtok(NULL," ");
+      char *file = tok(p," ");
       if( !file ) { SJC_Write("You must specify a name in game/console/*.txt"); return; }
       exec_commands(file);
 
@@ -68,13 +70,13 @@ void command(const char *s)
       cleanup();
 
     }else if( strcmp(q,"listen")==0 ) {
-      char *port = strtok(NULL," ");
+      char *port = tok(p," ");
       host_start(port?atoi(port):0);
 
     }else if( strcmp(q,"connect")==0 ) {
-      char *hostname = strtok(NULL," :");
-      char *port = strtok(NULL," :");
-      char *clientport = strtok(NULL," ");
+      char *hostname = tok(p," :");
+      char *port = tok(p," :");
+      char *clientport = tok(p," ");
       client_start(hostname,(port?atoi(port):0),(clientport?atoi(clientport):0));
 
     }else if( strcmp(q,"disconnect")==0 ) {
@@ -103,8 +105,8 @@ void command(const char *s)
       v_oscillo = a_musictest = a_musictest ? 0 : 1;
    
     }else if( strcmp(q,"fullscreen")==0 || strncmp(q,"window",6)==0 ) {
-      char *sw = strtok(NULL," x");
-      char *sh = strtok(NULL," ");
+      char *sw = tok(p," x");
+      char *sh = tok(p," ");
       int w = sw?atoi(sw):0;
       int h = sh?atoi(sh):0;
       int full = strcmp(q,"fullscreen")==0 ? 1 : 0;
@@ -116,8 +118,8 @@ void command(const char *s)
         setvideosoon(0,0,full,1);
 
     }else if( strcmp(q,"bind")==0 ) {
-      char *arg0 = strtok(NULL," ");
-      char *arg1 = strtok(NULL,"\0");
+      char *arg0 = tok(p," ");
+      char *arg1 = tok(p,"\0");
       if( arg1 ) {
         char *s = arg1 + strlen(arg1);
         while( --s>arg1 && isspace(*s) )
@@ -154,7 +156,7 @@ void command(const char *s)
       }
 
     }else if( strcmp(q,"save")==0 ) {
-      char *name = strtok(NULL," ");
+      char *name = tok(p," ");
       if( name==NULL ) {
         SJC_Write("Please specify a file name to save");
         break;
@@ -162,7 +164,7 @@ void command(const char *s)
       save_context( name, mycontext, hotfr );
 
     }else if( strcmp(q,"load")==0 ) {
-      char *name = strtok(NULL," ");
+      char *name = tok(p," ");
       if( name==NULL ) {
         SJC_Write("Please specify a file name to load");
         break;
@@ -170,7 +172,7 @@ void command(const char *s)
       load_context( name, mycontext, hotfr );
 
     }else if( strcmp(q,"spr")==0 ) {
-      char *num = strtok(NULL," ");
+      char *num = tok(p," ");
       if( num==NULL ) {
         SJC_Write("There are %d sprites",spr_count);
         break;
@@ -193,7 +195,7 @@ void command(const char *s)
                   sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
 
     }else if( strcmp(q,"fovy")==0 ) {
-      char *num = strtok(NULL," ");
+      char *num = tok(p," ");
       if( num==NULL ) {
         SJC_Write("fovy is %f, eyedist is %d",v_fovy,v_eyedist);
         break;
@@ -206,13 +208,11 @@ void command(const char *s)
       v_fovy = n;
       break;
 
-    }else if( mod_command(q) ) {
+    }else if( mod_command(q,p) ) {
       SJC_Write("Huh?");
 
     }
   } while(0);
-
-  free(p);
 }
 
 static void parse_dev_sym( int *devnum, int *sym, char *dev_sym )

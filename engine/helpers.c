@@ -41,3 +41,22 @@ int pointlis_add( thing **list, thing item )
   list[0][n] = item;
   return 1;
 }
+
+char *tok_( char **restrict buf, const char *restrict sep )
+{
+  if( !*buf || !**buf ) return NULL;
+
+  char *p = *buf;
+  char *found = strpbrk(p,sep);
+
+  if( found )
+    *buf = found;
+  else
+    while( *(*buf)++ ) ; // no body
+
+  size_t seplen = strspn(*buf,sep);
+  **buf = '\0';
+  *buf += seplen;
+
+  return p;
+}

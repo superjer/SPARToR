@@ -18,6 +18,7 @@
 #include "video_helpers.h"
 #include "command.h"
 #include "keynames.h"
+#include "helpers.h"
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
@@ -361,7 +362,7 @@ int safe_atoi(const char *s)
   return atoi(s);
 }
 
-int mod_command(char *q)
+int mod_command(char *q,char *args)
 {
   if( q==NULL ){
     ;
@@ -372,14 +373,14 @@ int mod_command(char *q)
     return 0;
 
   }else if( strcmp(q,"model")==0 ){
-    setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
+    setmodel = safe_atoi(tok(args," ")); // FIXME: lame hack
     return 0;
 
   }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
-    int x = safe_atoi(strtok(NULL," "));
-    int y = safe_atoi(strtok(NULL," "));
-    int z = safe_atoi(strtok(NULL," "));
+    int x = safe_atoi(tok(args," "));
+    int y = safe_atoi(tok(args," "));
+    int z = safe_atoi(tok(args," "));
     char chr = strcmp(q,"bounds")==0 ? 'b' : 'z';
 
     if( !x || !y || !z ) {
@@ -404,8 +405,8 @@ int mod_command(char *q)
 
   }else if( strcmp(q,"tilespacing")==0 ){
     size_t n = 0;
-    int tileuw = safe_atoi(strtok(NULL," "));
-    int tileuh = safe_atoi(strtok(NULL," "));
+    int tileuw = safe_atoi(tok(args," "));
+    int tileuh = safe_atoi(tok(args," "));
 
     if( !tileuw || !tileuh ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;

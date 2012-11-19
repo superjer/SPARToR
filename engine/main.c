@@ -24,6 +24,7 @@
 #include "input.h"
 #include "video.h"
 #include "audio.h"
+#include "gui.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
 #include <math.h>
@@ -335,6 +336,8 @@ void advance()
     adv_frames++;
     setsurefr(hotfr>50 ? hotfr-50 : 0); //FIXME: UGLY HACK! surefr should be determined for REAL
   }
+
+  gui_update(hotfr);
 }
 
 

@@ -36,7 +36,6 @@
 #define STRINGIFY(a) STRINGIFY_(a)
 
 
-#define FLEXER_EXTRAS
 struct {
   const char *name;
   ptrdiff_t pos;
@@ -45,7 +44,9 @@ struct {
   ptrdiff_t pvel;
   ptrdiff_t model;
   ptrdiff_t refcount;
+#ifdef FLEXER_EXTRAS
   FLEXER_EXTRAS
+#endif
 } flexer[OBJT_MAX];
 
 

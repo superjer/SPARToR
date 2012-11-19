@@ -555,9 +555,11 @@ void mod_huddraw(Uint32 vidfr)
     POPUP_t *pop = ob->data;
     V *pos  = flex(ob,pos);
     V *hull = flex(ob,hull);
-    SJGL_SetTex( 0 );
-    SJGL_SetTex( 2 ); // FIXME: NO NO NO!
-    SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+    if( i==gui_hover ) {
+      SJGL_SetTex( 0 );
+      SJGL_SetTex( 2 ); // FIXME: NO NO NO!
+      SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+    }
     SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
   }
 }

@@ -526,13 +526,14 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 
 void mod_huddraw(Uint32 vidfr)
 {
-  MOTHER_t *mo = fr[vidfr%maxframes].objs[0].data;
+  Uint32 vidfrmod = vidfr%maxframes;
+  MOTHER_t *mo = fr[vidfrmod].objs[0].data;
 
   if( mo->active && mo->pc )
   {
     int x = 57;
 
-    PERSON_t *pe = fr[vidfr%maxframes].objs[mo->active].data;
+    PERSON_t *pe = fr[vidfrmod%maxframes].objs[mo->active].data;
 
     SJGL_SetTex( sys_tex[TEX_HUD].num );
     SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
@@ -549,6 +550,25 @@ void mod_huddraw(Uint32 vidfr)
     #undef BAR_W
 
     SJF_DrawText( 3, NATIVEH-49, SJF_LEFT, "%s", pe->name );
+  }
+
+  // draw menu background and then menu items
+  SJGL_SetTex( 0 );
+  SJGL_SetTex( sys_tex[TEX_HUD].num );
+  SJGL_Blit( &(REC){512-75,0,75,150}, NATIVEW-75, 0, 0 );
+
+  int i;
+  for( i=0; i<maxobjs; i++ )
+  {
+    OBJ_t *ob = fr[vidfrmod].objs+i;
+    if( ob->type != OBJT_POPUP ) continue;
+    POPUP_t *pop = ob->data;
+    V *pos  = flex(ob,pos);
+    V *hull = flex(ob,hull);
+    SJGL_SetTex( 0 );
+    SJGL_SetTex( 2 ); // FIXME: NO NO NO!
+    SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+    SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
   }
 }
 

@@ -62,6 +62,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   MKOBJ( gy, PERSON, 1, PERS_FLAGS );
   int gyslot = slot0;
   MKOBJ( en, PERSON, 1, PERS_FLAGS );
+  //int enslot = slot0;
 
   SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
 
@@ -71,7 +72,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
 
   memset(gh,0,sizeof *gh);
   gh->client      = client_nr;
-  gh->avatar      = slot0;
+  gh->avatar      = gyslot;
   gh->pos         = (V){340,0,340};
 
   memset(az,0,sizeof *az);
@@ -156,6 +157,25 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->max_ml      = 10;
   en->max_to      = 100;
   en->max_xp      = 10;
+
+  #define MKMENU(button,text_,ypos)              \
+    MKOBJ( button, POPUP, 0, 0 );                \
+    button->pos     = (V){NATIVEW-62,ypos,0};    \
+    button->hull[0] = (V){0,0,0};                \
+    button->hull[1] = (V){50,18,0};              \
+    button->visible = 1;                         \
+    button->enabled = 1;                         \
+    button->active  = 0;                         \
+    button->click   = NULL;                      \
+    button->text    = text_;
+  MKMENU(menu1,"MOVE"   , 10)
+  MKMENU(menu2,"ATTACK" , 30)
+  MKMENU(menu3,"SPECIAL", 50)
+  MKMENU(menu4,"MAGIC"  , 70)
+  MKMENU(menu5,"ITEM"   , 90)
+  MKMENU(menu6,"ORDERS" ,110)
+  MKMENU(menu7,"STATUS" ,130)
+  #undef MKMENU
 }
 
 int in_party(MOTHER_t *mo, int objid)

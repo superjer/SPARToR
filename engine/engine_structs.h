@@ -32,7 +32,6 @@ STRUCT()
   HIDE(
     int visible;
     int enabled;
-    int hover;
     int active;
     int (*click)(OBJ_t *obj);
     char *text;

@@ -12,6 +12,7 @@ extern int v_showstats;
 extern int v_oscillo;
 extern int v_fullscreen;
 extern int v_center;
+extern int v_scale;
 
 extern int v_camx;
 extern int v_camy;

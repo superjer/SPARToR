@@ -1,13 +1,11 @@
 // DO NOT USE INCLUDE GUARDS HERE
 
-
 #define TYPE EMPTY
 STRUCT()
   HIDE(
     int decoy;
   )
 #include "endstruct.h"
-
 
 #define TYPE CONTEXT
 STRUCT()
@@ -27,4 +25,16 @@ STRUCT()
   )
 #include "endstruct.h"
 
-
+#define TYPE POPUP
+STRUCT()
+  EXPOSE(V,pos,)
+  EXPOSE(V,hull,[2])
+  HIDE(
+    int visible;
+    int enabled;
+    int hover;
+    int active;
+    int (*click)(OBJ_t *obj);
+    char *text;
+  )
+#include "endstruct.h"

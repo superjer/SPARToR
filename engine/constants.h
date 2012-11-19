@@ -5,7 +5,8 @@
 
 #define ENGINE_OBJT_LIST() \
   OBJT_EMPTY = 0,          \
-  OBJT_CONTEXT,
+  OBJT_CONTEXT,            \
+  OBJT_POPUP,
 
 
 #endif

@@ -79,6 +79,7 @@ static FCMD_t magic_c;      // magical storage for an extra command, triggered f
 // prototypes
 static int proc_edit_cmd(FCMD_t *c,int device,int sym,int press);
 static int gui_click( int press );
+static int gui_element_at( int x, int y );
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z );
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
@@ -276,22 +277,33 @@ int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
 // returns 0 iff the GUI did not eat the click
 static int gui_click( int press )
 {
+  int elem = gui_element_at(i_mousex,i_mousey);
+  if( !elem || !press )
+    return 0;
+
+  POPUP_t *pop = fr[hotfr%maxframes].objs[elem].data;
+  SJC_Write("Clicked on button: %s",pop->text);
+  return 1;
+}
+
+// returns obj index of a GUI element (POPUP) or 0
+static int gui_element_at( int x, int y )
+{
   int i;
-  int x = i_mousex / v_scale;
-  int y = i_mousey / v_scale;
+  x /= v_scale;
+  y /= v_scale;
 
   for( i=0; i<maxobjs; i++ ) {
     OBJ_t *ob = fr[hotfr%maxframes].objs+i;
     if( ob->type!=OBJT_POPUP )
       continue;
-    POPUP_t *pop = ob->data;
+    //POPUP_t *pop = ob->data;
     V *pos  = flex(ob,pos);
     V *hull = flex(ob,hull);
     if( x<pos->x+hull[0].x || x>=pos->x+hull[1].x ||
         y<pos->y+hull[0].y || y>=pos->y+hull[1].y )
       continue;
-    SJC_Write("Clicked on button: %s",pop->text);
-    return 1;
+    return i;
   }
   return 0;
 }

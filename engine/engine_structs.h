@@ -33,6 +33,7 @@ STRUCT()
     int visible;
     int enabled;
     int active;
+    unsigned int layer;
     int (*click)(OBJ_t *obj);
     char *text;
   )

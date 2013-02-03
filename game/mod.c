@@ -256,8 +256,21 @@ static int gui_click( int press )
   if( !elem || !press )
     return 0;
 
-  POPUP_t *pop = fr[hotfr%maxframes].objs[elem].data;
+  unsigned int hotfrmod = hotfr%maxframes;
+  POPUP_t *pop = fr[hotfrmod].objs[elem].data;
+  MOTHER_t *mo = fr[hotfrmod].objs[0].data;
   SJC_Write("Clicked on button: %s",pop->text);
+
+  if( strcmp(pop->text,"MOVE")==0 ) {
+    mo->menulayer = MOVE;
+  } else if( strcmp(pop->text,"WALK")==0 ) {
+    mo->menulayer = NOLAYER;
+  } else if( strcmp(pop->text,"RUN")==0 ) {
+    mo->menulayer = NOLAYER;
+  } else if( strcmp(pop->text,"SPRINT")==0 ) {
+    mo->menulayer = NOLAYER;
+  }
+
   return 1;
 }
 

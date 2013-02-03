@@ -30,9 +30,19 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
           mo->turnstart = hotfr;
           mo->intervalstart = hotfr;
           mo->pc = in_party(mo,i);
+          if( mo->pc )
+            mo->menulayer = MAIN;
+          else
+            mo->menulayer = NOLAYER;
           break;
         }
       }
+
+  for(i=0; i<maxobjs; i++)
+    if( fr[b].objs[i].type==OBJT_POPUP ) {
+      POPUP_t *pop = fr[b].objs[i].data;
+      pop->visible = (pop->layer == mo->menulayer);
+    }
 
   // if no one can be made active, make sure to go to the next interval
   if( !mo->active ) mo->intervalstart = hotfr;
@@ -83,6 +93,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   az->tilex       = 11;
   az->tilez       = 11;
   az->dir         = S;
+  az->gait        = RUNNING;
   az->character   = CHR_AZMA;
   az->name        = "Azmagelle";
   az->armed       = 1;
@@ -111,6 +122,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   gy->tilex       = 13;
   gy->tilez       = 15;
   gy->dir         = S;
+  gy->gait        = RUNNING;
   gy->character   = CHR_GYLLIOC;
   gy->name        = "Gyllioc";
   gy->armed       = 1;
@@ -138,6 +150,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->tilex       = 15;
   en->tilez       = 15;
   en->dir         = S;
+  en->gait        = RUNNING;
   en->character   = CHR_SLUG;
   en->name        = "Sluggathor";
   en->armed       = 1;
@@ -158,23 +171,30 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->max_to      = 100;
   en->max_xp      = 10;
 
-  #define MKMENU(button,text_,ypos)              \
-    MKOBJ( button, POPUP, 0, 0 );                \
-    button->pos     = (V){NATIVEW-62,ypos,0};    \
-    button->hull[0] = (V){0,0,0};                \
-    button->hull[1] = (V){50,18,0};              \
-    button->visible = 1;                         \
-    button->enabled = 1;                         \
-    button->active  = 0;                         \
-    button->click   = NULL;                      \
-    button->text    = text_;
-  MKMENU(menu1,"MOVE"   , 10)
-  MKMENU(menu2,"ATTACK" , 30)
-  MKMENU(menu3,"SPECIAL", 50)
-  MKMENU(menu4,"MAGIC"  , 70)
-  MKMENU(menu5,"ITEM"   , 90)
-  MKMENU(menu6,"ORDERS" ,110)
-  MKMENU(menu7,"STATUS" ,130)
+  #define MKMENU(text_,ypos,layer_)                \
+    do {                                           \
+      MKOBJ( button, POPUP, 0, 0 );                \
+      button->pos     = (V){NATIVEW-62,ypos,0};    \
+      button->hull[0] = (V){0,0,0};                \
+      button->hull[1] = (V){50,18,0};              \
+      button->visible = 0;                         \
+      button->enabled = 1;                         \
+      button->active  = 0;                         \
+      button->layer   = layer_;                    \
+      button->click   = NULL;                      \
+      button->text    = text_;                     \
+    } while(0)
+  MKMENU("MOVE"   , 10,MAIN);
+  MKMENU("ATTACK" , 30,MAIN);
+  MKMENU("SPECIAL", 50,MAIN);
+  MKMENU("MAGIC"  , 70,MAIN);
+  MKMENU("ITEM"   , 90,MAIN);
+  MKMENU("ORDERS" ,110,MAIN);
+  MKMENU("STATUS" ,130,MAIN);
+
+  MKMENU("WALK"  , 10,MOVE);
+  MKMENU("RUN"   , 30,MOVE);
+  MKMENU("SPRINT", 50,MOVE);
   #undef MKMENU
 }
 

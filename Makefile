@@ -4,7 +4,7 @@
 UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Same for all platforms, probably
-CC = gcc
+CC = gcc #tcc
 OBJDIR = objects
 SRCS = $(wildcard engine/*.c)
 SRCS += $(wildcard engine/mt19937ar/*.c)
@@ -13,8 +13,10 @@ OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 GITCOMMIT := $(shell sh -c "git branch -v | grep '^\*' | sed 's/\s\+/ /g' | cut -d' ' -f2,3")
 
-FLAGS = --std=c99 -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
+FLAGS = -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
 FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
+FLAGS += -std=c99
+
 
 INC = -Iengine -Igame
 

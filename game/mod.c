@@ -553,14 +553,17 @@ void mod_huddraw(Uint32 vidfr)
     OBJ_t *ob = fr[vidfrmod].objs+i;
     if( ob->type != OBJT_POPUP ) continue;
     POPUP_t *pop = ob->data;
-    V *pos  = flex(ob,pos);
-    V *hull = flex(ob,hull);
-    if( i==gui_hover ) {
-      SJGL_SetTex( 0 );
-      SJGL_SetTex( 2 ); // FIXME: NO NO NO!
-      SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+
+    if( pop->visible ) {
+      V *pos  = flex(ob,pos);
+      V *hull = flex(ob,hull);
+      if( i==gui_hover && pop->enabled ) {
+        SJGL_SetTex( 0 );
+        SJGL_SetTex( 2 ); // FIXME: NO NO NO!
+        SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+      }
+      SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
     }
-    SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
   }
 }
 

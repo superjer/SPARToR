@@ -41,9 +41,11 @@ int gui_element_at( Uint32 guifr, int x, int y )
     OBJ_t *ob = fr[guifr%maxframes].objs+i;
     if( ob->type!=OBJT_POPUP )
       continue;
-    //POPUP_t *pop = ob->data;
+    POPUP_t *pop = ob->data;
     V *pos  = flex(ob,pos);
     V *hull = flex(ob,hull);
+    if( !pop->visible || !pop->enabled )
+      continue;
     if( x<pos->x+hull[0].x || x>=pos->x+hull[1].x ||
         y<pos->y+hull[0].y || y>=pos->y+hull[1].y )
       continue;

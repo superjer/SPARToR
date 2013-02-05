@@ -33,6 +33,10 @@ enum { ENGINE_OBJT_LIST()
 
 enum DIR8 { NODIR=0, E, NE, N, NW, W, SW, S, SE };
 
+enum MENULAYER { NOLAYER=0, MAIN, MOVE };
+
+enum GAIT { NOGAIT=0, WALKING, RUNNING, SPRINTING };
+
 //character types for PERSON_t
 enum CHARACTERS { CHR_AZMA,
                   CHR_GYLLIOC,

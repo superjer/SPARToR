@@ -11,6 +11,7 @@ STRUCT()
     int pc;                     // if the active is player controlled
     unsigned int intervalstart; // frame number the current time interval started on
     unsigned int turnstart;     // frame number the turn started on
+    enum MENULAYER menulayer;   // where you are at in the menus
   )
 #include "endstruct.h"
 
@@ -45,6 +46,7 @@ STRUCT()
     int tilex;
     int tilez;
     enum DIR8 dir;
+    enum GAIT gait;
     int walkcounter;
     int hitcounter;
     int stopcounter;

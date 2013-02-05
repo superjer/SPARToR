@@ -24,6 +24,9 @@
 #define HAS(v,flags) (((v)&(flags)) == (flags))
 #define COUNTOF(ident) ((sizeof (ident)) / (sizeof *(ident)))
 
+#define safe_free(x) do { free(x); x = NULL; } while(0)
+#define safe_copy(to,from) do { to = NULL; if(from) { to = malloc(strlen(from)+1); strcpy(to,from); } } while(0)
+
 #define assert(expr) { if(!(expr)) SJC_Write( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
 
 
@@ -33,7 +36,6 @@
 #define STRINGIFY(a) STRINGIFY_(a)
 
 
-#define FLEXER_EXTRAS
 struct {
   const char *name;
   ptrdiff_t pos;
@@ -41,7 +43,10 @@ struct {
   ptrdiff_t hull;
   ptrdiff_t pvel;
   ptrdiff_t model;
+  ptrdiff_t refcount;
+#ifdef FLEXER_EXTRAS
   FLEXER_EXTRAS
+#endif
 } flexer[OBJT_MAX];
 
 
@@ -58,6 +63,7 @@ struct {
 #define OBJF_BNDZ (1<< 9) //clips against context edge Z-wise
 #define OBJF_BNDT (1<<10) //clips against context top edge
 #define OBJF_BNDB (1<<11) //clips against context bottom edge
+#define OBJF_REFC (1<<12) //refcount
 
 //CoMmanD Flags
 #define CMDF_NEW  (1<< 0) //new client connect

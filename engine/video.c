@@ -32,6 +32,7 @@ int v_showstats  = 0; // show timing stats
 int v_oscillo    = 0; // show oscilloscope of the sound output
 int v_fullscreen = 0;
 int v_center     = 1; // whether to center the scaled game rendering
+int v_scale      = 2; // current scaling from native res to screen res
 
 int v_camx       = 0;
 int v_camy       = 0;
@@ -66,7 +67,6 @@ static int soon      = 0;
 static int soon_w    = 0;
 static int soon_h    = 0;
 static int soon_full = 0;
-static int scale     = 2;
 
 
 void videoinit()
@@ -103,7 +103,7 @@ void render()
   const SDL_VideoInfo *vidinfo;
   int x,y,w,h;
   int i;
-  Uint32 vidfr = (metafr-1);
+  Uint32 vidfr = metafr;
   Uint32 vidfrmod = vidfr%maxframes;
 
   Uint32 render_start = SDL_GetTicks();
@@ -124,8 +124,8 @@ void render()
   pad_left = 0;
   pad_top  = 0;
   if( v_center ) {
-    pad_left = (w - NATIVEW*scale)/2;
-    pad_top  = (h - NATIVEH*scale)/2;
+    pad_left = (w - NATIVEW*v_scale)/2;
+    pad_top  = (h - NATIVEH*v_scale)/2;
   }
 
   glMatrixMode(GL_TEXTURE);
@@ -146,7 +146,7 @@ void render()
   glClear(GL_DEPTH_BUFFER_BIT);
 
   // viewport and matrixes for game objects
-  glViewport(pad_left,h-NATIVEH*scale-pad_top,NATIVEW*scale,NATIVEH*scale);
+  glViewport(pad_left,h-NATIVEH*v_scale-pad_top,NATIVEW*v_scale,NATIVEH*v_scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
@@ -300,8 +300,8 @@ void render()
   {
     int outerl = 0;   int innerl = pad_left;
     int outert = 0;   int innert = pad_top;
-    int outerr = w;   int innerr = pad_left + NATIVEW*scale;
-    int outerb = h;   int innerb = pad_top  + NATIVEH*scale;
+    int outerr = w;   int innerr = pad_left + NATIVEW*v_scale;
+    int outerb = h;   int innerb = pad_top  + NATIVEH*v_scale;
     glDisable(GL_TEXTURE_2D);
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColor4f(0,0,0,1.0f);
@@ -414,9 +414,9 @@ void setvideo(int w,int h,int go_full,int quiet)
   const SDL_VideoInfo *vidinfo = SDL_GetVideoInfo();
   screen_w = w = vidinfo->current_w;
   screen_h = h = vidinfo->current_h;
-  scale = (h/NATIVEH < w/NATIVEW) ? h/NATIVEH : w/NATIVEW;
-  if( scale<1 )
-    scale = 1;
+  v_scale = (h/NATIVEH < w/NATIVEW) ? h/NATIVEH : w/NATIVEW;
+  if( v_scale<1 )
+    v_scale = 1;
   SJF_Init();
   mod_setvideo(w,h);
   if( !quiet )

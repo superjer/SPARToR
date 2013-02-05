@@ -224,8 +224,8 @@ void input_bindsoon(int presscmd,int releasecmd)
 
 void kwikbind(int device,int sym)
 {
-  mod_keybind( device, sym, 0, kwik_releasecmd );
-  mod_keybind( device, sym, 1, kwik_presscmd );
+  mod_keybind( device, sym, 0, kwik_releasecmd, NULL );
+  mod_keybind( device, sym, 1, kwik_presscmd  , NULL );
   kwik = 0;
   const char *keyname = sym<KEYNAMECOUNT ? keynames[sym] : NULL;
   switch( device ) {

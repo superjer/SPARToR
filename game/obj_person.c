@@ -62,9 +62,22 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( mo->active==objid ) {
     if( mo->turnstart == hotfr ) {
       newpe->to = 0;
-      newpe->ap += 100;
-      if( newpe->ap > newpe->max_ap )
-        newpe->ap = newpe->max_ap;
+      newpe->ap = newpe->max_ap;
+
+      if( mo->pc )
+        newpe->gait = RUNNING;
+
+      #define PERSON_CLAMP(pe,attr,amt)       \
+        (pe)->attr += (amt);                  \
+        if( (pe)->attr > (pe)->max_ ## attr ) \
+          (pe)->attr = (pe)->max_ ## attr;
+
+      PERSON_CLAMP(newpe,st,10) // TODO: use 10 + 1/3 of might
+      PERSON_CLAMP(newpe,mp, 0) // TODO: use f( lucidity, intrepidity )
+      PERSON_CLAMP(newpe,pn, 1) // TODO: 1 + 1/3 of intrepidity
+      PERSON_CLAMP(newpe,ml, 0) // TODO: 1/3 of intrepidity + 1/3 lucidity
+
+      #undef PERSON_CLAMP
     }
 
     // check for input if player controlled
@@ -122,6 +135,7 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( dir && newx>=0 && newz>=0 && newx<co->x && newz<co->z ) {
     int i;
     int required_ap;
+    int required_st;
     PERSON_t *obstructor = NULL;
 
     // FIXME make it easier to check for obstructions
@@ -135,22 +149,40 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       }
     }
 
+    // TODO: go to somewhere else to handle obstructor
+
     switch( (newpe->tilex==newx ? 0 : 1) + (newpe->tilez==newz ? 0 : 1) ) {
       case 2: required_ap = 14; break;
       case 1: required_ap = 10; break;
       default: SJC_Write("How many directions do you really need to move at one time, jeeez!");
     }
 
+    required_st = 1;
+
+    // walking, running, or sprinting?
+    if( newpe->gait == WALKING ) {
+      required_ap += required_ap / 2;
+      required_st = 0;
+    } else if( newpe->gait == SPRINTING ) {
+      required_ap /= 2;
+      required_st = 2;
+    }
+
     if( newpe->ap < required_ap ) {
       // not enough Action Points
-    } else if( obstructor ) {
-      obstructor->hp -= 10;
-      obstructor->hitcounter = 20;
-      newpe->ap -= required_ap;
+    } else if( newpe->st < required_st ) {
+      // not enough Stamina Points
     } else {
-      newpe->tilex = newx;
-      newpe->tilez = newz;
+      if( obstructor ) {
+        obstructor->hp -= 10;
+        obstructor->hitcounter = 20;
+      } else {
+        newpe->tilex = newx;
+        newpe->tilez = newz;
+      }
+
       newpe->ap -= required_ap;
+      newpe->st -= required_st;
     }
   }
 
@@ -170,7 +202,7 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newpe->walkcounter = 0;
     newpe->stopcounter++;
   }
-  
+
   if( newpe->hp > 0 ) newpe->incapcounter = 0;
   else                newpe->incapcounter++;
 

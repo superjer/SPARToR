@@ -15,8 +15,11 @@
 #include "sjglob.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
+#include "video_helpers.h"
 #include "command.h"
 #include "keynames.h"
+#include "helpers.h"
+#include "gui.h"
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
@@ -44,16 +47,9 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
                             {"edit-next"  ,CMDT_1ENEXT   ,CMDT_0ENEXT   },
                             {"edit-texup" ,CMDT_1EPGUP   ,CMDT_0EPGUP   },
                             {"edit-texdn" ,CMDT_1EPGDN   ,CMDT_0EPGDN   },
-                            {"edit-lay0"  ,CMDT_1ELAY0   ,CMDT_0ELAY0   },
-                            {"edit-lay1"  ,CMDT_1ELAY1   ,CMDT_0ELAY1   },
-                            {"edit-lay2"  ,CMDT_1ELAY2   ,CMDT_0ELAY2   },
-                            {"edit-lay3"  ,CMDT_1ELAY3   ,CMDT_0ELAY3   },
-                            {"edit-lay4"  ,CMDT_1ELAY4   ,CMDT_0ELAY4   },
-                            {"edit-lay5"  ,CMDT_1ELAY5   ,CMDT_0ELAY5   },
-                            {"edit-lay6"  ,CMDT_1ELAY6   ,CMDT_0ELAY6   },
-                            {"edit-lay7"  ,CMDT_1ELAY7   ,CMDT_0ELAY7   },
-                            {"edit-lay8"  ,CMDT_1ELAY8   ,CMDT_0ELAY8   },
-                            {"edit-lay9"  ,CMDT_1ELAY9   ,CMDT_0ELAY9   },
+                            {"edit-layup" ,CMDT_1ELAUP   ,CMDT_0ELAUP   },
+                            {"edit-laydn" ,CMDT_1ELADN   ,CMDT_0ELADN   },
+                            {"edit-show"  ,CMDT_1ESHOW   ,CMDT_0ESHOW   },
                             {"edit-undo"  ,CMDT_1EUNDO   ,CMDT_0EUNDO   }};
 int numinputnames = COUNTOF(inputnames);
 
@@ -73,9 +69,10 @@ CB    *hack_dmap;
 static int    binds_size = 0;
 static struct {
   unsigned short sym;
-  unsigned char device;
-  unsigned char press;
+  unsigned char  device;
+  unsigned char  press;
   unsigned char  cmd;
+  char          *script;
 }            *binds;
 static int    editmode = 0;
 static int    myspr    = 0;
@@ -83,6 +80,8 @@ static int    mytex    = 0;
 static FCMD_t magic_c;      // magical storage for an extra command, triggered from console
 
 // prototypes
+static int proc_edit_cmd(FCMD_t *c,int device,int sym,int press);
+static int gui_click( int press );
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z );
 static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
@@ -97,7 +96,7 @@ void mod_setup(Uint32 setupfr)
   memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
 
   //make default context object (map)
-  fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, 0, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
+  fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, OBJF_REFC, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
   CONTEXT_t *co = fr[setupfr].objs[1].data;
   co->bsx = co->bsy = co->bsz = 16;
   co->x   = co->y   = co->z   = 15;
@@ -150,10 +149,11 @@ void mod_showbinds()
   int i,j;
 
   for(i=0; i<binds_size; i++) {
-    if( !binds[i].cmd )
+    if( !binds[i].cmd && !binds[i].script )
       continue;
 
-    char plusminus = binds[i].press ? '+' : '-';
+    char plusminus[3] = "";
+    plusminus[0] = binds[i].press ? '+' : '-';
 
     const char *devname = "?";
     int device = MIN( INP_MAX, binds[i].device );
@@ -173,17 +173,22 @@ void mod_showbinds()
     char cbuf[10] = "badcmd";
     int cmd = binds[i].cmd;
     const char *cmdname = cbuf;
-    for(j=0; j<numinputnames; j++)
+    for(j=0; j<numinputnames && cmd; j++)
       if( inputnames[j].presscmd==cmd || inputnames[j].releasecmd==cmd )
         cmdname = inputnames[j].name;
+
+    if( binds[i].script ) {
+      plusminus[1] = '!';
+      cmdname = binds[i].script;
+    }
     if( !cmdname )
       sprintf(cbuf,"%d",cmd);
 
-    SJC_Write("bind %s%s %c%s",devname,symname,plusminus,cmdname);
+    SJC_Write("bind %s%s %s%s",devname,symname,plusminus,cmdname);
   }
 }
 
-void mod_keybind(int device,int sym,int press,char cmd)
+void mod_keybind(int device,int sym,int press,char cmd,char *script)
 {
   int i;
 
@@ -200,135 +205,177 @@ void mod_keybind(int device,int sym,int press,char cmd)
   binds[i].device = device;
   binds[i].press = press;
   binds[i].cmd = cmd;
+  safe_free(binds[i].script);
+  safe_copy(binds[i].script,script);
 }
 
 // returns 0 iff a command is created to be put on the network
 int mod_mkcmd(FCMD_t *c,int device,int sym,int press)
 {
   int i;
-  CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
 
   // apply magic command?
   if( device==-1 ) {
-    if( magic_c.datasz ) {
-      memcpy(c, &magic_c, sizeof magic_c);
-      memset(&magic_c, 0, sizeof magic_c);
-      return 0;
+    if( !magic_c.datasz )
+      return -1;
+    memcpy(c, &magic_c, sizeof magic_c);
+    memset(&magic_c, 0, sizeof magic_c);
+    return 0;
+  }
+
+  for(i=0; i<binds_size; i++) {
+    if( binds[i].sym!=sym || binds[i].device!=device || binds[i].press!=press )
+      continue;
+
+    memset( c, 0, sizeof *c );
+
+    if( binds[i].script ) {
+      command( binds[i].script );
+      return -1;
+    }
+
+    c->cmd = binds[i].cmd;
+
+    if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT )
+      if( gui_click( press ) )
+        return -1;
+
+    if( editmode )
+      return proc_edit_cmd(c,device,sym,press);
+
+    return c->cmd<=CMDT_1CON ? 0 : -1;
+  }
+
+  return -1;
+}
+
+// returns 0 iff the GUI did not eat the click
+static int gui_click( int press )
+{
+  int elem = gui_element_at(hotfr,i_mousex,i_mousey);
+  if( !elem || !press )
+    return 0;
+
+  unsigned int hotfrmod = hotfr%maxframes;
+  POPUP_t *pop = fr[hotfrmod].objs[elem].data;
+  MOTHER_t *mo = fr[hotfrmod].objs[0].data;
+  SJC_Write("Clicked on button: %s",pop->text);
+
+  if( strcmp(pop->text,"MOVE")==0 ) {
+    mo->menulayer = MOVE;
+  } else if( strcmp(pop->text,"WALK")==0 ) {
+    mo->menulayer = NOLAYER;
+  } else if( strcmp(pop->text,"RUN")==0 ) {
+    mo->menulayer = NOLAYER;
+  } else if( strcmp(pop->text,"SPRINT")==0 ) {
+    mo->menulayer = NOLAYER;
+  }
+
+  return 1;
+}
+
+static int proc_edit_cmd(FCMD_t *c,int device,int sym,int press)
+{
+  CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
+
+  if( c->cmd==CMDT_0EPREV || c->cmd==CMDT_0ENEXT ) //these shouldn't really happen and wouldn't mean anything
+    return -1;
+
+  if( c->cmd==CMDT_1EPREV ) { //select previous tile
+    if( !spr_count ) return -1;
+    myspr = (myspr + spr_count - 1) % spr_count;
+    mytex = sprites[myspr].texnum;
+    return -1;
+  }
+
+  if( c->cmd==CMDT_1ENEXT ) { //select next tile
+    if( !spr_count ) return -1;
+    myspr = (myspr + 1) % spr_count;
+    mytex = sprites[myspr].texnum;
+    return -1;
+  }
+
+  if( c->cmd==CMDT_0EPGUP || c->cmd==CMDT_0EPGDN )
+    return -1;
+
+  if( c->cmd==CMDT_1EPGUP ) { //prev texture file
+    if( textures[mytex].filename ) do {
+      mytex = (mytex + tex_count - 1) % tex_count;
+    } while( !textures[mytex].filename );
+    return -1;
+  }
+
+  if( c->cmd==CMDT_1EPGDN ) { //next texture file
+    if( textures[mytex].filename ) do {
+      mytex = (mytex + 1) % tex_count;
+    } while( !textures[mytex].filename );
+    return -1;
+  }
+
+  if( c->cmd==CMDT_0ELAUP || c->cmd==CMDT_0ELADN )
+    return -1;
+
+  if( c->cmd==CMDT_1ELAUP )
+    if( ylayer > 0 ) ylayer--;
+
+  if( c->cmd==CMDT_1ELADN )
+    if( ylayer < co->y ) ylayer++;
+
+  if( c->cmd==CMDT_1ESHOW ) { showlayer = 1; return -1; }
+  if( c->cmd==CMDT_0ESHOW ) { showlayer = 0; return -1; }
+
+  if( c->cmd!=CMDT_1EPANT && c->cmd!=CMDT_0EPANT )
+    return 0; //cmd created
+
+  //edit-paint command only from here on
+  int dnx = downx;
+  int dny = downy;
+  int dnz = downz;
+
+  if( c->cmd==CMDT_0EPANT ) //always clear mousedown pos on mouseup
+    downx = downy = downz = -1;
+
+  if( !i_hasmouse )
+    return -1;
+
+  if( i_mousex >= v_w-NATIVE_TEX_SZ && i_mousey < NATIVE_TEX_SZ ) { //click in texture selector
+    if( c->cmd==CMDT_1EPANT ) {
+      int tmp = sprite_at(mytex, i_mousex-(v_w-NATIVE_TEX_SZ), i_mousey);
+      if( tmp>=0 ) myspr = tmp;
     }
     return -1;
   }
 
-  for(i=0; i<binds_size; i++)
-    if( binds[i].sym==sym && binds[i].device==device && binds[i].press==press ) {
-      memset( c, 0, sizeof *c );
-      c->cmd = binds[i].cmd;
+  //map to game coordinates
+  int tilex,tiley,tilez;
+  screen_unproject( i_mousex, i_mousey, ylayer * co->bsy, &tilex, &tiley, &tilez );
 
-      if( !editmode )
-        return 0;
+  if( co->projection == DIMETRIC     ) tiley = ylayer;
+  if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
 
-      if( c->cmd==CMDT_0EPREV || c->cmd==CMDT_0ENEXT ) //these shouldn't really happen and wouldn't mean anything
-        return -1;
+  if( c->cmd==CMDT_1EPANT ) {
+    downx = tilex;
+    downy = tiley;
+    downz = tilez;
+    return -1; //finish cmd later...
+  }
 
-      if( c->cmd==CMDT_1EPREV ) { //select previous tile
-        if( !spr_count ) return -1;
-        myspr = (myspr + spr_count - 1) % spr_count;
-        mytex = sprites[myspr].texnum;
-        return -1;
-      }
+  if( dnx<0 || dny<0 || dnz<0 )
+    return -1; //no mousedown? no cmd
 
-      if( c->cmd==CMDT_1ENEXT ) { //select next tile
-        if( !spr_count ) return -1;
-        myspr = (myspr + 1) % spr_count;
-        mytex = sprites[myspr].texnum;
-        return -1;
-      }
+  size_t n = 0;
+  packbytes(c->data,  'p',&n,1);
+  packbytes(c->data,  dnx,&n,4);
+  packbytes(c->data,  dny,&n,4);
+  packbytes(c->data,  dnz,&n,4);
+  packbytes(c->data,tilex,&n,4);
+  packbytes(c->data,tiley,&n,4);
+  packbytes(c->data,tilez,&n,4);
+  packbytes(c->data,myspr,&n,4);
+  c->datasz = n;
+  c->flags |= CMDF_DATA; //indicate presence of extra cmd data
 
-      if( c->cmd==CMDT_0EPGUP || c->cmd==CMDT_0EPGDN )
-        return -1;
-
-      if( c->cmd==CMDT_1EPGUP ) { //prev texture file
-        if( textures[mytex].filename ) do {
-          mytex = (mytex + tex_count - 1) % tex_count;
-        } while( !textures[mytex].filename );
-        return -1;
-      }
-
-      if( c->cmd==CMDT_1EPGDN ) { //next texture file
-        if( textures[mytex].filename ) do {
-          mytex = (mytex + 1) % tex_count;
-        } while( !textures[mytex].filename );
-        return -1;
-      }
-
-      int layerkeyup =
-        c->cmd==CMDT_0ELAY0 || c->cmd==CMDT_0ELAY1 || c->cmd==CMDT_0ELAY2 || c->cmd==CMDT_0ELAY3 || c->cmd==CMDT_0ELAY4 ||
-        c->cmd==CMDT_0ELAY5 || c->cmd==CMDT_0ELAY6 || c->cmd==CMDT_0ELAY7 || c->cmd==CMDT_0ELAY8 || c->cmd==CMDT_0ELAY9;
-      if( layerkeyup ) {
-        showlayer = 0;
-        return -1;
-      }
-      if( c->cmd==CMDT_1ELAY0 ) { ylayer = 0; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY1 ) { ylayer = 1; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY2 ) { ylayer = 2; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY3 ) { ylayer = 3; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY4 ) { ylayer = 4; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY5 ) { ylayer = 5; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY6 ) { ylayer = 6; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY7 ) { ylayer = 7; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY8 ) { ylayer = 8; showlayer = 1; return -1; }
-      if( c->cmd==CMDT_1ELAY9 ) { ylayer = 9; showlayer = 1; return -1; }
-
-      if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT ) { //edit-paint command
-        int dnx = downx;
-        int dny = downy;
-        int dnz = downz;
-
-        if( c->cmd==CMDT_0EPANT ) //always clear mousedown pos on mouseup
-          downx = downy = downz = -1;
-
-        if( !i_hasmouse )
-          return -1;
-
-        if( i_mousex >= v_w-NATIVE_TEX_SZ && i_mousey < NATIVE_TEX_SZ ) { //click in texture selector
-          if( c->cmd==CMDT_1EPANT ) {
-            int tmp = sprite_at(mytex, i_mousex-(v_w-NATIVE_TEX_SZ), i_mousey);
-            if( tmp>=0 ) myspr = tmp;
-          }
-          return -1;
-        }
-
-        //map to game coordinates
-        int tilex,tiley,tilez;
-        screen_unproject( i_mousex, i_mousey, ylayer * co->bsy, &tilex, &tiley, &tilez );
-
-        if( co->projection == DIMETRIC     ) tiley = ylayer;
-        if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
-
-        if( c->cmd==CMDT_1EPANT ) {
-          downx = tilex;
-          downy = tiley;
-          downz = tilez;
-          return -1; //finish cmd later...
-        }
-
-        if( dnx<0 || dny<0 || dnz<0 )
-          return -1; //no mousedown? no cmd
-
-        size_t n = 0;
-        packbytes(c->data,  'p',&n,1);
-        packbytes(c->data,  dnx,&n,4);
-        packbytes(c->data,  dny,&n,4);
-        packbytes(c->data,  dnz,&n,4);
-        packbytes(c->data,tilex,&n,4);
-        packbytes(c->data,tiley,&n,4);
-        packbytes(c->data,tilez,&n,4);
-        packbytes(c->data,myspr,&n,4);
-        c->datasz = n;
-        c->flags |= CMDF_DATA; //indicate presence of extra cmd data
-      }
-      return 0; //cmd created
-    }
-  return -1;
+  return 0;
 }
 
 int safe_atoi(const char *s)
@@ -337,7 +384,7 @@ int safe_atoi(const char *s)
   return atoi(s);
 }
 
-int mod_command(char *q)
+int mod_command(char *q,char *args)
 {
   if( q==NULL ){
     ;
@@ -348,14 +395,14 @@ int mod_command(char *q)
     return 0;
 
   }else if( strcmp(q,"model")==0 ){
-    setmodel = safe_atoi(strtok(NULL," ")); // FIXME: lame hack
+    setmodel = safe_atoi(tok(args," ")); // FIXME: lame hack
     return 0;
 
   }else if( strcmp(q,"bounds")==0 || strcmp(q,"blocksize")==0 ){
     size_t n = 0;
-    int x = safe_atoi(strtok(NULL," "));
-    int y = safe_atoi(strtok(NULL," "));
-    int z = safe_atoi(strtok(NULL," "));
+    int x = safe_atoi(tok(args," "));
+    int y = safe_atoi(tok(args," "));
+    int z = safe_atoi(tok(args," "));
     char chr = strcmp(q,"bounds")==0 ? 'b' : 'z';
 
     if( !x || !y || !z ) {
@@ -380,8 +427,8 @@ int mod_command(char *q)
 
   }else if( strcmp(q,"tilespacing")==0 ){
     size_t n = 0;
-    int tileuw = safe_atoi(strtok(NULL," "));
-    int tileuh = safe_atoi(strtok(NULL," "));
+    int tileuw = safe_atoi(tok(args," "));
+    int tileuh = safe_atoi(tok(args," "));
 
     if( !tileuw || !tileuh ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
@@ -482,13 +529,14 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 
 void mod_huddraw(Uint32 vidfr)
 {
-  MOTHER_t *mo = fr[vidfr%maxframes].objs[0].data;
+  Uint32 vidfrmod = vidfr%maxframes;
+  MOTHER_t *mo = fr[vidfrmod].objs[0].data;
 
   if( mo->active && mo->pc )
   {
     int x = 57;
 
-    PERSON_t *pe = fr[vidfr%maxframes].objs[mo->active].data;
+    PERSON_t *pe = fr[vidfrmod%maxframes].objs[mo->active].data;
 
     SJGL_SetTex( sys_tex[TEX_HUD].num );
     SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
@@ -505,6 +553,30 @@ void mod_huddraw(Uint32 vidfr)
     #undef BAR_W
 
     SJF_DrawText( 3, NATIVEH-49, SJF_LEFT, "%s", pe->name );
+  }
+
+  // draw menu background and then menu items
+  SJGL_SetTex( 0 );
+  SJGL_SetTex( sys_tex[TEX_HUD].num );
+  SJGL_Blit( &(REC){512-75,0,75,150}, NATIVEW-75, 0, 0 );
+
+  int i;
+  for( i=0; i<maxobjs; i++ )
+  {
+    OBJ_t *ob = fr[vidfrmod].objs+i;
+    if( ob->type != OBJT_POPUP ) continue;
+    POPUP_t *pop = ob->data;
+
+    if( pop->visible ) {
+      V *pos  = flex(ob,pos);
+      V *hull = flex(ob,hull);
+      if( i==gui_hover && pop->enabled ) {
+        SJGL_SetTex( 0 );
+        SJGL_SetTex( 2 ); // FIXME: NO NO NO!
+        SJGL_Blit( &(REC){30,30,hull[1].x,hull[1].y}, pos->x, pos->y, 0 );
+      }
+      SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
+    }
   }
 }
 
@@ -559,6 +631,9 @@ void mod_postdraw(Uint32 vidfr)
     draw_sprite_on_tile( dspr, co, i, j, k );
   }
 
+  glDepthMask( GL_FALSE );
+  draw_guides(co,upx,upy,upz);
+  glDepthMask( GL_TRUE );
   glPopAttrib();
 }
 

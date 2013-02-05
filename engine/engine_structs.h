@@ -1,6 +1,5 @@
 // DO NOT USE INCLUDE GUARDS HERE
 
-
 #define TYPE EMPTY
 STRUCT()
   HIDE(
@@ -8,9 +7,9 @@ STRUCT()
   )
 #include "endstruct.h"
 
-
 #define TYPE CONTEXT
 STRUCT()
+  EXPOSE(int,refcount,) // for memory management
   HIDE(
     int  bsx;           // block size
     int  bsy;
@@ -26,4 +25,16 @@ STRUCT()
   )
 #include "endstruct.h"
 
-
+#define TYPE POPUP
+STRUCT()
+  EXPOSE(V,pos,)
+  EXPOSE(V,hull,[2])
+  HIDE(
+    int visible;
+    int enabled;
+    int active;
+    unsigned int layer;
+    int (*click)(OBJ_t *obj);
+    char *text;
+  )
+#include "endstruct.h"

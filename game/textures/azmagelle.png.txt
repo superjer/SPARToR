@@ -16,7 +16,7 @@
     azma_idle_e flipx
 .end
 
-.grid  cols 15  pos 0 45
+.grid  cols 15  pos 0 45  bump -1
   azma_walk1_s
   azma_walk2_s
   azma_walk1_se size 34 45
@@ -66,7 +66,7 @@
     azma_c_idle_e flipx
 .end
 
-.grid  cols 7  pos 0 135
+.grid  cols 7  pos 0 135  bump -1
   azma_w_idle_s  anchor ^ ^-1 
   azma_w_idle_se  pos ^+6 ^  size 22 ^  anchor ^ ^+3
     .also
@@ -136,11 +136,9 @@
   azma_w_walk2_n  pos ^+1 ^  anchor ^-1 ^+1
 .end
 
-azma_w_walk1_w  pos 441 0  size 34 45  anchor ^+1 ^+6
+azma_w_walk1_w  pos 441 0  size 34 45  anchor ^+1 ^+6  bump -1
   .also
   azma_w_walk1_e  flipx  anchor ^-2 ^
-azma_w_walk2_w  pos 475 0  size 34 45  anchor ^ ^+6
+azma_w_walk2_w  pos 475 0  size 34 45  anchor ^ ^+6  bump -1
   .also
   azma_w_walk2_e  flipx
-
-shadow 0 502 20 10 cen mid floor

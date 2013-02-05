@@ -22,6 +22,7 @@
 #include "host.h"
 #include "client.h"
 #include "video.h"
+#include "audio.h"
 #include "input.h"
 #include "saveload.h"
 #include "sprite.h"
@@ -94,7 +95,13 @@ void command(const char *s)
 
     }else if( strcmp(q,"stats")==0 ) {
       v_showstats = v_showstats ? 0 : 1;
-
+    
+    }else if( strcmp(q,"oscillo")==0 ) {
+      v_oscillo = v_oscillo ? 0 : 1;
+   
+    }else if( strcmp(q,"musictest")==0 ) {
+      v_oscillo = a_musictest = a_musictest ? 0 : 1;
+   
     }else if( strcmp(q,"fullscreen")==0 || strncmp(q,"window",6)==0 ) {
       char *sw = strtok(NULL," x");
       char *sh = strtok(NULL," ");
@@ -172,11 +179,27 @@ void command(const char *s)
                 n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
       SJC_Write("  pos %d %d  size %d %d  anchor %d %d",
                 sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
+      SJC_Write("  floor %d  flange %d  bump %d",
+                sprites[n].flags&SPRF_FLOOR,sprites[n].flange,sprites[n].bump);
       if( sprites[n].more )
         SJC_Write("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
                   sprites[n].more->gridwide,sprites[n].more->gridlast,
                   sprites[n].more->piping,sprites[n].more->stretch,
                   sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
+
+    }else if( strcmp(q,"fovy")==0 ) {
+      char *num = strtok(NULL," ");
+      if( num==NULL ) {
+        SJC_Write("fovy is %f, eyedist is %d",v_fovy,v_eyedist);
+        break;
+      }
+      float n = atof(num);
+      if( n < 0.0001f || n > 90.0f ) {
+        SJC_Write("Value out of range (0.0001-90)");
+        break;
+      }
+      v_fovy = n;
+      break;
 
     }else if( mod_command(q) ) {
       SJC_Write("Huh?");
@@ -255,13 +278,28 @@ static void bind( char *dev_sym, char *press_cmdname )
 void exec_commands( char *name )
 {
   char path[PATH_MAX];
-  int printed = snprintf( path, PATH_MAX, "game/console/%s.txt", name );
+  int printed;
+  FILE *f;
+  char line[1000];
+
+  printed = snprintf( path, PATH_MAX, "game/console/%s.txt", name );
   if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
 
-  FILE *f = fopen(path, "r");
+  f = fopen(path, "r");
   if( !f ) { SJC_Write("Couldn't open %s",path); return; }
 
-  char line[1000];
+  while( fgets(line,1000,f) )
+    command(line);
+
+  fclose(f);
+
+  // FIXME LAME HACK FOR NOW
+  printed = snprintf( path, PATH_MAX, "user/console/%s.txt", name );
+  if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
+
+  f = fopen(path, "r");
+  if( !f ) { SJC_Write("Couldn't open %s",path); return; }
+
   while( fgets(line,1000,f) )
     command(line);
 

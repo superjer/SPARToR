@@ -73,12 +73,24 @@ enum { CMDT_NONE = 0,
        CMDT_0ELAY1,
        CMDT_1ELAY2,
        CMDT_0ELAY2,
+       CMDT_1ELAY3,
+       CMDT_0ELAY3,
+       CMDT_1ELAY4,
+       CMDT_0ELAY4,
+       CMDT_1ELAY5,
+       CMDT_0ELAY5,
+       CMDT_1ELAY6,
+       CMDT_0ELAY6,
+       CMDT_1ELAY7,
+       CMDT_0ELAY7,
+       CMDT_1ELAY8,
+       CMDT_0ELAY8,
+       CMDT_1ELAY9,
+       CMDT_0ELAY9,
        CMDT_1EUNDO,
        CMDT_0EUNDO };
 
 
 extern int    myghost;
 extern int    mycontext;
-extern int    downx;
-extern int    downy;
 

@@ -49,7 +49,7 @@ void sprblit( SPRITE_T *spr, int x, int y )
 {
   if( !spr ) return;
 
-  int zlo = DEPTH_OF(y) + spr->bump;
+  int zlo = /*DEPTH_OF(y) +*/ spr->bump;
   int zhi;
 
   if( spr->flags & SPRF_FLOOR )
@@ -61,6 +61,17 @@ void sprblit( SPRITE_T *spr, int x, int y )
   SJGL_BlitSkew( &spr->rec, x-spr->ancx, y-spr->ancy, zlo, zhi );
 }
 
+void sprblit3d( SPRITE_T *spr, int x, int y, int z )
+{
+  if( !spr ) return;
+
+  SJGL_SetTex( spr->texnum );
+
+  if( spr->flags & SPRF_FLOOR )
+    SJGL_Box3D( spr, x, y, z );
+  else
+    SJGL_Wall3D( spr, x, y, z );
+}
 
 int load_sprites(int texnum)
 {
@@ -86,7 +97,7 @@ int load_sprites(int texnum)
   int piping    =  0;
   int also      =  0;
   int gridstart = -1;
-  SPRITE_T defs = {0, 0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
+  SPRITE_T defs = {0, 0, 0, NULL, {0, 0, 32, 32}, 16, 32, 0, NULL};
   SPRITE_T gdefs;
   SPRITE_T prev_spr = defs;
 
@@ -217,6 +228,13 @@ int load_sprites(int texnum)
           return fail("Expecting 1 arg for 'bump'");
 
         read_num(&targ->bump, tokens[++i]);
+
+      } else if( !strcmp(tokens[i],"flange") ) {
+        if( count-i < 2 )
+          return fail("Expecting 1 arg for 'flange'");
+
+        read_num(&targ->flange, tokens[++i]);
+        targ->flags |= SPRF_FLOOR;
 
       } else if( !strcmp(tokens[i],"anchor") ) {
         if( count-i < 3 )

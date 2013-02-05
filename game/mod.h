@@ -13,7 +13,6 @@
 #include "video.h"
 #include "input.h"
 #include "patt.h"
-#include "projection.h"
 #include "mod_private.h"
 #include "obj_.h"
 #include "sprite.h"
@@ -25,8 +24,6 @@ extern size_t     num_sys_tex;
 
 extern INPUTNAME_t inputnames[];
 extern int numinputnames;
-
-extern int m_showdepth;
 
 extern CB *hack_map; //FIXME REMOVE SOMEDAY
 extern CB *hack_dmap;

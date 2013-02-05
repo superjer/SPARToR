@@ -20,7 +20,7 @@ STRUCT()
     int  z;
     int  tileuw;        // tile graphics "used" width/height; includes spacing or overlap
     int  tileuh;
-    int  projection;    // whether to be displayed ORTHOGRAPHIC or DIMETRIC
+    int  projection;    // whether to be displayed AXIS or DIMETRIC or PERSPECTIVE
     CB  *map;           // block data
     CB  *dmap;          // delta block data
   )

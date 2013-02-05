@@ -1,3 +1,4 @@
+*~
 *.dll
 *.[oa]
 *.swp
@@ -14,3 +15,4 @@ game/maps/backup
 game/maps/autosave
 console.log
 deadking
+user/

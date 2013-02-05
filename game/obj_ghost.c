@@ -22,15 +22,10 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co );
 
 void obj_ghost_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
-  GHOST_t *gh = o->data;
-
   if( !v_drawhulls ) return;
 
-  int g = TILE2NATIVE_X(co, gh->pos.x, gh->pos.y, gh->pos.z);
-  int h = TILE2NATIVE_Y(co, gh->pos.x, gh->pos.y, gh->pos.z);
-
-  SJGL_SetTex( sys_tex[TEX_PLAYER].num );
-  SJGL_Blit( &(REC){80,177,16,16}, g, h, NATIVEH );
+  // draw ghost (optional)
+  //GHOST_t *gh = o->data;
 }
 
 void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
@@ -43,7 +38,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     mycontext   = ob->context;
   }
 
-  static V v2_dimetric[2] = {{-64,-72,-64},{64,  0, 64}};
+  static V v2_dimetric[2] = {{-64,0,-64},{64,72,64}};
   static V v2_ortho[2]    = {{-NATIVEW/2,-NATIVEH/2,0},{NATIVEW/2,NATIVEH/2,0}};
 
   if( co->projection == DIMETRIC     )
@@ -51,8 +46,12 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( co->projection == ORTHOGRAPHIC )
     memcpy( gh->hull, v2_ortho,    sizeof (V[2]) );
 
-  v_camx = POINT2NATIVE_X(&gh->pos);
-  v_camy = POINT2NATIVE_Y(&gh->pos);
+  v_camx = gh->pos.x;
+  v_camy = gh->pos.y;
+
+  v_targx = gh->pos.x;
+  v_targy = gh->pos.y;
+  v_targz = gh->pos.z;
 
   switch( fr[b].cmds[gh->client].cmd ) {
     case CMDT_1CAMLEFT:  gh->goingl = 1; break;
@@ -67,10 +66,10 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   gh->vel = (V){0,0,0};
 
-  if( gh->goingl || gh->goingu ) gh->vel.x += -5;
-  if( gh->goingr || gh->goingd ) gh->vel.x +=  5;
-  if( gh->goingl || gh->goingd ) gh->vel.z +=  5;
-  if( gh->goingr || gh->goingu ) gh->vel.z += -5;
+  if( gh->goingr || gh->goingu ) gh->vel.x += -5;
+  if( gh->goingl || gh->goingd ) gh->vel.x +=  5;
+  if( gh->goingr || gh->goingd ) gh->vel.z +=  5;
+  if( gh->goingl || gh->goingu ) gh->vel.z += -5;
 
   FCMD_t *c = fr[b].cmds + gh->client;
 

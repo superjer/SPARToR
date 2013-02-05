@@ -19,22 +19,40 @@
 #include "main.h"
 #include "console.h"
 #include "font.h"
+#include "patt.h"
+#include "audio.h"
 
 
 TEX_T *textures;
 size_t tex_count;
 
 
-int v_drawhulls  = 0;
-int v_showstats  = 0;
+int v_drawhulls  = 0; // make hulls on objects visible
+int v_showstats  = 0; // show timing stats
+int v_oscillo    = 0; // show oscilloscope of the sound output
 int v_fullscreen = 0;
 int v_center     = 1; // whether to center the scaled game rendering
 
 int v_camx       = 0;
 int v_camy       = 0;
 
-int v_w;
+int v_eyex       = 0;
+int v_eyey       = 0;
+int v_eyez       = 0;
+
+int v_targx      = 0;
+int v_targy      = 0;
+int v_targz      = 0;
+
+int v_eyedist    = 1;
+float v_fovy     = 20.0f;
+
+int v_w;              // width, height of video output
 int v_h;
+
+GLdouble v_modeltrix[16];
+GLdouble v_projtrix[16];
+int v_viewport[4];
 
 static int screen_w  = NATIVEW;
 static int screen_h  = NATIVEH;
@@ -131,12 +149,34 @@ void render()
   glViewport(pad_left,h-NATIVEH*scale-pad_top,NATIVEW*scale,NATIVEH*scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+
+  // compute eyedist such that we can see the same amount of stuff
+  float diagdist = 45.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
+  v_eyedist = sqrtf( 3*diagdist*diagdist );
+
+  //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,v_eyedist,v_eyedist*2+4000);
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  int camx = NATIVEW/2-(int)v_camx;
-  int camy = NATIVEH/2-(int)v_camy;
-  glTranslatef(camx,camy,0);
+
+  //old dimetric mode:
+  //int camx = NATIVEW/2-(int)v_camx;
+  //int camy = NATIVEH/2-(int)v_camy;
+  //glTranslatef(camx,camy,0);
+
+  v_eyex = v_targx + v_eyedist;
+  v_eyey = v_targy - v_eyedist;
+  v_eyez = v_targz + v_eyedist;
+
+  gluLookAt(v_eyex ,v_eyey ,v_eyez ,
+            v_targx,v_targy,v_targz,
+            0      ,-1     ,0      );
+
+  // store values for unprojecting, etc.
+  glGetDoublev(GL_MODELVIEW_MATRIX,v_modeltrix);
+  glGetDoublev(GL_PROJECTION_MATRIX,v_projtrix);
+  glGetIntegerv(GL_VIEWPORT,v_viewport);
 
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
@@ -176,7 +216,7 @@ void render()
         else if( flags & CBF_PLAT  ) { y2 = y1 + 4; }
         else continue;
 
-        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define SOL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i(x,y,z);
         #define SOL_R  SOL_VERTEX(1  ,0  ,0  ,x1, y1, z1);
         #define SOL_RG SOL_VERTEX(1  ,0.2,0  ,x1, y1, z2);
         #define SOL_W  SOL_VERTEX(1  ,0.2,0.2,x2, y1, z2);
@@ -206,7 +246,7 @@ void render()
         int y2 = pos->y + hull[1].y;
         int z2 = pos->z + hull[1].z;
 
-        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i( XYZ2NATIVE_X(x,y,z), XYZ2NATIVE_Y(x,y,z), 0 );
+        #define HULL_VERTEX(r,g,b,x,y,z) glColor4f(r,g,b,1); glVertex3i(x,y,z);
         #define HULL_R  HULL_VERTEX(1,0,0,x , y , z );
         #define HULL_RG HULL_VERTEX(1,1,0,x , y , z2);
         #define HULL_W  HULL_VERTEX(1,1,1,x2, y , z2);
@@ -229,7 +269,9 @@ void render()
 
       if( o->flags & OBJF_POS ) {
         V *pos  = flex(o,pos);
-        SJF_DrawText(POINT2NATIVE_X(pos), POINT2NATIVE_Y(pos)-10, SJF_CENTER, "%d", i);
+        V screenpos = get_screen_pos(pos->x,pos->y,pos->z);
+
+        SJF_DrawText(screenpos.x, screenpos.y-10, SJF_CENTER, "%d", i);
       }
     }
 
@@ -237,7 +279,13 @@ void render()
   }
 
   // translate back for HUD
-  glTranslatef(-camx,-camy,0);
+  //glTranslatef(-camx,-camy,0);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
   mod_huddraw(vidfr);
 
   // viewport and matrixes for outerdraw
@@ -314,6 +362,17 @@ void render()
     SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
   }
 
+  //display audio waveform
+  if( v_oscillo ) {
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glColor4f(0,1,0,1);
+    glBegin(GL_LINE_STRIP);
+    int *wf = a_waveform;
+    if( wf ) for( i=0; i<a_waveform_len; i++ )
+      glVertex3i( i * v_w / a_waveform_len, (-wf[i]*3 + 32768) * v_h / 65536, 0 );
+    glEnd();
+  }
+
   SDL_GL_SwapBuffers();
   setdrawnfr(vidfr);
 
@@ -383,14 +442,44 @@ void setvideosoon(int w,int h,int go_full,int delay)
   soon = delay;
 }
 
-int screen2native_x(int x)
+// find ray from point on screen (mouse?) into world space
+V get_screen_ray(double x,double y)
 {
-  return (x - pad_left)/scale + v_camx - NATIVEW/2;
+  double farx,fary,farz,nearx,neary,nearz;
+  V ray;
+
+  //or find point matching depth buffer?
+  //glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+
+  gluUnProject(           x,           y,        1.0,
+                v_modeltrix,  v_projtrix, v_viewport,
+                      &farx,       &fary,      &farz );
+  gluUnProject(           x,           y,        0.0,
+                v_modeltrix,  v_projtrix, v_viewport,
+                     &nearx,      &neary,     &nearz );
+
+  ray.x = farx - nearx;
+  ray.y = fary - neary;
+  ray.z = farz - nearz;
+
+  return ray;
 }
 
-int screen2native_y(int y)
+// find position on screen of in-world point
+V get_screen_pos(double x,double y,double z)
 {
-  return (y - pad_top )/scale + v_camy - NATIVEH/2;
+  double winx,winy,winz;
+  V out;
+
+  gluProject(           x,           y,          z,
+              v_modeltrix,  v_projtrix, v_viewport,
+                    &winx,       &winy,      &winz );
+
+  out.x = winx;
+  out.y = winy;
+  out.z = winz;
+
+  return out;
 }
 
 int make_sure_texture_is_loaded(const char *texfile)

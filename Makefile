@@ -13,7 +13,7 @@ OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 GITCOMMIT := $(shell sh -c "git branch -v | grep '^\*' | sed 's/\s\+/ /g' | cut -d' ' -f2,3")
 
-FLAGS = --std=c99 -g -Wall -Wextra -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
+FLAGS = --std=c99 -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
 FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
 
 INC = -Iengine -Igame

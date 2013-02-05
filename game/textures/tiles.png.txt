@@ -1,4 +1,4 @@
-.default  size 46 24  anchor mid cen
+.default  size 48 23  anchor mid cen  floor
 
 .grid  cols 10  pos 0 0  size 48 73
 wall-woodbasic
@@ -57,3 +57,12 @@ floor-rough3
 floor-dirt1
 floor-dirt2
 floor-dirt3
+.
+.
+.
+.
+.
+.
+.
+shadow bump -1
+.end

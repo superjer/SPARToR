@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2012  Jer Wilson
  **
@@ -18,6 +18,7 @@
 #include "main.h"
 #include "console.h"
 #include "command.h"
+#include "pack.h"
 #include "net.h"
 #include "host.h"
 #include "client.h"
@@ -28,6 +29,12 @@
 #include "sprite.h"
 #include "keynames.h"
 #include "helpers.h"
+
+static enum NETMODE {
+  NETMODE_NONE = 0,
+  NETMODE_HOST,
+  NETMODE_CLIENT,
+} netmode;
 
 static void bind( char *dev_sym, char *press_cmdname );
 
@@ -71,39 +78,63 @@ void command(const char *s)
 
     }else if( strcmp(q,"listen")==0 ) {
       char *port = tok(p," ");
-      host_start(port?atoi(port):0);
+      int nport = port ? atoi(port) : HOSTPORT;
+      int err = net_start(nport, 8);
+
+      if( !err )
+      {
+        SJC_Write("Started host on port %d", nport);
+        netmode = NETMODE_HOST;
+      }
 
     }else if( strcmp(q,"connect")==0 ) {
       char *hostname = tok(p," :");
       char *port = tok(p," :");
       char *clientport = tok(p," ");
-      client_start(hostname,(port?atoi(port):0),(clientport?atoi(clientport):0));
+      int nport = port ? atoi(port) : HOSTPORT;
+      int nclientport = clientport ? atoi(clientport) : CLIENTPORT;
+      int err = net_start(nclientport, 1);
+
+      if( !err )
+      {
+        err = net_connect(hostname, nport);
+        if( !err )
+        {
+          SJC_Write("Connecting to %s on port %d", hostname, nport);
+          netmode = NETMODE_CLIENT;
+        }
+      }
+
+    }else if( strcmp(q,"echo")==0 ) {
+      int ret = net_write(0, (Uint8*)p, strlen(p));
+      if( ret ) SJC_Write("Net write error: %d", ret);
 
     }else if( strcmp(q,"disconnect")==0 ) {
-      if( hostsock ) {
-        host_stop();
+      if( netmode == NETMODE_HOST ) {
+        net_stop();
         SJC_Write("Host stopped.");
-      }else if( clientsock ) {
-        client_stop();
+      }else if( netmode == NETMODE_CLIENT ) {
+        net_stop();
         SJC_Write("Disconnected from host.");
       }else
         SJC_Write("Nothing to disconnect from.");
+      netmode = NETMODE_NONE;
 
     }else if( strcmp(q,"reconnect")==0 ) {
-      SJC_Write("Not implemented."); //TODO
+      SJC_Write("Not implemented.");
 
     }else if( strcmp(q,"hulls")==0 ) {
       v_drawhulls = v_drawhulls ? 0 : 1;
 
     }else if( strcmp(q,"stats")==0 ) {
       v_showstats = v_showstats ? 0 : 1;
-    
+
     }else if( strcmp(q,"oscillo")==0 ) {
       v_oscillo = v_oscillo ? 0 : 1;
-   
+
     }else if( strcmp(q,"musictest")==0 ) {
       v_oscillo = a_musictest = a_musictest ? 0 : 1;
-   
+
     }else if( strcmp(q,"fullscreen")==0 || strncmp(q,"window",6)==0 ) {
       char *sw = tok(p," x");
       char *sh = tok(p," ");

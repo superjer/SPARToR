@@ -40,6 +40,7 @@ void videoinit();
 void render();
 void setvideo(int w,int h,int go_full,int quiet);
 void setvideosoon(int w,int h,int go_full,int delay);
+void setwinpos(int x,int h);
 V get_screen_ray(double x,double y);
 V get_screen_pos(double x,double y,double z);
 int  make_sure_texture_is_loaded(const char *texfile);

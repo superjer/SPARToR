@@ -16,7 +16,7 @@
 #include "input.h"
 #include "main.h"
 #include "console.h"
-#include "net.h"
+#include "pack.h"
 #include "video.h"
 #include "command.h"
 #include "keynames.h"

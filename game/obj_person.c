@@ -154,7 +154,6 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     switch( (newpe->tilex==newx ? 0 : 1) + (newpe->tilez==newz ? 0 : 1) ) {
       case 2: required_ap = 14; break;
       case 1: required_ap = 10; break;
-      default: SJC_Write("How many directions do you really need to move at one time, jeeez!");
     }
 
     required_st = 1;
@@ -210,15 +209,20 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newpe->hitcounter = 0;
 
   // just snap if close
-  if( fabsf(velx)<0.5 && fabsf(velz)<0.5 ) {
+  if( fabsf(velx)<0.5 && fabsf(velz)<0.5 )
+  {
     newpe->vel.x = 0;
     newpe->vel.z = 0;
     newpe->pos.x = posx;
     newpe->pos.z = posz;
-  } else if( mag<2 ) {
+  }
+  else if( mag<2 )
+  {
     newpe->vel.x = velx/mag*2;
     newpe->vel.z = velz/mag*2;
-  } else {
+  }
+  else
+  {
     newpe->vel.x = velx;
     newpe->vel.z = velz;
   }

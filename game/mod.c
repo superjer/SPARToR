@@ -627,7 +627,7 @@ void mod_postdraw(Uint32 vidfr)
     } else if( co->projection == ORTHOGRAPHIC ) {
       dspr = sprite_grid_transform_xy(spr, co, i, j, k, i-dnx, j-dny, upx-dnx+1, upy-dny+1);
     }
-                 
+
     draw_sprite_on_tile( dspr, co, i, j, k );
   }
 
@@ -667,7 +667,7 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
     else                { glColor4f(1,1,1,0.6f); b1 = 1; }
     b2 = b1*2;
 
-    REC rec = sprites[i].rec; 
+    REC rec = sprites[i].rec;
     int x = w-sz+rec.x;
     int y =      rec.y;
 
@@ -683,7 +683,7 @@ void mod_outerdraw(Uint32 vidfr,int w,int h)
     if( sprites[i].texnum != mytex )
       continue;
 
-    REC rec = sprites[i].rec; 
+    REC rec = sprites[i].rec;
     int x = w-sz+rec.x;
     int y =      rec.y;
 
@@ -757,11 +757,11 @@ static int sprite_at(int texnum, int x, int y)
     if( sprites[i].texnum != texnum )
       continue;
 
-    REC rec = sprites[i].rec; 
+    REC rec = sprites[i].rec;
     if( x >= rec.x && x < rec.x+rec.w &&
         y >= rec.y && y < rec.y+rec.h    )
       return i;
   }
 
-  return -1; 
+  return -1;
 }

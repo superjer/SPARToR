@@ -2,12 +2,13 @@
 #ifndef SPARTOR_MAIN_H_
 #define SPARTOR_MAIN_H_
 
+#include <GL/glew.h>
 #include "SDL.h"
 #include "SDL_net.h"
 #include "SDL_image.h"
 #include "mod_constants.h"
 
-#define VERSION "0.12.05.13"
+#define VERSION "0.15.03.31"
 
 #ifndef GITCOMMIT
 #define GITCOMMIT "* no commit"

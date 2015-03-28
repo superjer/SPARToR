@@ -442,6 +442,11 @@ void setvideosoon(int w,int h,int go_full,int delay)
   soon = delay;
 }
 
+void setwinpos(int x,int y)
+{
+  //SDL_SetWindowPosition(NULL, x, y);
+}
+
 // find ray from point on screen (mouse?) into world space
 V get_screen_ray(double x,double y)
 {
@@ -500,12 +505,12 @@ int make_sure_texture_is_loaded(const char *texfile)
 
     // is slot j the one?
     if( !textures[j].filename ) {
-      SJC_Write("Texture %s is new, using slot %d",texfile,j);
+      //SJC_Write("Texture %s is new, using slot %d",texfile,j);
       textures[j].filename = malloc( strlen(texfile) + 1 );
       strcpy(textures[j].filename,texfile);
       load_sprites(j);
     } else if( !strcmp(textures[j].filename,texfile) ) {
-      SJC_Write("Texture %s was loaded before, reusing slot %d",texfile,j);
+      //SJC_Write("Texture %s was loaded before, reusing slot %d",texfile,j);
       if( textures[j].generated )
         return j; // nothing to do!
     } else

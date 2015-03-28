@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2012  Jer Wilson
  **
@@ -10,171 +10,353 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-
 #include "SDL.h"
 #include "SDL_net.h"
-#include "mod.h"
 #include "main.h"
-#include "console.h"
-#include "command.h"
 #include "net.h"
+#include "pack.h"
+#include "console.h"
 
+enum CONN_STATES {
+  CONN_FREE = 0,
+  CONN_NEW,
+  CONN_CONNECTED,
+};
 
-Uint8 *packframe(Uint32 packfr,size_t *n) {
-  FRAME_t *pfr = fr + packfr % maxframes;
-  int i;
-  size_t s = 80;
-  Uint8 *data = malloc(s);
-  *n = 0;
+static UDPsocket  sock = NULL;
+static UDPpacket *pkt;
+static CONNEX_t  *conns;
+static int        maxconns;
 
-  packbytes(data,maxobjs,n,4);
-  for(i=0;i<maxobjs;i++) {
-    while( *n+4+sizeof(size_t)+pfr->objs[i].size >= s-1 )
-      data = realloc(data,(s*=2));
-    packbytes(data,pfr->objs[i].type,n,2);
-    if(pfr->objs[i].type) {
-      packbytes(data,pfr->objs[i].flags,n,2);
-      packbytes(data,pfr->objs[i].context,n,4);
-      packbytes(data,pfr->objs[i].size ,n,sizeof(size_t));
-      memcpy(data+*n, pfr->objs[i].data, pfr->objs[i].size);
-      *n += pfr->objs[i].size;
-    }
+static int get_free_conn();
+static void create_ring(RING_t *r, int count);
+static void create_part(int connexid, int partid, int count, Uint8 *data, size_t len);
+static void welcome();
+static void acknowlege(int connexid);
+static void accept_from(int connexid);
+
+int net_start(int port, int _maxconns)
+{
+  if( sock )
+  {
+    SJC_Write("Error: Socket already open");
+    return -1;
   }
-  return data;
-}
 
+  sock = SDLNet_UDP_Open(port);
 
-Uint8 *packframecmds(Uint32 packfr,size_t *n) {
-  FRAME_t *pfr = fr + packfr % maxframes;
-  int i;
-  size_t s = maxclients*6+4;
-  Uint8 *data = malloc(s);
-  *n = 0;
-
-  packbytes(data,maxclients,n,4);
-  for(i=0;i<maxclients;i++) {
-    FCMD_t *c = pfr->cmds+i;
-    packbytes(data,c->cmd    ,n,1);
-    packbytes(data,c->mousehi,n,1);
-    packbytes(data,c->mousex ,n,1);
-    packbytes(data,c->mousey ,n,1);
-    packbytes(data,c->flags  ,n,2);
-    if( c->flags & CMDF_DATA ) {
-      packbytes(data,c->datasz     ,n,2);
-      memcpy(data+*n,c->data,c->datasz);
-      *n += c->datasz;
-    }
-    if( c->flags & CMDF_NEW )
-      SJC_Write("%u: Packed CMDF_NEW for client %d",packfr,i);
+  if( !sock )
+  {
+    SJC_Write("Unable to open port %d", port);
+    SJC_Write("%s", SDL_GetError());
+    return -1;
   }
-  return data;
-}
 
-
-int unpackframe(Uint32 packfr,Uint8 *data,size_t len) {
-  FRAME_t *pfr = fr + packfr % maxframes;
-  int i;
-  size_t n = 0;
-
-  if( maxobjs!=(int)unpackbytes(data,len,&n,4) ) {
-    SJC_Write("Your maxobjs setting (%d) differs from server's!",maxobjs);
-    return 1;
-  }
-  for(i=0;i<maxobjs;i++) {
-    pfr->objs[i].type = unpackbytes(data,len,&n,2);
-    if(pfr->objs[i].type) {
-      pfr->objs[i].flags   = unpackbytes(data,len,&n,2);
-      pfr->objs[i].context = unpackbytes(data,len,&n,4);
-      pfr->objs[i].size    = unpackbytes(data,len,&n,sizeof(size_t));
-      if( pfr->objs[i].size ) {
-        if( len<n+pfr->objs[i].size ) {
-          SJC_Write("Packed data ended early!");
-          return 1;
-        }
-        pfr->objs[i].data  = malloc(pfr->objs[i].size); //FIXME: might already be allocated with pre-net data
-        memcpy(pfr->objs[i].data, data+n, pfr->objs[i].size);
-        n += pfr->objs[i].size;
-        mod_recvobj( pfr->objs + i );
-      }
-    }
-  }
+  maxconns = _maxconns;
+  conns = calloc(sizeof *conns, maxconns);
+  pkt = SDLNet_AllocPacket(PACKET_SIZE);
   return 0;
 }
 
+void net_stop()
+{
+  if( !sock ) return;
 
-int unpackframecmds(Uint32 packfr,Uint8 *data,size_t len) {
-  FRAME_t *pfr = fr + packfr % maxframes;
-  int i;
-  size_t n = 0;
+  SDLNet_UDP_Close(sock);
+  sock = NULL;
+  SDLNet_FreePacket(pkt);
+}
 
-  if( maxclients!=(int)unpackbytes(data,len,&n,4) ) {
-    SJC_Write("Your maxclients setting (%d) differs from server's! packfr=%d",maxclients,packfr);
+int net_connect(const char *hostname, int port)
+{
+  IPaddress ipaddr;
+  int connexid;
+
+  if( (connexid = get_free_conn()) < 0 )
+  {
+    SJC_Write("Error: No free connection");
     return -1;
   }
-  for(i=0;i<maxclients;i++) {
-    FCMD_t *c = pfr->cmds+i;
-    c->cmd     = unpackbytes(data,len,&n,1);
-    c->mousehi = unpackbytes(data,len,&n,1);
-    c->mousex  = unpackbytes(data,len,&n,1);
-    c->mousey  = unpackbytes(data,len,&n,1);
-    c->flags   = unpackbytes(data,len,&n,2);
-    if( c->flags & CMDF_DATA ) { //check for variable data
-      c->datasz = unpackbytes(data,len,&n,2);
-      if( c->datasz > sizeof c->data ) {
-        SJC_Write("Treachery: datasz too large (%d) from server",c->datasz);
-        break;
-      }
-      memcpy( c->data, data+n, c->datasz );
-      n += c->datasz;
+
+  SDLNet_ResolveHost(&ipaddr, hostname, port);
+
+  if( ipaddr.host==INADDR_NONE )
+  {
+    SJC_Write("Error: Could not resolve host");
+    return -1;
+  }
+
+  pkt->address = ipaddr;
+  int nchars = snprintf((char *)pkt->data, PACKET_SIZE, "%s", PROTONAME "/" VERSION);
+  pkt->len = nchars;
+
+  if( !SDLNet_UDP_Send(sock, -1, pkt) )
+  {
+    SJC_Write("Error: Could not send connect packet");
+    SJC_Write("%s", SDL_GetError());
+    net_stop();
+  }
+
+  SJC_Write("Using connex #%d", connexid);
+
+  memset(conns + connexid, 0, sizeof *conns);
+  conns[connexid].state = CONN_NEW;
+  conns[connexid].addr = ipaddr;
+
+  return 0;
+}
+
+void net_loop()
+{
+  int     status;
+  int     i;
+
+  if( !sock ) return;
+
+  for( ; ; )
+  {
+    status = SDLNet_UDP_Recv(sock, pkt);
+
+    if( status == -1 )
+    {
+      SJC_Write("Network Error: Recv failed!");
+      SJC_Write(SDL_GetError());
+      return;
     }
-    if( c->flags & CMDF_NEW )
-      SJC_Write("%u: Unpacked CMDF_NEW for client %d",packfr,i);
+
+    if( status != 1 ) break;
+
+    for( i=0; i<maxconns; i++ )
+    {
+      /* SJC_Write("state:%d  host:%d:%d  port:%d:%d", */
+      /*     conns[i].state, conns[i].addr.host, pkt->address.host, */
+      /*     conns[i].addr.port, pkt->address.port); */
+      if( conns[i].state != CONN_FREE &&
+          conns[i].addr.host == pkt->address.host &&
+          conns[i].addr.port == pkt->address.port )
+        break;
+    }
+
+    if( i == maxconns ) //a new connexion approaches
+      welcome();
+    else if( conns[i].state == CONN_NEW )
+      acknowlege(i);
+    else
+      accept_from(i);
   }
-  return n;
+
+  // TODO: resend packets or something?
 }
 
+int net_write(int connexid, Uint8 *data, size_t len)
+{
+  CONNEX_t *conn = conns + connexid;
 
-void packbytes(Uint8 *data,Uint64 value,size_t *offset,int width) {
+  if( conn->state != CONN_CONNECTED )
+    return -1;
+
+  int parts = (len - 1) / PAYLOAD_SIZE + 1;
+  int i;
+
+  create_ring(conn->ringout + conn->outconga % RING_SIZE, parts);
+
+  for( i=0; i<parts; i++ )
+  {
+    size_t partlen = (i == parts-1) ? (len % PAYLOAD_SIZE) : PAYLOAD_SIZE;
+    create_part(connexid, i, parts, data + i*PAYLOAD_SIZE, partlen);
+  }
+
+  conn->outconga++;
+
+  return 0;
+}
+
+Uint8 *net_read(int connexid)
+{
+  int i;
+  size_t sum = 0;
+  CONNEX_t *conn = conns + connexid;
+  RING_t *r = conn->ringin + conn->inconga + 1;
+
+  for( i=0; i<r->count; i++ )
+  {
+    if( !r->pkt[i] )
+      return NULL; // still is missing packet(s)
+
+    sum += r->pkt[i]->len;
+  }
+
+  Uint8 *output = malloc(sum+1);
+
+  for( i=0; i<r->count; i++ )
+    memcpy(output, r->pkt[i], r->pkt[i]->len);
+
+  output[sum] = '\0'; // safe/sorry
+
+  // delete
+  create_ring(conn->ringin, 0);
+  conn->inconga++;
+
+  return output;
+}
+
+int get_free_conn()
+{
+  int i;
+  for( i=0; i<maxconns; i++ )
+    if( conns[i].state == CONN_FREE )
+      return i;
+  return -1;
+}
+
+void create_ring(RING_t *r, int count)
+{
+  int i;
+
+  for( i=0; i<r->count; i++ )
+    if( r->pkt[i] )
+      SDLNet_FreePacket(r->pkt[i]);
+
+  r->count = count;
+  r->pkt = realloc(r->pkt, sizeof *r->pkt * count);
+
+  memset(r->pkt, 0, sizeof *r->pkt);
+}
+
+void create_part(int connexid, int partid, int count, Uint8 *data, size_t datalen)
+{
+  CONNEX_t *conn = conns + connexid;
+  int outconga = conn->outconga;
+  int inconga  = conn->inconga;
+  int len = datalen + HEADER_SIZE;
   size_t n = 0;
-  if( offset==NULL ) offset = &n;
-  switch(width) {
-    case 8: *(data+(*offset)++) = (Uint8)(value>>56);
-    case 7: *(data+(*offset)++) = (Uint8)(value>>48);
-    case 6: *(data+(*offset)++) = (Uint8)(value>>40);
-    case 5: *(data+(*offset)++) = (Uint8)(value>>32);
-    case 4: *(data+(*offset)++) = (Uint8)(value>>24);
-    case 3: *(data+(*offset)++) = (Uint8)(value>>16);
-    case 2: *(data+(*offset)++) = (Uint8)(value>>8 );
-    case 1: *(data+(*offset)++) = (Uint8)(value    );
+
+  RING_t *r = conn->ringout + conn->outconga % RING_SIZE;
+  r->count = partid;
+
+  UDPpacket *pkt = r->pkt[partid] = SDLNet_AllocPacket(len);
+  pkt->len = len;
+  pkt->address = conn->addr;
+
+  packbytes(pkt->data, outconga, &n, 4);
+  pack(count, 2);
+  pack(partid, 2);
+  pack(inconga, 4);
+  memcpy(pkt->data + n, data, datalen);
+
+  if( !SDLNet_UDP_Send(sock, -1, pkt) )
+  {
+    SJC_Write("Error: Could not send new ring packet");
+    SJC_Write("%s", SDL_GetError());
   }
 }
 
+void welcome()
+{
+  char *p = (char *)pkt->data;
+  char *reply = "OK";
 
-Uint64 unpackbytes(Uint8 *data,size_t len,size_t *offset,int width) {
-  Uint64 value = 0;
+  if( strncmp(p, PROTONAME "/", strlen(PROTONAME) + 1) )
+  {
+    SJC_Write("Junk packet from %u:%u", pkt->address.host, pkt->address.port);
+    reply = "Ejunk";
+    goto errout;
+  }
+
+  p += strlen(PROTONAME) + 1;
+
+  int versiondiff = strncmp(p, VERSION, strlen(VERSION));
+  int lenmismatch = (pkt->len != strlen(PROTONAME) + 1 + strlen(VERSION));
+
+  if( lenmismatch || versiondiff )
+  {
+    SJC_Write("Wrong protocol version \"%s\" from %u:%u",
+        p, pkt->address.host, pkt->address.port);
+    reply = "Eversion";
+    goto errout;
+  }
+
+  int connexid = get_free_conn();
+
+  if( connexid < 0 )
+  {
+    SJC_Write("New client at %u:%u denied; server is full",
+        pkt->address.host, pkt->address.port);
+    reply = "Efull";
+    goto errout;
+  }
+
+  SJC_Write("New client at %u:%u accepted as connex #%d",
+      pkt->address.host, pkt->address.port, connexid);
+
+  memset(conns + connexid, 0, sizeof *conns);
+  conns[connexid].state = CONN_CONNECTED;
+  conns[connexid].addr = pkt->address;
+
+  errout:
+  snprintf((char *)pkt->data, PACKET_SIZE, "%s", reply);
+  pkt->len = strlen(reply);
+
+  if( !SDLNet_UDP_Send(sock, -1, pkt) )
+  {
+    SJC_Write("Error: Could not send reply packet");
+    SJC_Write("%s", SDL_GetError());
+  }
+}
+
+void acknowlege(int connexid)
+{
+  CONNEX_t *conn = conns + connexid;
+
+  if( !pkt->len || pkt->len >= PACKET_SIZE )
+    return;
+
+  pkt->data[ pkt->len ] = '\0';
+
+  if( pkt->data[0] == 'E' )
+  {
+    SJC_Write("Connection failed because: %s", pkt->data + 1);
+    return;
+  }
+  else if( pkt->data[0] == 'O' && pkt->data[1] == 'K' )
+  {
+    SJC_Write("Connection successful");
+    conn->state = CONN_CONNECTED;
+    return;
+  }
+
+  SJC_Write("Got weird packet in acknowlege: %s", pkt->data);
+}
+
+void accept_from(int connexid)
+{
   size_t n = 0;
-  if( offset==NULL ) offset = &n;
-  if( len<*offset+width ) {
-    SJC_Write("Not enough packed bytes to read!");
-    return 0;
-  }
-  switch(width) {
-    case 8: value |= ((Uint64)*(data+(*offset)++))<<56;
-    case 7: value |= ((Uint64)*(data+(*offset)++))<<48;
-    case 6: value |= ((Uint64)*(data+(*offset)++))<<40;
-    case 5: value |= ((Uint64)*(data+(*offset)++))<<32;
-    case 4: value |= ((Uint64)*(data+(*offset)++))<<24;
-    case 3: value |= ((Uint64)*(data+(*offset)++))<<16;
-    case 2: value |= ((Uint64)*(data+(*offset)++))<<8 ;
-    case 1: value |= ((Uint64)*(data+(*offset)++))    ;
-  }
-  return value;
+  int conga     = unpackbytes(pkt->data, pkt->len, &n, 4);
+  int count     = unpack(2);
+  int partid    = unpack(2);
+  int peerconga = unpack(4); // TODO: use this!
+
+  SJC_Write("Message: %.10s", pkt->data + n);
+  SJC_Write("peerconga: %d", peerconga);
+
+  CONNEX_t *conn = conns + connexid;
+
+  if( conga > conn->inconga + RING_SIZE - 1 )
+    return; // not ready for such a future packet
+
+  if( conga <= conn->inconga )
+    return; // this is way too late
+
+  RING_t *r = conn->ringin + conga % RING_SIZE;
+
+  if( !r->count )
+    create_ring(r, count);
+
+  if( r->pkt[partid]->len )
+    return; // already received this packet
+
+  r->pkt[partid] = SDLNet_AllocPacket(pkt->len); // TODO: this is dumb
+  r->pkt[partid]->maxlen = pkt->maxlen;
+  r->pkt[partid]->len    = pkt->len;
+  memcpy(r->pkt[partid]->data, pkt->data, pkt->len);
 }
-
-
-void inspectbytes(Uint8 *data,int n) {
-  int i = 0;
-  for(;i<n;i++)
-    SJC_Write("Byte %d: %d",i,data[i]);
-}
-

@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2012  Jer Wilson
  **
@@ -18,63 +18,21 @@
 #include "command.h"
 #include "client.h"
 #include "host.h"
-#include "net.h"
-
-
-UDPsocket clientsock = NULL;
-
+#include "pack.h"
 
 static Uint32 pktnum;
 static Uint32 sentfr = 0;
 static int negotiated;
 static UDPpacket *pkt;
 
-
-void client_start(const char *hostname,int port,int clientport) {
-  int i;
-  IPaddress ipaddr;
-
-  pktnum = 1;
-  if( !hostname || !*hostname ) {  SJC_Write("Usage: connect <host> [<port>] [<localport>]");          return; }
-  if( hostsock ) {                 SJC_Write("Already running as a host. Type 'disconnect' to stop."); return; }
-  if( clientsock ) {               SJC_Write("Already connected to a host. Type 'disconnect' first."); return; }
-  SDLNet_ResolveHost(&ipaddr,hostname,port?port:HOSTPORT);
-  if( ipaddr.host==INADDR_NONE ) { SJC_Write("Error: Could not resolve host!");                        return; }
-  clientport = clientport?clientport:CLIENTPORT;
-  for(i=0;i<maxclients;i++) {
-    if( (clientsock = SDLNet_UDP_Open(clientport)) )
-      break;
-    SJC_Write("Could not open client socket on port %d",clientport++);
-    SJC_Write(SDL_GetError());
-  }
-    
-  if( !clientsock ) { SJC_Write("Error: Could not open client any client socket!"); return; }
-  SJC_Write("Connecting from port %d...",clientport);
-  negotiated = 0;
-  pkt = SDLNet_AllocPacket(PACKET_SIZE);
-  pkt->address = ipaddr;
-  sprintf((char *)pkt->data,"%s/%s",PROTONAME,VERSION);
-  pkt->len = strlen((char *)pkt->data);
-  if( !SDLNet_UDP_Send(clientsock,-1,pkt) ) {
-    SJC_Write("Error: Could not send connect packet!");
-    SJC_Write(SDL_GetError());
-    client_stop();
-  }
-}
-
-
-void client_stop() {
-  SDLNet_FreePacket(pkt);
-  SDLNet_UDP_Close(clientsock);
-  clientsock = NULL;
-}
-
-
-void client() {
+void client()
+{
   int status;
   int i;
   size_t n;
   Uint32 packfr;
+
+  return;
 
   //send cmd updates to server
   while(negotiated && sentfr<metafr-1) {
@@ -106,18 +64,25 @@ void client() {
   }
 
   //look for data from server
-  for(;;) {
+  for(;;)
+  {
     status = SDLNet_UDP_Recv(clientsock,pkt);
-    if( status==-1 ) {
+
+    if( status==-1 )
+    {
       SJC_Write("Network Error: Failed to check for new packets.");
       SJC_Write(SDL_GetError());
     }
+
     if( status!=1 )
       break;
-    switch(pkt->data[0]) {
+
+    switch(pkt->data[0])
+    {
       case 'M': //message
         SJC_Write("Server says: %s",pkt->data+1);
         break;
+
       case 'S': //state
         clearframebuffer();
         me               = unpackbytes(pkt->data+1,4,NULL,1);
@@ -131,26 +96,30 @@ void client() {
         unpackframe(surefr,pkt->data+10,pkt->len-10);
         negotiated = 1;
         break;
+
       case 'C': //cmds
         n = 2;
-        for(i=0;i<(int)pkt->data[1];i++) {
+        for(i=0; i<(int)pkt->data[1]; i++)
+        {
           packfr = unpackbytes(pkt->data,pkt->len,&n,4);
           setcmdfr(packfr);
           int unpacked = unpackframecmds(packfr,pkt->data+n,pkt->len-n);
-          if( unpacked<0 ) {
+
+          if( unpacked<0 )
+          {
             SJC_Write("Failed to unpack frame cmds!");
             break;
           }
+
           n += unpacked;
+
           if( hotfr>packfr-1 )
             sethotfr(packfr-1);
         }
         break;
+
       default:
         SJC_Write("Error: Packet is garbled!");
     }
   }
 }
-
-
-

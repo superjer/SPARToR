@@ -9,7 +9,7 @@
 #include "mod_constants.h"
 #include "main.h"
 #include "console.h"
-#include "net.h"
+#include "pack.h"
 #include "video.h"
 #include "input.h"
 #include "patt.h"

@@ -28,13 +28,13 @@ POSTCC =
 
 ifeq ($(UNAME),Linux)
 	EXE_NAME = spartor
-	FLAGS += `sdl-config --cflags`
-	LIBS = -lm -lSDL -lSDL_net -lSDL_image -lGL -lGLU -lGLEW
+	FLAGS += `sdl2-config --cflags`
+	LIBS = -lm -lSDL2 -lSDL2_net -lSDL2_image -lGL -lGLU -lGLEW
 endif
 ifeq ($(UNAME),Darwin)
 	EXE_NAME = platforms/mac/spartor.app/Contents/MacOS/spartor
-	FLAGS += `sdl-config --cflags`
-	LIBS = -lm `sdl-config --libs` -lSDL_net -lSDL_image -framework OpenGL -lGLEW
+	FLAGS += `sdl2-config --cflags`
+	LIBS = -lm `sdl2-config --libs` -lSDL2_net -lSDL2_image -framework OpenGL -lGLEW
 	POSTCC = cp -R -f platforms/mac/spartor.app .
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))
@@ -43,8 +43,8 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	WINDRES = windres
 	FLAGS += -mwindows
 	LIBS = -L/usr/local/lib -L/usr/lib \
-	       -lmingw32 -lSDLmain -lSDL -lSDL_net -lSDL_image -lglew32 -lopengl32 -lglu32 -lm
-	INC += -I/usr/local/include/SDL -I/usr/include
+	       -lmingw32 -lSDL2main -lSDL2 -lSDL2_net -lSDL2_image -lglew32 -lopengl32 -lglu32 -lm
+	INC += -I/usr/local/include/SDL2 -I/usr/include
 	POSTCC = cp platforms/win/*.dll .
 endif
 

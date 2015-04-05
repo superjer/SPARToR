@@ -62,9 +62,6 @@ void command(const char *s)
       if( !file ) { SJC_Write("You must specify a name in game/console/*.txt"); return; }
       exec_commands(file);
 
-    }else if( strcmp(q,"redetect")==0 ) {
-      inputinit();
-
     }else if( strcmp(q,"realtime")==0 ) {
       eng_realtime = eng_realtime ? 0 : 1;
       SJC_Write("Realtime mode %s",eng_realtime?"on":"off");
@@ -136,17 +133,43 @@ void command(const char *s)
       v_oscillo = a_musictest = a_musictest ? 0 : 1;
 
     }else if( strcmp(q,"fullscreen")==0 || strncmp(q,"window",6)==0 ) {
-      char *sw = tok(p," x");
-      char *sh = tok(p," ");
-      int w = sw?atoi(sw):0;
-      int h = sh?atoi(sh):0;
-      int full = strcmp(q,"fullscreen")==0 ? 1 : 0;
-      if( w>=320 && h>=200 )
-        setvideosoon(w,h,full,1);
-      else if( w>=1 && w<=5 )
-        setvideosoon(NATIVEW*w,NATIVEH*w,full,1);
+      char *sw = tok(p, " x");
+      char *sh = tok(p, " ");
+      int w = sw ? atoi(sw) : 0;
+      int h = sh ? atoi(sh) : 0;
+
+      if( strcmp(q,"fullscreen")==0 )
+      {
+        setvideosoon(0, 0, 1, 1);
+      }
       else
-        setvideosoon(0,0,full,1);
+      {
+        if( w>=320 && h>=200 )
+        {
+          SDL_SetWindowSize(screen, w, h);
+          setvideosoon(w, h, 0, 1);
+        }
+        else if( w>=1 && w<=5 )
+        {
+          SDL_SetWindowSize(screen, NATIVEW*w, NATIVEH*w);
+          setvideosoon(NATIVEW*w, NATIVEH*w, 0, 1);
+        }
+        else
+        {
+          setvideosoon(0, 0, 0, 1);
+        }
+      }
+
+    }else if( strcmp(q,"winpos")==0 ) {
+      char *sx = tok(p, " ");
+      char *sy = tok(p, " ");
+      int x = sx ? atoi(sx) : -1;
+      int y = sy ? atoi(sy) : -1;
+
+      if( x < 0 || y < 0 )
+        SJC_Write("Please specify x and y position");
+      else
+        setwinpos(x, y);
 
     }else if( strcmp(q,"bind")==0 ) {
       char *arg0 = tok(p," ");
@@ -248,8 +271,12 @@ void command(const char *s)
 
 static void parse_dev_sym( int *devnum, int *sym, char *dev_sym )
 {
-  *devnum = INP_KEYB;
+  *devnum = INP_JBUT;
+  for( *sym=0; *sym<PADNAMECOUNT; (*sym)++ )
+    if( padnames[*sym] && 0==strcmp(padnames[*sym],dev_sym) )
+      return;
 
+  *devnum = INP_KEYB;
   for( *sym=0; *sym<KEYNAMECOUNT; (*sym)++ )
     if( keynames[*sym] && 0==strcmp(keynames[*sym],dev_sym) )
       return;
@@ -288,7 +315,7 @@ static void bind( char *dev_sym, char *press_cmdname )
   else {
     parse_dev_sym(&device,&sym,dev_sym);
 
-    if( !device ) { SJC_Write("Unrecognized key, button, or stick!"); return; }
+    if( !device ) { SJC_Write("Unrecognized key, button, or stick: %s", dev_sym); return; }
 
     if(      press_cmdname[0]=='+' ) { press = 1; cmdname = press_cmdname+1; }
     else if( press_cmdname[0]=='-' ) { press = 0; cmdname = press_cmdname+1; }

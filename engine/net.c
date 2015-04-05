@@ -152,7 +152,7 @@ int net_write(int connexid, Uint8 *data, size_t len)
 {
   CONNEX_t *conn = conns + connexid;
 
-  if( conn->state != CONN_CONNECTED )
+  if( !conn || conn->state != CONN_CONNECTED )
     return -1;
 
   int parts = (len - 1) / PAYLOAD_SIZE + 1;
@@ -176,6 +176,10 @@ Uint8 *net_read(int connexid)
   int i;
   size_t sum = 0;
   CONNEX_t *conn = conns + connexid;
+
+  if( !conn )
+    return NULL;
+
   RING_t *r = conn->ringin + conn->inconga + 1;
 
   for( i=0; i<r->count; i++ )

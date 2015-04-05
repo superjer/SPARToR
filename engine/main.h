@@ -8,7 +8,8 @@
 #include "SDL_image.h"
 #include "mod_constants.h"
 
-#define VERSION "0.15.03.31"
+#define VERSION "0.15.04.04"
+#define PATH_MAX 4096
 
 #ifndef GITCOMMIT
 #define GITCOMMIT "* no commit"
@@ -173,7 +174,6 @@ extern Uint32 drawnfr;//most recently rendered frame
 extern Uint32 hotfr;  //newest fully advanced frame (it's hot and fresh)
 extern Uint32 cmdfr;  //newest frame with cmds inserted (possibly in future)
 
-extern SDL_Surface *screen;
 extern Uint32 ticks;
 extern int    me;
 extern int    console_open;

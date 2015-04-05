@@ -1,11 +1,13 @@
-
 #ifndef SPARTOR_VIDEO_H_
 #define SPARTOR_VIDEO_H_
 
+#include "SDL.h"
+
+extern SDL_Window *screen;
+extern SDL_GLContext *glcontext;
 
 extern TEX_T     *textures;
 extern size_t     tex_count;
-
 
 extern int v_drawhulls;
 extern int v_showstats;
@@ -35,7 +37,6 @@ extern GLdouble v_modeltrix[16];
 extern GLdouble v_projtrix[16];
 extern int v_viewport[4];
 
-
 void videoinit();
 void render();
 void setvideo(int w,int h,int go_full,int quiet);
@@ -46,4 +47,3 @@ V get_screen_pos(double x,double y,double z);
 int  make_sure_texture_is_loaded(const char *texfile);
 
 #endif
-

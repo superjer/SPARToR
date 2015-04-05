@@ -51,7 +51,6 @@ Uint32 drawnfr;
 Uint32 hotfr;
 Uint32 cmdfr = 1; //DO NOT clear frame 1, it is prefilled with client-connect for local person
 
-SDL_Surface *screen;
 Uint32 ticks,newticks;
 int me;
 int console_open;
@@ -67,7 +66,7 @@ Uint32 adv_frames = 0;
 //runtime engine options
 int eng_realtime = 0;
 
-static const Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
+static const Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER;
 
 static void args(int argc,char **argv);
 
@@ -85,7 +84,6 @@ static void init_flexers()
 
 int main(int argc,char **argv)
 {
-  SDL_Event event;
   int i;
   Uint32 idle_start = 0;
 
@@ -97,20 +95,19 @@ int main(int argc,char **argv)
     fr[i].objs = calloc(sizeof(OBJ_t),maxobjs);
   }
 
-  if( SDL_Init(sdlflags)<0 || !SDL_GetVideoInfo() ) { fprintf(stderr,"SDL_Init: %s\n",SDL_GetError());     exit(-1); }
-  if( SDLNet_Init()<0 )                             { fprintf(stderr,"SDLNet_Init: %s\n",SDL_GetError());  exit(-2); }
-  if( IMG_Init(IMG_INIT_PNG)!=IMG_INIT_PNG )        { fprintf(stderr,"IMG_Init: %s\n",SDL_GetError());     exit(-3); }
+  if( SDL_Init(sdlflags)<0 )                 { fprintf(stderr,"SDL_Init: %s\n",   SDL_GetError()); exit(-1); }
+  if( SDLNet_Init()<0 )                      { fprintf(stderr,"SDLNet_Init: %s\n",SDL_GetError()); exit(-2); }
+  if( IMG_Init(IMG_INIT_PNG)!=IMG_INIT_PNG ) { fprintf(stderr,"IMG_Init: %s\n",   SDL_GetError()); exit(-3); }
 
-  SDL_WM_SetCaption("SPARToR " VERSION " " GITCOMMIT,NULL);
-  SDL_Surface *iconsurf = IMG_Load("game/images/icon.png");
-  SDL_WM_SetIcon(iconsurf,NULL);
-  SDL_FreeSurface(iconsurf);
+  SDL_StopTextInput();
+
+  //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "SPARToR", "Waiting...", NULL);
 
   SJC_Write("SPARToR " VERSION " " GITCOMMIT);
   SJC_Write("Copyright (C) 2010-2012 Jer Wilson");
   SJC_Write("Please visit github.com/superjer for updates and source code.");
   SJC_Write("");
-  SJC_Write(" --->  \\#F80Type 'help' for help.\\#FFF  <---");
+  SJC_Write(" \\#F00--->  \\#FFFType \\#F80help\\#FFF for help.\\#F00  <---");
   SJC_Write("");
 
   //toggleconsole();
@@ -120,28 +117,32 @@ int main(int argc,char **argv)
   mod_setup(0);
   args(argc, argv);
 
-  setwinpos(200,200);
-
   //main loop
-  for(;;) {
+  for(;;)
+  {
+    SDL_Event e;
     newticks = SDL_GetTicks();
     if( !eng_realtime && newticks-ticks<5 ) // give system some time to breathe if we're not too busy
       SDL_Delay(1);
     ticks = newticks;
     metafr = ticks/ticksaframe + frameoffset;
-    while( SDL_PollEvent(&event) ) switch(event.type) {
-      case SDL_VIDEOEXPOSE:                                                         break;
-      case SDL_VIDEORESIZE:     setvideosoon(event.resize.w,event.resize.h,0,10);   break;
-      case SDL_ACTIVEEVENT:     setactive(event.active.gain,event.active.state);    break;
-      case SDL_KEYDOWN:         kbinput(    1, event.key.keysym );                  break;
-      case SDL_KEYUP:           kbinput(    0, event.key.keysym );                  break;
-      case SDL_JOYBUTTONDOWN:   joyinput(   1, event.jbutton );                     break;
-      case SDL_JOYBUTTONUP:     joyinput(   0, event.jbutton );                     break;
-      case SDL_JOYAXISMOTION:   axisinput(     event.jaxis );                       break;
-      case SDL_MOUSEBUTTONDOWN: mouseinput( 1, event.button );                      break;
-      case SDL_MOUSEBUTTONUP:   mouseinput( 0, event.button );                      break;
-      case SDL_MOUSEMOTION:     mousemove(     event.motion );                      break;
-      case SDL_QUIT:            cleanup();                                          break;
+    while( SDL_PollEvent(&e) ) switch(e.type)
+    {
+      case SDL_WINDOWEVENT:              winevent  (   e.window ); break;
+      case SDL_TEXTINPUT:                textinput (   e.text   ); break;
+      case SDL_TEXTEDITING:              textedit  (   e.edit   ); break;
+      case SDL_KEYDOWN:                  kbinput   (1, e.key    ); break;
+      case SDL_KEYUP:                    kbinput   (0, e.key    ); break;
+      case SDL_MOUSEBUTTONDOWN:          mouseinput(1, e.button ); break;
+      case SDL_MOUSEBUTTONUP:            mouseinput(0, e.button ); break;
+      case SDL_MOUSEMOTION:              mousemove (   e.motion ); break;
+      case SDL_CONTROLLERDEVICEADDED:    padadd    (   e.cdevice); break;
+      case SDL_CONTROLLERDEVICEREMOVED:  padremove (   e.cdevice); break;
+      case SDL_CONTROLLERDEVICEREMAPPED: padremap  (   e.cdevice); break;
+      case SDL_CONTROLLERBUTTONDOWN:     padinput  (1, e.cbutton); break;
+      case SDL_CONTROLLERBUTTONUP:       padinput  (0, e.cbutton); break;
+      case SDL_CONTROLLERAXISMOTION:     padaxis   (   e.caxis  ); break;
+      case SDL_QUIT:                     cleanup   (            ); break;
     }
     idle_time += SDL_GetTicks() - idle_start;
     readinput();
@@ -170,16 +171,14 @@ static void args(int argc,char **argv)
 void toggleconsole()
 {
   if( console_open ) {
+    SDL_StopTextInput();
     console_open = 0;
-    SDL_EnableUNICODE(0);
-    SDL_EnableKeyRepeat(0,0);
   } else {
+    SDL_StartTextInput();
+    SDL_SetTextInputRect(&(SDL_Rect){0, v_h/2, v_h/2 + 12, v_w});
     console_open = 1;
-    SDL_EnableUNICODE(1);
-    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
   }
 }
-
 
 void advance()
 {

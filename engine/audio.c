@@ -41,7 +41,6 @@ typedef struct {
   SDL_AudioCVT cvt;
 } SOUND_T;
 
-
 int *a_waveform     = NULL;
 int  a_waveform_len = WAVEFORM_LEN;
 int  a_musictest    = 0;
@@ -201,7 +200,6 @@ struct {
   {"B" ,9,15804.264,0.022 },*/
 };
 #define NUM_MUSIC_NOTES (sizeof music_notes / sizeof *music_notes)
-
 
 static void music_test( int *buf, int len )
 {
@@ -530,5 +528,3 @@ void make_sure_sound_is_loaded(const char *file)
   free(name);
   return;
 }
-
-

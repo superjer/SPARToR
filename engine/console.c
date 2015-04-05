@@ -12,27 +12,39 @@
 
 #include "console.h"
 
-
 SJC_t SJC = {{0},{0},{0},0,0};
 
-
-static void SJC_Log(const char *prefix,const char *s);
-
+static void flog(const char *prefix,const char *s);
+static void recall();
 
 void SJC_Put(char c)
 {
   int n;
-  if( SJC.buf[0]==NULL || strlen(SJC.buf[0])>=SJC.size[0]-1 ) {
-    SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0]+32 );
-    if( SJC.size[0]==0 )
-      SJC.buf[0][0] = '\0';
+
+  if( SJC.buf[0]==NULL || strlen(SJC.buf[0])+1>=SJC.size[0] )
+  {
     SJC.size[0] += 32;
+    SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0] );
+
+    if( SJC.size[0] == 32 )
+      SJC.buf[0][0] = '\0';
   }
+
   n = strlen(SJC.buf[0]);
   SJC.buf[0][n] = c;
   SJC.buf[0][n+1] = '\0';
 }
 
+void SJC_Replace(const char *s)
+{
+  if( SJC.buf[0]==NULL || strlen(s)+1>=SJC.size[0] )
+  {
+    SJC.size[0] = strlen(s) + 32;
+    SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0] );
+  }
+
+  strcpy(SJC.buf[0], s);
+}
 
 void SJC_Write(const char *s,...)
 {
@@ -52,9 +64,8 @@ void SJC_Write(const char *s,...)
   SJC.buf[1][1] = (char)32;
   strcpy(SJC.buf[1]+2,buf);
 
-  SJC_Log("",buf);
+  flog("",buf);
 }
-
 
 void SJC_Rub()
 {
@@ -66,6 +77,11 @@ void SJC_Rub()
   }
 }
 
+void SJC_Clear()
+{
+  if( SJC.buf[0]!=NULL )
+      SJC.buf[0][0] = '\0';
+}
 
 void recall()
 {
@@ -80,7 +96,6 @@ void recall()
   strcpy(SJC.buf[0],SJC.rememory[SJC.remempos]);
 }
 
-
 void SJC_Up()
 {
   if( (SJC.rememend+1)%200 == SJC.remempos )
@@ -94,7 +109,6 @@ void SJC_Up()
   recall();
 }
 
-
 void SJC_Down()
 {
   if( SJC.remempos == SJC.rememend )
@@ -103,7 +117,6 @@ void SJC_Down()
   SJC.remempos = (SJC.remempos+1) % 200;
   recall();
 }
-
 
 int SJC_Submit()
 {
@@ -121,17 +134,15 @@ int SJC_Submit()
   SJC.size[0] = 0;
   SJC.buf[0] = NULL;
 
-  SJC_Log("> ",SJC.buf[1]);
+  flog("> ",SJC.buf[1]);
 
   return 1;
 }
 
-
-static void SJC_Log(const char *prefix,const char *s)
+static void flog(const char *prefix,const char *s)
 {
   static FILE *f = NULL;
 
   if( !f ) f = fopen("console.log","w");
   if( f ) fprintf(f,"%s%s\n",prefix,s);
 }
-

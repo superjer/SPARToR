@@ -12,6 +12,7 @@
 
 #include <GL/glew.h>
 #include "SDL.h"
+#include "SDL_video.h"
 #include "SDL_net.h"
 #include "mod.h"
 #include "video.h"
@@ -22,10 +23,11 @@
 #include "patt.h"
 #include "audio.h"
 
+SDL_Window *screen;
+SDL_GLContext *glcontext;
 
 TEX_T *textures;
 size_t tex_count;
-
 
 int v_drawhulls  = 0; // make hulls on objects visible
 int v_showstats  = 0; // show timing stats
@@ -68,39 +70,42 @@ static int soon_w    = 0;
 static int soon_h    = 0;
 static int soon_full = 0;
 
-
 void videoinit()
 {
-  const SDL_VideoInfo *vidinfo;
+  SDL_DisplayMode dispmode;
 
   SDL_GL_SetAttribute(SDL_GL_RED_SIZE,    8);
   SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,  8);
   SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,   8);
   SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,  8);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-  SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL,1);
 
-  vidinfo = SDL_GetVideoInfo();
-  *((int*)&desktop_w) = vidinfo->current_w;
-  *((int*)&desktop_h) = vidinfo->current_h;
+  SDL_GetDesktopDisplayMode(0, &dispmode); //FIXME check for 0 on success
+  desktop_w = dispmode.w;
+  desktop_h = dispmode.h;
+
   int i;
   int default_scale = 1;
+
   for( i=2; i<=5; i++ )
     if( desktop_w-50 > NATIVEW*i && desktop_h-50 > NATIVEH*i )
       default_scale = i;
-  setvideo(NATIVEW*default_scale,NATIVEH*default_scale,0,0);
+
+  setvideo(NATIVEW*default_scale, NATIVEH*default_scale, 0, 0);
 
   GLenum glewerr = glewInit();
-  if( glewerr!=GLEW_OK ) { fprintf(stderr,"glewInit: %s\n",glewGetErrorString(glewerr)); exit(-4); }
+  if( glewerr!=GLEW_OK )
+  {
+    fprintf(stderr, "glewInit: %s\n", glewGetErrorString(glewerr));
+    exit(-4);
+  }
 
-  SJC_Write("Desktop resolution detected as %d x %d",desktop_w,desktop_h);
-  SJC_Write("OpenGL version %s",glGetString(GL_VERSION));
+  SJC_Write("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
+  SJC_Write("OpenGL version %s", glGetString(GL_VERSION));
 }
-
 
 void render()
 {
-  const SDL_VideoInfo *vidinfo;
   int x,y,w,h;
   int i;
   Uint32 vidfr = metafr;
@@ -114,13 +119,14 @@ void render()
     return;
 
   if( soon==1 )
-    setvideo(soon_w,soon_h,soon_full,0);
+    setvideo(soon_w, soon_h, soon_full, 0);
+
   if( soon>0 )
     soon--;
 
-  vidinfo  = SDL_GetVideoInfo();
-  w = v_w  = vidinfo->current_w;
-  h = v_h  = vidinfo->current_h;
+  SDL_GL_GetDrawableSize(screen, &w, &h);
+  v_w = w;
+  v_h = h;
   pad_left = 0;
   pad_top  = 0;
   if( v_center ) {
@@ -360,6 +366,7 @@ void render()
     SJF_DrawText(w-20,60,SJF_RIGHT,"unaccounted_time %4d", unaccounted_time/denom);
     SJF_DrawText(w-20,70,SJF_RIGHT,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
     SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
+    SJF_DrawText(w-20,90,SJF_RIGHT,"textedit: %d"        ,SDL_IsTextInputActive());
   }
 
   //display audio waveform
@@ -373,7 +380,7 @@ void render()
     glEnd();
   }
 
-  SDL_GL_SwapBuffers();
+  SDL_GL_SwapWindow(screen);
   setdrawnfr(vidfr);
 
   if( (int)vidfrmod==maxframes-1 ) { // reset time stats
@@ -387,33 +394,58 @@ void render()
   }
 }
 
-
-void setvideo(int w,int h,int go_full,int quiet)
+void setvideo(int w, int h, int go_full, int quiet)
 {
   Uint32 flags = 0;
+
   if( !w || !h ) { //default to previous res
     w = prev_w;
     h = prev_h;
   }
+
   if( go_full && !v_fullscreen ) { // record previous res when changing to fullscreen
     prev_w = screen_w;
     prev_h = screen_h;
   }
-  v_fullscreen = go_full;
-  flags |= (go_full ? SDL_FULLSCREEN : SDL_RESIZABLE);
-  screen = SDL_SetVideoMode(w,h,SDL_GetVideoInfo()->vfmt->BitsPerPixel,SDL_OPENGL|flags);
-  if( !screen ){
-    v_fullscreen = 0;
-    screen = SDL_SetVideoMode(NATIVEW,NATIVEH,SDL_GetVideoInfo()->vfmt->BitsPerPixel,SDL_OPENGL|SDL_RESIZABLE);
-    SJC_Write("Error changing video mode. Using safe defaults.");
-    if( !screen ) {
-      fprintf(stderr,"Fatal error setting video mode!");
-      exit(-4);
+
+  flags |= (go_full ? 0 : SDL_WINDOW_RESIZABLE);
+
+  if( !screen )
+  {
+    screen = SDL_CreateWindow(
+        "SPARToR " VERSION " " GITCOMMIT,
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        w, h,
+        SDL_WINDOW_OPENGL | flags);
+
+    if( !screen ) { fprintf(stderr, "CreateWindow failed: %s\n", SDL_GetError()); exit(-5); }
+
+    SDL_Surface *iconsurf = IMG_Load("game/images/icon.png");
+    SDL_SetWindowIcon(screen, iconsurf);
+    SDL_FreeSurface(iconsurf);
+
+    if( !(glcontext = SDL_GL_CreateContext(screen)) )
+    {
+      fprintf(stderr, "CreateContext failed: %s\n", SDL_GetError());
+      exit(-6);
+    }
+
+    if( SDL_GL_MakeCurrent(screen, glcontext) )
+    {
+      fprintf(stderr, "CreateContext failed: %s\n", SDL_GetError());
+      exit(-7);
     }
   }
-  const SDL_VideoInfo *vidinfo = SDL_GetVideoInfo();
-  screen_w = w = vidinfo->current_w;
-  screen_h = h = vidinfo->current_h;
+
+  if( go_full && !v_fullscreen )
+    SDL_SetWindowFullscreen(screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
+  else if( !go_full && v_fullscreen )
+    SDL_SetWindowFullscreen(screen, 0);
+
+  v_fullscreen = go_full;
+
+  SDL_GetWindowSize(screen, &screen_w, &screen_h);
+
   v_scale = (h/NATIVEH < w/NATIVEW) ? h/NATIVEH : w/NATIVEW;
   if( v_scale<1 )
     v_scale = 1;
@@ -422,7 +454,6 @@ void setvideo(int w,int h,int go_full,int quiet)
   if( !quiet )
     SJC_Write("Video mode set to %d x %d",w,h);
 }
-
 
 void setvideosoon(int w,int h,int go_full,int delay)
 {
@@ -444,7 +475,7 @@ void setvideosoon(int w,int h,int go_full,int delay)
 
 void setwinpos(int x,int y)
 {
-  //SDL_SetWindowPosition(NULL, x, y);
+  SDL_SetWindowPosition(screen, x, y);
 }
 
 // find ray from point on screen (mouse?) into world space

@@ -5,11 +5,13 @@ UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # Same for all platforms, probably
 CC = gcc #tcc
+MKDIRP = mkdir -p
 OBJDIR = objects
 SRCS = $(wildcard engine/*.c)
 SRCS += $(wildcard engine/mt19937ar/*.c)
 include game/Makefile-include
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+DEPS = $(OBJS:.o=.d)
 
 GITCOMMIT := $(shell sh -c "git branch -v | grep '^\*' | sed 's/\s\+/ /g' | cut -d' ' -f2,3")
 
@@ -48,17 +50,18 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	POSTCC = cp platforms/win/*.dll .
 endif
 
-all: clean $(EXE_NAME)
-
-quick: $(EXE_NAME)
+all: $(EXE_NAME)
 
 $(EXE_NAME): $(OBJS) $(OBJSRES)
 	$(CC) -o $@ $(OBJS) $(OBJSRES) $(FLAGS) $(INC) $(LIBS) $(XLIBS)
 	$(POSTCC)
 
+-include $(DEPS)
+
 $(OBJDIR)/%.o: %.c
-	mkdir -p `dirname $@`
-	$(CC) -o $@ -c $(FLAGS) $(INC) $*.c
+	@$(MKDIRP) $(dir $@)
+	$(CC) $(FLAGS) $(INC) -MM -MT $@ -MF $(patsubst %.o,%.d,$@) $<
+	$(CC) -o $@ -c $(FLAGS) $(INC) $<
 
 .rc.o:
 	$(WINDRES) $^ -o $@
@@ -68,6 +71,5 @@ $(OBJDIR)/%.o: %.c
 clean:
 	-$(RM) $(OBJS) $(OBJSRES)
 
-distclean:
-	-$(RM) -r $(OBJDIR)
-	-$(RM) $(OBJSRES) $(EXE_NAME)
+distclean: clean
+	-$(RM) $(EXE_NAME)

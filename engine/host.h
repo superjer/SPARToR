@@ -13,9 +13,8 @@ typedef struct{
   Uint8 *buf;
 } CLIENT_t;
 
-extern UDPsocket  hostsock;
-
-void host_write_packets();
-void host_read_packet(int clientid);
+void host_send_state(int clientid);
+void host_outbox_write();
+void host_inbox_read(int clientid, CLIENT_t *cl);
 
 #endif

@@ -27,12 +27,6 @@ connect         connect <host> [[:]port]
                 Connect to a server. E.g. connect 127.0.0.1:31103
 
 
-dimetric        dimetric
-
-                Switch the current context to render mode dimetric. See also
-                `orthographic'.
-
-
 disconnect      disconnect
 
                 Disconnect from the currently connected server.
@@ -41,6 +35,11 @@ disconnect      disconnect
 edit            edit
 
                 Start edit mode, in which you can edit the levels, etc.
+
+
+exec            exec <script>
+
+                Run a script in user/console or game/console.
 
 
 exit            exit
@@ -52,6 +51,12 @@ fast            fast
 
                 Run the game at the "fast" speed. This is the default. See also
                 `slow'.
+
+
+fovy            fovy
+                fovy <number>
+
+                Get or set the field of view to a number from 0.0001 to 90.
 
 
 fullscreen      fullscreen
@@ -92,12 +97,6 @@ musictest       musictest
 oscillo         oscillo
 
                 Toggle display of an oscilloscope-like view of the sound output.
-
-
-orthographic    orthographic
-
-                Switch the current context to render mode orthographic. See also
-                `dimetric'.
 
 
 quit            quit
@@ -168,3 +167,9 @@ window          window
 
                 Switch to windowed mode at the specified scale or resolution.
 
+
+winpos          winpos
+                winpos <x> <y>
+
+                Move the window to x, y on the desktop, as allowed by the
+                desktop environment.

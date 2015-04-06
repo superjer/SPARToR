@@ -2,6 +2,7 @@
 *.dll
 *.[oa]
 *.swp
+*.log
 objects/
 cscope.*
 tags
@@ -13,6 +14,5 @@ stderr.txt
 .DS_Store
 game/maps/backup
 game/maps/autosave
-console.log
 deadking
 user/

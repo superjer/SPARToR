@@ -339,7 +339,7 @@ void render()
     glColor4f(1.0f,1.0f,1.0f,1.0f);
     x = 10;
     y = conh-20;
-    if((ticks/200)%2)
+    if((ticks/200)%2 && i_hasfocus)
       SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '\2');
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
@@ -398,14 +398,21 @@ void setvideo(int w, int h, int go_full, int quiet)
 {
   Uint32 flags = 0;
 
-  if( !w || !h ) { //default to previous res
+  if( !w || !h ) //default to previous res
+  {
     w = prev_w;
     h = prev_h;
   }
 
-  if( go_full && !v_fullscreen ) { // record previous res when changing to fullscreen
+  if( go_full && !v_fullscreen ) // record previous res when changing to fullscreen
+  {
     prev_w = screen_w;
     prev_h = screen_h;
+  }
+  else
+  {
+    prev_w = w;
+    prev_h = h;
   }
 
   flags |= (go_full ? 0 : SDL_WINDOW_RESIZABLE);
@@ -432,7 +439,7 @@ void setvideo(int w, int h, int go_full, int quiet)
 
     if( SDL_GL_MakeCurrent(screen, glcontext) )
     {
-      fprintf(stderr, "CreateContext failed: %s\n", SDL_GetError());
+      fprintf(stderr, "MakeCurrent failed: %s\n", SDL_GetError());
       exit(-7);
     }
   }
@@ -455,7 +462,7 @@ void setvideo(int w, int h, int go_full, int quiet)
     SJC_Write("Video mode set to %d x %d",w,h);
 }
 
-void setvideosoon(int w,int h,int go_full,int delay)
+void setvideosoon(int w, int h, int go_full)
 {
   if( !w || !h ) {
     if( go_full ) {
@@ -470,7 +477,7 @@ void setvideosoon(int w,int h,int go_full,int delay)
     soon_h = h;
   }
   soon_full = go_full;
-  soon = delay;
+  soon = 2;
 }
 
 void setwinpos(int x,int y)

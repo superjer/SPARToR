@@ -147,6 +147,9 @@ int main(int argc,char **argv)
     idle_time += SDL_GetTicks() - idle_start;
     readinput();
     net_loop();
+    net_test();
+    /* if( netmode == NM_HOST   ) host(); */
+    /* if( netmode == NM_CLIENT ) client(); */
     advance();
     render();
     idle_start = SDL_GetTicks();

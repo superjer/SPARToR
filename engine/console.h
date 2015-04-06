@@ -4,6 +4,8 @@
 #include "SDL.h"
 #include "font.h"
 
+#define echo SJC_Write
+
 #define SJC_BUFLEN 200
 
 typedef struct
@@ -21,6 +23,7 @@ void SJC_Init();
 void SJC_Put(char c);
 void SJC_Replace(const char *c);
 void SJC_Write(const char *s,...);
+void SJC_Log(const char *newfile);
 void SJC_Rub();
 void SJC_Clear();
 void SJC_Up();

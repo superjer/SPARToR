@@ -30,11 +30,7 @@
 #include "keynames.h"
 #include "helpers.h"
 
-static enum NETMODE {
-  NETMODE_NONE = 0,
-  NETMODE_HOST,
-  NETMODE_CLIENT,
-} netmode;
+int netmode;
 
 static void bind( char *dev_sym, char *press_cmdname );
 
@@ -56,6 +52,9 @@ void command(const char *s)
   do {
     if( q==NULL ) {
       ;
+
+    }else if( strcmp(q,"console")==0 ) {
+      toggleconsole();
 
     }else if( strcmp(q,"exec")==0 ) {
       char *file = tok(p," ");
@@ -81,7 +80,7 @@ void command(const char *s)
       if( !err )
       {
         SJC_Write("Started host on port %d", nport);
-        netmode = NETMODE_HOST;
+        netmode = NM_HOST;
       }
 
     }else if( strcmp(q,"connect")==0 ) {
@@ -94,31 +93,40 @@ void command(const char *s)
 
       if( !err )
       {
+        if( !hostname ) hostname = "localhost";
+
         err = net_connect(hostname, nport);
         if( !err )
         {
           SJC_Write("Connecting to %s on port %d", hostname, nport);
-          netmode = NETMODE_CLIENT;
+          netmode = NM_CLIENT;
         }
       }
 
     }else if( strcmp(q,"echo")==0 ) {
-      int ret = net_write(0, (Uint8*)p, strlen(p));
-      if( ret ) SJC_Write("Net write error: %d", ret);
+      if( p && *p )
+      {
+        int ret = net_write(0, (Uint8*)p, strlen(p));
+        if( ret ) SJC_Write("Net write error: %d", ret);
+      }
 
     }else if( strcmp(q,"disconnect")==0 ) {
-      if( netmode == NETMODE_HOST ) {
+      if( netmode == NM_HOST ) {
         net_stop();
         SJC_Write("Host stopped.");
-      }else if( netmode == NETMODE_CLIENT ) {
+      }else if( netmode == NM_CLIENT ) {
         net_stop();
         SJC_Write("Disconnected from host.");
       }else
         SJC_Write("Nothing to disconnect from.");
-      netmode = NETMODE_NONE;
+      netmode = NM_NONE;
 
     }else if( strcmp(q,"reconnect")==0 ) {
       SJC_Write("Not implemented.");
+
+    }else if( strcmp(q,"log")==0 ) {
+      echo("Switching to log file \"%s\"", p);
+      SJC_Log(p);
 
     }else if( strcmp(q,"hulls")==0 ) {
       v_drawhulls = v_drawhulls ? 0 : 1;
@@ -140,23 +148,23 @@ void command(const char *s)
 
       if( strcmp(q,"fullscreen")==0 )
       {
-        setvideosoon(0, 0, 1, 1);
+        setvideosoon(0, 0, 1);
       }
       else
       {
         if( w>=320 && h>=200 )
         {
           SDL_SetWindowSize(screen, w, h);
-          setvideosoon(w, h, 0, 1);
+          setvideosoon(w, h, 0);
         }
         else if( w>=1 && w<=5 )
         {
           SDL_SetWindowSize(screen, NATIVEW*w, NATIVEH*w);
-          setvideosoon(NATIVEW*w, NATIVEH*w, 0, 1);
+          setvideosoon(NATIVEW*w, NATIVEH*w, 0);
         }
         else
         {
-          setvideosoon(0, 0, 0, 1);
+          setvideosoon(0, 0, 0);
         }
       }
 

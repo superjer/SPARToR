@@ -11,7 +11,13 @@
  **/
 
 #include <limits.h>
+#include <unistd.h>
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "mod.h"
@@ -269,6 +275,15 @@ void command(const char *s)
       }
       v_fovy = n;
       break;
+
+    }else if( strcmp(q,"pwd")==0 || strcmp(q,"cwd")==0 ) {
+      char buf[PATH_MAX+1];
+      SJC_Write("%s", getcwd(buf, PATH_MAX));
+
+    }else if( strcmp(q,"cd")==0 || strcmp(q,"chdir")==0 ) {
+      char buf[PATH_MAX+1];
+      chdir(p);
+      SJC_Write("Changed to %s", getcwd(buf, PATH_MAX));
 
     }else if( mod_command(q,p) ) {
       SJC_Write("Huh?");

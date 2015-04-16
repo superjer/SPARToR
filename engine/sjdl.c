@@ -11,7 +11,11 @@
  **/
 
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "mod.h"
 #include "sjdl.h"

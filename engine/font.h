@@ -8,7 +8,11 @@
 #ifndef SPARTOR_SJFONT_H_
 #define SPARTOR_SJFONT_H_
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "sjdl.h"
 

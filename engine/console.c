@@ -140,6 +140,21 @@ void SJC_Down()
   recall();
 }
 
+void SJC_Copy()
+{
+  if( SJC.buf[0] )
+    SDL_SetClipboardText(SJC.buf[0]);
+}
+
+void SJC_Paste()
+{
+  char *p = SDL_GetClipboardText();
+  char *q = p;
+  while( p && *p )
+    SJC_Put(*p++);
+  SDL_free(q);
+}
+
 int SJC_Submit()
 {
   if(!SJC.buf[0] || !strlen(SJC.buf[0]))

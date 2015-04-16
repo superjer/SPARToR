@@ -10,7 +10,13 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#include <unistd.h>
+
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "SDL_image.h"
@@ -81,9 +87,20 @@ static void init_flexers()
   #include "game_structs.h"
 }
 
-
-int main(int argc,char **argv)
+#ifdef __APPLE__
+int main(int argc, char **argv, char **envp, char **apple)
 {
+  char *applefix = strstr(apple[0], "/spartor.app/");
+  if( applefix )
+  {
+    *applefix = '\0';
+    chdir(apple[0]);
+    echo("Apple startup path fix: %s", apple[0]);
+  }
+#else
+int main(int argc, char **argv)
+{
+#endif
   int i;
   Uint32 idle_start = 0;
 

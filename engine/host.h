@@ -1,6 +1,11 @@
 #ifndef SPARTOR_HOST_H_
 #define SPARTOR_HOST_H_
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 

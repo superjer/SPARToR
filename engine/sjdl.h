@@ -9,7 +9,11 @@
 #ifndef SPARTOR_SJDL_H_
 #define SPARTOR_SJDL_H_
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "basictypes.h"
 #include "sprite.h"

@@ -10,7 +10,12 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#endif
 #include "SDL.h"
 #include "SDL_video.h"
 #include "SDL_net.h"
@@ -93,12 +98,14 @@ void videoinit()
 
   setvideo(NATIVEW*default_scale, NATIVEH*default_scale, 0, 0);
 
+#ifdef DOGLEW
   GLenum glewerr = glewInit();
   if( glewerr!=GLEW_OK )
   {
     fprintf(stderr, "glewInit: %s\n", glewGetErrorString(glewerr));
     exit(-4);
   }
+#endif
 
   SJC_Write("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
   SJC_Write("OpenGL version %s", glGetString(GL_VERSION));

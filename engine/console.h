@@ -1,6 +1,11 @@
 #ifndef SPARTOR_SJCONSOLE_H_
 #define SPARTOR_SJCONSOLE_H_
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "font.h"
 
@@ -28,6 +33,8 @@ void SJC_Rub();
 void SJC_Clear();
 void SJC_Up();
 void SJC_Down();
+void SJC_Copy();
+void SJC_Paste();
 int SJC_Submit();
 
 #endif

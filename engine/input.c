@@ -10,6 +10,11 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "mod.h"
@@ -154,18 +159,22 @@ void kbinput(int press, SDL_KeyboardEvent e)
   }
   else if(console_open)
   {
-    if(!press)
+    if( !press )
       ; //nothing on key up
-    else if(sym==SDLK_RETURN && SJC_Submit())
+    else if( sym==SDLK_RETURN && SJC_Submit() )
       command(SJC.buf[1]);
-    else if(sym==SDLK_BACKSPACE || sym==SDLK_DELETE)
+    else if( sym==SDLK_BACKSPACE || sym==SDLK_DELETE )
       SJC_Rub();
-    else if(sym==SDLK_UP)
+    else if( sym==SDLK_UP )
       SJC_Up();
-    else if(sym==SDLK_DOWN)
+    else if( sym==SDLK_DOWN )
       SJC_Down();
-    else if(sym==SDLK_ESCAPE)
+    else if( sym==SDLK_ESCAPE )
       toggleconsole();
+    else if( sym==SDLK_c && mod&KMOD_CTRL )
+      SJC_Copy();
+    else if( sym==SDLK_v && mod&KMOD_CTRL )
+      SJC_Paste();
   }
   else
   {

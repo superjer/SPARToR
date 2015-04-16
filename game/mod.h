@@ -3,7 +3,11 @@
 #define DEADKING_MOD_H_
 
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "mod_constants.h"

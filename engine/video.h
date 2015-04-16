@@ -1,6 +1,11 @@
 #ifndef SPARTOR_VIDEO_H_
 #define SPARTOR_VIDEO_H_
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 
 extern SDL_Window *screen;

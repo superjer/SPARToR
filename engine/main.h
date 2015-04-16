@@ -2,14 +2,20 @@
 #ifndef SPARTOR_MAIN_H_
 #define SPARTOR_MAIN_H_
 
+#ifdef DOGLEW
 #include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "SDL_image.h"
 #include "mod_constants.h"
 
 #define VERSION "0.15.04.04"
+#ifndef PATH_MAX
 #define PATH_MAX 4096
+#endif
 
 #ifndef GITCOMMIT
 #define GITCOMMIT "* no commit"

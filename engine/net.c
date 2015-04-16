@@ -10,6 +10,11 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#ifdef DOGLEW
+#include <GL/glew.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include "SDL.h"
 #include "SDL_net.h"
 #include "main.h"

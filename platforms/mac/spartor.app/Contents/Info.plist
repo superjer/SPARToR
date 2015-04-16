@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>spartor_mac</string>
+	<string>spartor</string>
 	<key>CFBundleGetInfoString</key>
-	<string>UNKNOWN, Copyright 2010 superjer.com</string>
+	<string>UNKNOWN, Copyright 2015 superjer.com</string>
 	<key>CFBundleIconFile</key>
 	<string>ct.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.superjercom.spartor_mac</string>
+	<string>com.superjer.spartor</string>
 	<key>CFBundleName</key>
-	<string>spartor_mac</string>
+	<string>spartor</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>UNKNOWN</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2010 superjer.com</string>
+	<string>Copyright 2015 superjer.com</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

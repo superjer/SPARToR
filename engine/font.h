@@ -27,6 +27,9 @@
 #define SJF_CENTER  0
 #define SJF_RIGHT   1
 
+#define SJF_DrawChar(x, y, ch) SJF_DrawCharScaled(1, x, y, ch)
+#define SJF_DrawText(x, y, align, str, ...) SJF_DrawTextScaled(1, x, y, align, str, __VA_ARGS__)
+
 typedef struct
 {
   GLuint tex;
@@ -40,8 +43,8 @@ typedef struct
 extern SJF_t SJF;
 
 void SJF_Init();
-void SJF_DrawChar(int x, int y, char ch);
-void SJF_DrawText(int x, int y, int align, const char *str, ...);
+void SJF_DrawCharScaled(int scale, int x, int y, char ch);
+void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...);
 int SJF_TextExtents(const char *str);
 
 #endif

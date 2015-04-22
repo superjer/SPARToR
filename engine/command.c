@@ -285,6 +285,13 @@ void command(const char *s)
       chdir(p);
       SJC_Write("Changed to %s", getcwd(buf, PATH_MAX));
 
+    }else if( strcmp(q,"fontscale")==0 ) {
+      float scale = atof(p);
+      if( scale < 1 || scale > 9 )
+        echo("Font scale must be between 1 and 9, sir.");
+      else
+        v_conscale = scale;
+
     }else if( mod_command(q,p) ) {
       SJC_Write("Huh?");
 

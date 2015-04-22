@@ -178,7 +178,7 @@ void SJF_Init()
 }
 
 //draws a single character with GL
-void SJF_DrawChar(int x, int y, char ch)
+void SJF_DrawCharScaled(int scale, int x, int y, char ch)
 {
   int sx = (ch%16)*SJF.w;
   int sy = (ch/16)*SJF.h;
@@ -188,17 +188,17 @@ void SJF_DrawChar(int x, int y, char ch)
   glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win
   glBindTexture(GL_TEXTURE_2D,SJF.tex);
   glBegin(GL_QUADS);
-  glTexCoord2i(sx  ,sy  ); glVertex2i(x  ,y  );
-  glTexCoord2i(sx+w,sy  ); glVertex2i(x+w,y  );
-  glTexCoord2i(sx+w,sy+h); glVertex2i(x+w,y+h);
-  glTexCoord2i(sx  ,sy+h); glVertex2i(x  ,y+h);
+  glTexCoord2i(sx   ,sy  ); glVertex2i(x         ,y        );
+  glTexCoord2i(sx+w ,sy  ); glVertex2i(x+w*scale ,y        );
+  glTexCoord2i(sx+w ,sy+h); glVertex2i(x+w*scale ,y+h*scale);
+  glTexCoord2i(sx   ,sy+h); glVertex2i(x         ,y+h*scale);
   glEnd();
 }
 
 //prints a message at location x,y with GL
 //align: SJF_LEFT, SJF_CENTER, SJF_RIGHT
 //str and ... work like printf
-void SJF_DrawText(int x, int y, int align, const char *str, ...)
+void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...)
 {
   if( !str ) str = "<null>";
 
@@ -235,11 +235,11 @@ void SJF_DrawText(int x, int y, int align, const char *str, ...)
     sx = (*str%16)*SJF.w;
     sy = (*str/16)*SJF.h;
     w = SJF.space[(Uint8)*str];
-    glTexCoord2i(sx  ,sy  ); glVertex2i(x  ,y  );
-    glTexCoord2i(sx+w,sy  ); glVertex2i(x+w,y  );
-    glTexCoord2i(sx+w,sy+h); glVertex2i(x+w,y+h);
-    glTexCoord2i(sx  ,sy+h); glVertex2i(x  ,y+h);
-    x += w;
+    glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
+    glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
+    glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
+    glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
+    x += w * scale;
     str++;
   }
   glEnd();

@@ -62,6 +62,8 @@ GLdouble v_modeltrix[16];
 GLdouble v_projtrix[16];
 int v_viewport[4];
 
+float v_conscale = 1;
+
 static int screen_w  = NATIVEW;
 static int screen_h  = NATIVEH;
 static int prev_w    = NATIVEW;
@@ -333,7 +335,8 @@ void render()
   mod_outerdraw(vidfr,w,h);
 
   //display console
-  if(console_open) {
+  if(console_open)
+  {
     int conh = h/2 - 40;
     if(conh<40) conh = 40;
     glColor4f(0.15,0.15,0.15,0.85);
@@ -345,16 +348,19 @@ void render()
     glEnable(GL_TEXTURE_2D);
     glColor4f(1.0f,1.0f,1.0f,1.0f);
     x = 10;
-    y = conh-20;
+    y = conh - 12 * v_conscale - 4;
+
     if((ticks/200)%2 && i_hasfocus)
-      SJF_DrawChar(x+SJF_TextExtents(SJC.buf[0]), y, '\2');
+      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0])*v_conscale, y, '\2');
+
     for(i=0;y>0;i++) {
       if(SJC.buf[i])
-        SJF_DrawText(x, y, SJF_LEFT, "%s", SJC.buf[i]);
-      y -= 12;
+        SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s", SJC.buf[i]);
+      y -= 12 * v_conscale;
     }
+
     if( SJC.buf[0] && SJC.buf[0][0] ) {
-      SJF_DrawText(w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);
+      SJF_DrawTextScaled(v_conscale, w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);
     }
   }
 

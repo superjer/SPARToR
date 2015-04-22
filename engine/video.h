@@ -42,6 +42,8 @@ extern GLdouble v_modeltrix[16];
 extern GLdouble v_projtrix[16];
 extern int v_viewport[4];
 
+extern float v_conscale;
+
 void videoinit();
 void render();
 void setvideo(int w, int h, int go_full, int quiet);

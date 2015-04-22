@@ -130,13 +130,7 @@ void kbinput(int press, SDL_KeyboardEvent e)
   int safesym = sym <= 127 ? sym : (sym & (~(1<<30))) + 256;
 
   if( i_watch && press )
-<<<<<<< HEAD
     SJC_Write("key #%i, mod #%d", safesym, mod);
-||||||| parent of ce59957... WIP
-    SJC_Write("key #%d, mod #%d", sym, mod);
-=======
-    SJC_Write("key #%i, mod #%d", sym, mod);
->>>>>>> ce59957... WIP
 
   if( (sym==SDLK_q && mod&(KMOD_CTRL|KMOD_GUI)) || (sym==SDLK_F4 && mod&KMOD_ALT) )
   {

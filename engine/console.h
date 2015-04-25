@@ -1,6 +1,11 @@
 #ifndef SPARTOR_SJCONSOLE_H_
 #define SPARTOR_SJCONSOLE_H_
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
 #ifdef DOGLEW
 #include <GL/glew.h>
 #else

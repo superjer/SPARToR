@@ -19,7 +19,6 @@ FLAGS = -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings -
 FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
 FLAGS += -std=c99
 
-
 INC = -Iengine -Igame
 
 # Only useful on certain platforms
@@ -48,10 +47,10 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	OBJSRES = game/icon.o
 	WINDRES = windres
 	FLAGS += -DDOGLEW -mwindows
-	LIBS = -L/usr/local/lib -L/usr/lib \
-	       -lmingw32 -lSDL2main -lSDL2 -lSDL2_net -lSDL2_image -lglew32 -lopengl32 -lglu32 -lm
-	INC += -I/usr/local/include/SDL2 -I/usr/include
-	POSTCC = cp platforms/win/*.dll .
+	LIBS = -Lplatforms/win32/lib
+	LIBS += -lmingw32 -lSDL2main -lSDL2 -lSDL2_net -lSDL2_image -lglew32 -lopengl32 -lglu32 -lm
+	INC += -Iplatforms/win32/include -Iplatforms/win32/include/SDL2
+	POSTCC = cp platforms/win32/bin/*.dll .
 endif
 
 all: $(EXE_NAME)

@@ -2,6 +2,11 @@
 #ifndef SPARTOR_MAIN_H_
 #define SPARTOR_MAIN_H_
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
 #ifdef DOGLEW
 #include <GL/glew.h>
 #else

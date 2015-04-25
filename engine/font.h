@@ -5,6 +5,11 @@
  **  which requires no outside resources (images, fonts, etc.)
  **/
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+
 #ifndef SPARTOR_SJFONT_H_
 #define SPARTOR_SJFONT_H_
 

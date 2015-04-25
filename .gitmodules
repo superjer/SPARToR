@@ -1,0 +1,3 @@
+[submodule "platforms/win32"]
+	path = platforms/win32
+	url = https://github.com/superjer/SPARToR-win32

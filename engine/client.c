@@ -10,6 +10,7 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+
 #ifdef DOGLEW
 #include <GL/glew.h>
 #else

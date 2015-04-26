@@ -440,7 +440,7 @@ void setvideo(int w, int h, int go_full, int quiet)
 
     if( !screen ) { fprintf(stderr, "CreateWindow failed: %s\n", SDL_GetError()); exit(-5); }
 
-    SDL_Surface *iconsurf = IMG_Load("game/images/icon.png");
+    SDL_Surface *iconsurf = IMG_Load(GAME "/images/icon.png");
     SDL_SetWindowIcon(screen, iconsurf);
     SDL_FreeSurface(iconsurf);
 

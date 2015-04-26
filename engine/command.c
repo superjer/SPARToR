@@ -64,7 +64,7 @@ void command(const char *s)
 
     }else if( strcmp(q,"exec")==0 ) {
       char *file = tok(p," ");
-      if( !file ) { SJC_Write("You must specify a name in game/console/*.txt"); return; }
+      if( !file ) { SJC_Write("You must specify a name in " GAME "/console/*.txt"); return; }
       exec_commands(file);
 
     }else if( strcmp(q,"realtime")==0 ) {
@@ -380,7 +380,7 @@ void exec_commands( char *name )
   FILE *f;
   char line[1000];
 
-  printed = snprintf( path, PATH_MAX, "game/console/%s.txt", name );
+  printed = snprintf( path, PATH_MAX, GAME "/console/%s.txt", name );
   if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
 
   f = fopen(path, "r");

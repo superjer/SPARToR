@@ -1,6 +1,6 @@
 /**
- **  Dead Kings' Quest
- **  A special game for the SPARToR Network Game Engine
+ **  McDiddy's: The Game: Vengeance
+ **  Implementation example for the SPARToR Network Game Engine
  **  Copyright (c) 2010-2012  Jer Wilson
  **
  **  See COPYING for details.
@@ -23,6 +23,8 @@
 
 SYS_TEX_T sys_tex[] = {{"/tool.png"       ,0},
                        {"/player.png"     ,0},
+                       {"/slugtunnel.png" ,0},
+                       {"/amigo.png"      ,0},
                        {"/persons.png"    ,0},
                        {"/blankhud.png"   ,0}};
 size_t num_sys_tex = COUNTOF(sys_tex);
@@ -31,16 +33,8 @@ INPUTNAME_t inputnames[] = {{"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
                             {"right"      ,CMDT_1RIGHT   ,CMDT_0RIGHT   },
                             {"up"         ,CMDT_1UP      ,CMDT_0UP      },
                             {"down"       ,CMDT_1DOWN    ,CMDT_0DOWN    },
-                            {"nw"         ,CMDT_1NW      ,CMDT_0NW      },
-                            {"ne"         ,CMDT_1NE      ,CMDT_0NE      },
-                            {"sw"         ,CMDT_1SW      ,CMDT_0SW      },
-                            {"se"         ,CMDT_1SE      ,CMDT_0SE      },
-                            {"select"     ,CMDT_1SEL     ,CMDT_0SEL     },
-                            {"back"       ,CMDT_1BACK    ,CMDT_0BACK    },
-                            {"camleft"    ,CMDT_1CAMLEFT ,CMDT_0CAMLEFT },
-                            {"camright"   ,CMDT_1CAMRIGHT,CMDT_0CAMRIGHT},
-                            {"camup"      ,CMDT_1CAMUP   ,CMDT_0CAMUP   },
-                            {"camdown"    ,CMDT_1CAMDOWN ,CMDT_0CAMDOWN },
+                            {"fire"       ,CMDT_1FIRE    ,CMDT_0FIRE    },
+                            {"jump"       ,CMDT_1JUMP    ,CMDT_0JUMP    },
                          /* {"cons-cmd"   ,CMDT_1CON     ,CMDT_0CON     }, this may not be necessary, it may even be dangerous */
                             {"edit-paint" ,CMDT_1EPANT   ,CMDT_0EPANT   },
                             {"edit-prev"  ,CMDT_1EPREV   ,CMDT_0EPREV   },
@@ -113,7 +107,34 @@ void mod_setup(Uint32 setupfr)
     co->map[ i].spr   = 0;
     co->dmap[i].flags = CBF_NULL;
   }
-  load_context("dirtfarm",1,setupfr); //load a default map
+  load_context("noise",1,setupfr); //load a default map
+
+  //make some dummys
+  #define MAYBE_A_DUMMY(i,x,y,w,h) {                                                         \
+    DUMMY_t *du;                                                                             \
+    fr[setupfr].objs[i+20].type = OBJT_DUMMY;                                                \
+    fr[setupfr].objs[i+20].flags = OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP| \
+                                   OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB;                            \
+    fr[setupfr].objs[i+20].context = 1;                                                      \
+    fr[setupfr].objs[i+20].size = sizeof *du;                                                \
+    du = fr[setupfr].objs[i+20].data = malloc(sizeof *du);                                   \
+    du->pos = (V){x*8,y*8,0};                                                                \
+    du->vel = (V){0,0,0};                                                                    \
+    du->hull[0] = (V){-w*8,-h*8,-8};                                                         \
+    du->hull[1] = (V){ w*8, h*8, 8};                                                         \
+    du->model = 0;                                                                           }
+  MAYBE_A_DUMMY(20,  3,-25,1,1);
+  MAYBE_A_DUMMY(21,  3,-20,1,1);
+  MAYBE_A_DUMMY(22,  3,-15,1,1);
+  MAYBE_A_DUMMY(23,  3,-10,1,1);
+  MAYBE_A_DUMMY(24,  5,-15,1,1);
+  MAYBE_A_DUMMY(25,  9,-15,1,1);
+  MAYBE_A_DUMMY(26, 43,-20,1,1);
+  MAYBE_A_DUMMY(27, 43,-15,1,1);
+  MAYBE_A_DUMMY(28, 45,-25,1,1);
+  MAYBE_A_DUMMY(29, 45,-20,1,1);
+  MAYBE_A_DUMMY(30, 45,-15,1,1);
+  #undef MAYBE_A_DUMMY
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client
 
@@ -256,21 +277,8 @@ static int gui_click( int press )
   if( !elem || !press )
     return 0;
 
-  unsigned int hotfrmod = hotfr%maxframes;
-  POPUP_t *pop = fr[hotfrmod].objs[elem].data;
-  MOTHER_t *mo = fr[hotfrmod].objs[0].data;
+  POPUP_t *pop = fr[hotfr%maxframes].objs[elem].data;
   SJC_Write("Clicked on button: %s",pop->text);
-
-  if( strcmp(pop->text,"MOVE")==0 ) {
-    mo->menulayer = MOVE;
-  } else if( strcmp(pop->text,"WALK")==0 ) {
-    mo->menulayer = NOLAYER;
-  } else if( strcmp(pop->text,"RUN")==0 ) {
-    mo->menulayer = NOLAYER;
-  } else if( strcmp(pop->text,"SPRINT")==0 ) {
-    mo->menulayer = NOLAYER;
-  }
-
   return 1;
 }
 
@@ -481,7 +489,7 @@ void mod_loadsurfs(int quit)
 
   if( quit ) return;
 
-  SJGLOB_T *files = SJglob( "game/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
+  SJGLOB_T *files = SJglob( GAME "/textures", "*.png", SJGLOB_MARK|SJGLOB_NOESCAPE );
 
   for( i=0; i<files->gl_pathc; i++ )
     make_sure_texture_is_loaded( files->gl_pathv[i] );
@@ -522,44 +530,22 @@ void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 
   CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
   switch(o->type) {
+    case OBJT_PLAYER:         obj_player_draw(     objid, vidfrmod, o, co );     break;
     case OBJT_GHOST:          obj_ghost_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_PERSON:         obj_person_draw(     objid, vidfrmod, o, co );     break;
+    case OBJT_BULLET:         obj_bullet_draw(     objid, vidfrmod, o, co );     break;
+    case OBJT_SLUG:           obj_slug_draw(       objid, vidfrmod, o, co );     break;
+    case OBJT_DUMMY:          obj_dummy_draw(      objid, vidfrmod, o, co );     break;
+    case OBJT_AMIGO:          obj_amigo_draw(      objid, vidfrmod, o, co );     break;
+    case OBJT_AMIGOSWORD:     obj_amigosword_draw( objid, vidfrmod, o, co );     break;
   }
 }
 
 void mod_huddraw(Uint32 vidfr)
 {
-  Uint32 vidfrmod = vidfr%maxframes;
-  MOTHER_t *mo = fr[vidfrmod].objs[0].data;
+  // draw HUD here!
 
-  if( mo->active && mo->pc )
-  {
-    int x = 57;
-
-    PERSON_t *pe = fr[vidfrmod%maxframes].objs[mo->active].data;
-
-    SJGL_SetTex( sys_tex[TEX_HUD].num );
-    SJGL_Blit( &(REC){0,0,160,50},   0, NATIVEH-50, 0 );
-
-    #define BAR_W(stat) (pe->stat>0 ? 15+32*pe->stat/pe->max_##stat : 0)
-    SJGL_Blit( &(REC){0,50+6*0,BAR_W(hp),6}, x   , NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*1,BAR_W(mp),6}, x+51, NATIVEH-50+13+9*0, 0 );
-    SJGL_Blit( &(REC){0,50+6*2,BAR_W(st),6}, x   , NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*3,BAR_W(ap),6}, x+51, NATIVEH-50+13+9*1, 0 );
-    SJGL_Blit( &(REC){0,50+6*4,BAR_W(pn),6}, x   , NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*5,BAR_W(ml),6}, x+51, NATIVEH-50+13+9*2, 0 );
-    SJGL_Blit( &(REC){0,50+6*6,BAR_W(to),6}, x   , NATIVEH-50+13+9*3, 0 );
-    SJGL_Blit( &(REC){0,50+6*7,BAR_W(xp),6}, x+51, NATIVEH-50+13+9*3, 0 );
-    #undef BAR_W
-
-    SJF_DrawText( 3, NATIVEH-49, SJF_LEFT, "%s", pe->name );
-  }
-
-  // draw menu background and then menu items
-  SJGL_SetTex( 0 );
-  SJGL_SetTex( sys_tex[TEX_HUD].num );
-  SJGL_Blit( &(REC){512-75,0,75,150}, NATIVEW-75, 0, 0 );
-
+  // popups
+  Uint32 vidfrmod = vidfr % maxframes;
   int i;
   for( i=0; i<maxobjs; i++ )
   {
@@ -718,9 +704,29 @@ void mod_adv(int objid,Uint32 a,Uint32 b,OBJ_t *oa,OBJ_t *ob)
       assert(ob->size==sizeof(GHOST_t));
       obj_ghost_adv(      objid, a, b, oa, ob );
       break;
-    case OBJT_PERSON:
-      assert(ob->size==sizeof(PERSON_t));
-      obj_person_adv(       objid, a, b, oa, ob );
+    case OBJT_DUMMY:
+      assert(ob->size==sizeof(DUMMY_t));
+      obj_dummy_adv(      objid, a, b, oa, ob );
+      break;
+    case OBJT_PLAYER:
+      assert(ob->size==sizeof(PLAYER_t));
+      obj_player_adv(     objid, a, b, oa, ob );
+      break;
+    case OBJT_BULLET:
+      assert(ob->size==sizeof(BULLET_t));
+      obj_bullet_adv(     objid, a, b, oa, ob );
+      break;
+    case OBJT_SLUG:
+      assert(ob->size==sizeof(SLUG_t));
+      obj_slug_adv(       objid, a, b, oa, ob );
+      break;
+    case OBJT_AMIGO:
+      assert(ob->size==sizeof(AMIGO_t));
+      obj_amigo_adv(      objid, a, b, oa, ob );
+      break;
+    case OBJT_AMIGOSWORD:
+      assert(ob->size==sizeof(AMIGOSWORD_t));
+      obj_amigosword_adv( objid, a, b, oa, ob );
       break;
   } //end switch ob->type
 }

@@ -425,7 +425,7 @@ void audioinit()
   SJC_Write("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
             spec.freq, sfmt, spec.channels, spec.silence, spec.samples, spec.size);
 
-  SJGLOB_T *files = SJglob( "game/sounds", "*.wav", SJGLOB_MARK|SJGLOB_NOESCAPE );
+  SJGLOB_T *files = SJglob( GAME "/sounds", "*.wav", SJGLOB_MARK|SJGLOB_NOESCAPE );
   for( i=0; i<files->gl_pathc; i++ )
     make_sure_sound_is_loaded( files->gl_pathv[i] );
   SJglobfree( files );

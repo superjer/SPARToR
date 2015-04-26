@@ -3,7 +3,7 @@
 *.[oa]
 *.swp
 *.log
-objects/
+obj-*
 cscope.*
 tags
 spartor
@@ -12,7 +12,6 @@ spartor.app
 stdout.txt
 stderr.txt
 .DS_Store
-game/maps/backup
-game/maps/autosave
-deadking
+*/maps/backup
+*/maps/autosave
 user/

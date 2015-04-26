@@ -4,7 +4,7 @@
 # Uses some sed/awk tricks to get tags where they would otherwise be obscured by macros.
 # Run at the root of the project.
 
-FILES="game/game_structs.h engine/engine_structs.h"
+FILES="deadking/game_structs.h mcdiddy/game_structs.h engine/engine_structs.h"
 
 for file in $FILES
 do
@@ -25,8 +25,8 @@ do
         ' >$file
 done
 
-ctags {engine,game}/*.[ch]
-cscope -b -I engine -I game -s engine -s game
+ctags {engine,deadking,mcdiddy}/*.[ch]
+cscope -b -I engine -I deadking -I mcdiddy -s engine -s deadking -s mcdiddy
 
 for file in $FILES
 do

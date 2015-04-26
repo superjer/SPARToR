@@ -1,4 +1,0 @@
-GAMENAME = deadking
-
-SRCS += $(wildcard game/*.c)
-

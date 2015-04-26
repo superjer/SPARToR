@@ -83,8 +83,8 @@ int save_context(const char *name,int context,int savefr)
   char  bakdir[256];
   char *bakfile;
 
-  snprintf( path,   256, "game/maps/%s.txt", name );
-  snprintf( bakdir, 256, "game/maps/backup" );
+  snprintf( path,   256, GAME "/maps/%s.txt", name );
+  snprintf( bakdir, 256, GAME "/maps/backup" );
 
   // attempt to backup existing file by moving it to backup directory
   if( !(bakfile = sjtempnam(bakdir,name,".txt")) ) {
@@ -189,7 +189,7 @@ int load_context(const char *name,int context,int loadfr)
   char path[256];
   int i;
 
-  snprintf( path, 256, "game/maps/%s.txt", name );
+  snprintf( path, 256, GAME "/maps/%s.txt", name );
 
   FILE *f = fopen( path, "r" );
   if( !f ) {

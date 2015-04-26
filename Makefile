@@ -29,7 +29,6 @@ INC = -Iengine
 OBJSRES =
 WINDRES =
 POSTCC =
-EXE_PATH = ./
 EXE_SUF = .bin
 
 ifeq ($(UNAME),Linux)
@@ -37,14 +36,18 @@ ifeq ($(UNAME),Linux)
 	LIBS = -lm -lSDL2 -lSDL2_net -lSDL2_image -lGL -lGLU -lGLEW
 endif
 ifeq ($(UNAME),Darwin)
-	EXE_PATH = platforms/mac/spartor.app/Contents/MacOS/
 	# Because GLU funcs are deprecated on Mac (?):
 	FLAGS += -Wno-deprecated-declarations
 	FLAGS += -I/Library/Frameworks/SDL2.framework/Headers
 	FLAGS += -I/Library/Frameworks/SDL2_net.framework/Headers
 	FLAGS += -I/Library/Frameworks/SDL2_image.framework/Headers
 	LIBS = -lm -framework SDL2 -framework SDL2_net -framework SDL2_image -framework OpenGL
-	POSTCC = cp -R -f platforms/mac/spartor.app .
+	POSTCC_MC = cp -R -f platforms/mac/spartor.app mcdiddy.app
+	POSTCC_DK = cp -R -f platforms/mac/spartor.app deadking.app
+	POSTCC_MC += && sed -e s/spartor/mcdiddy/ -i '' mcdiddy.app/Contents/Info.plist
+	POSTCC_DK += && sed -e s/spartor/deadking/ -i '' deadking.app/Contents/Info.plist
+	POSTCC_MC += && cp mcdiddy.bin mcdiddy.app/Contents/MacOS/
+	POSTCC_DK += && cp deadking.bin deadking.app/Contents/MacOS/
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))
 	EXE_SUF = .exe
@@ -60,8 +63,8 @@ endif
 
 INC_MC = $(INC) -Imcdiddy
 INC_DK = $(INC) -Ideadking
-EXE_MC = $(EXE_PATH)mcdiddy$(EXE_SUF)
-EXE_DK = $(EXE_PATH)deadking$(EXE_SUF)
+EXE_MC = mcdiddy$(EXE_SUF)
+EXE_DK = deadking$(EXE_SUF)
 FLAGS_MC = $(FLAGS) -D'GAME="mcdiddy"'
 FLAGS_DK = $(FLAGS) -D'GAME="deadking"'
 
@@ -70,10 +73,12 @@ all: $(EXE_MC) $(EXE_DK)
 $(EXE_MC): $(OBJS_MC) $(OBJSRES_MC)
 	$(CC) -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS) $(XLIBS)
 	$(POSTCC)
+	$(POSTCC_MC)
 
 $(EXE_DK): $(OBJS_DK) $(OBJSRES_DK)
 	$(CC) -o $@ $(OBJS_DK) $(OBJSRES_DK) $(FLAGS_DK) $(INC_DK) $(LIBS) $(XLIBS)
 	$(POSTCC)
+	$(POSTCC_DK)
 
 -include $(DEPS_MC)
 -include $(DEPS_DK)

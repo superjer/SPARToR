@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>spartor</string>
+	<string>spartor.bin</string>
 	<key>CFBundleGetInfoString</key>
 	<string>UNKNOWN, Copyright 2015 superjer.com</string>
 	<key>CFBundleIconFile</key>

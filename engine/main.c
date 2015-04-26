@@ -90,7 +90,7 @@ static void init_flexers()
 #ifdef __APPLE__
 int main(int argc, char **argv, char **envp, char **apple)
 {
-  char *applefix = strstr(apple[0], "/spartor.app/");
+  char *applefix = strstr(apple[0], "/" GAME ".app/");
   if( applefix )
   {
     *applefix = '\0';

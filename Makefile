@@ -70,6 +70,10 @@ FLAGS_DK = $(FLAGS) -D'GAME="deadking"'
 
 all: $(EXE_MC) $(EXE_DK)
 
+mcdiddy: $(EXE_MC)
+
+deadking: $(EXE_DK)
+
 $(EXE_MC): $(OBJS_MC) $(OBJSRES_MC)
 	$(CC) -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS) $(XLIBS)
 	$(POSTCC)

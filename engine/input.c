@@ -157,12 +157,22 @@ void kbinput(int press, SDL_KeyboardEvent e)
       ; //nothing on key up
     else if( sym==SDLK_RETURN && SJC_Submit() )
       command(SJC.buf[1]);
-    else if( sym==SDLK_BACKSPACE || sym==SDLK_DELETE )
-      SJC_Rub();
+    else if( sym==SDLK_BACKSPACE )
+      SJC_Rub(0);
+    else if( sym==SDLK_DELETE )
+      SJC_Rub(1);
     else if( sym==SDLK_UP )
       SJC_Up();
     else if( sym==SDLK_DOWN )
       SJC_Down();
+    else if( sym==SDLK_LEFT )
+      SJC_Left();
+    else if( sym==SDLK_RIGHT )
+      SJC_Right();
+    else if( sym==SDLK_HOME )
+      SJC_Home();
+    else if( sym==SDLK_END )
+      SJC_End();
     else if( sym==SDLK_ESCAPE )
       toggleconsole();
     else if( sym==SDLK_c && mod&KMOD_CTRL )

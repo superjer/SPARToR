@@ -26,6 +26,10 @@
 #define GITCOMMIT "* no commit"
 #endif
 
+#ifndef GAME
+#define GAME "GAME"
+#endif
+
 #define TICKSAFRAME 30
 
 //macros

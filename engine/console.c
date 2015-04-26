@@ -20,8 +20,6 @@ static void recall();
 
 void SJC_Put(char c)
 {
-  int n;
-
   if( SJC.buf[0]==NULL || strlen(SJC.buf[0])+1>=SJC.size[0] )
   {
     SJC.size[0] += 32;
@@ -31,9 +29,12 @@ void SJC_Put(char c)
       SJC.buf[0][0] = '\0';
   }
 
-  n = strlen(SJC.buf[0]);
-  SJC.buf[0][n] = c;
-  SJC.buf[0][n+1] = '\0';
+  char *to   = SJC.buf[0] + SJC.pos + 1;
+  char *from = SJC.buf[0] + SJC.pos;
+  memmove(to, from, strlen(from) + 1);
+
+  SJC.buf[0][SJC.pos] = c;
+  SJC.pos++;
 }
 
 void SJC_Replace(const char *s)
@@ -89,14 +90,24 @@ void SJC_Log(const char *newfile)
     logfile = fopen(newfile, "w");
 }
 
-void SJC_Rub()
+void SJC_Rub(int right)
 {
-  int n;
-  if( SJC.buf[0]!=NULL ) {
-    n = strlen(SJC.buf[0]);
-    if( n )
-      SJC.buf[0][n-1] = '\0';
+  if( SJC.buf[0] == NULL ) return;
+
+  if( right ) {
+    if( SJC.buf[0] && SJC.pos < strlen(SJC.buf[0]) )
+      SJC.pos++;
+    else
+      return;
   }
+
+  if( SJC.pos == 0 ) return;
+
+  char *from = SJC.buf[0] + SJC.pos;
+  char *to   = SJC.buf[0] + SJC.pos - 1;
+  memmove(to, from, strlen(from) + 1);
+
+  SJC.pos--;
 }
 
 void SJC_Clear()
@@ -140,6 +151,29 @@ void SJC_Down()
   recall();
 }
 
+void SJC_Left()
+{
+  if( SJC.pos > 0 )
+    SJC.pos--;
+}
+
+void SJC_Right()
+{
+  if( SJC.buf[0] && SJC.pos < strlen(SJC.buf[0]) )
+    SJC.pos++;
+}
+
+void SJC_Home()
+{
+  SJC.pos = 0;
+}
+
+void SJC_End()
+{
+  if( SJC.buf[0] )
+    SJC.pos = strlen(SJC.buf[0]);
+}
+
 void SJC_Copy()
 {
   if( SJC.buf[0] )
@@ -170,6 +204,7 @@ int SJC_Submit()
   memmove(SJC.size+1, SJC.size, sizeof(int)*(SJC_BUFLEN-1));
   SJC.size[0] = 0;
   SJC.buf[0] = NULL;
+  SJC.pos = 0;
 
   fprintf(logfile ? logfile : stderr, "%s%s\n", "> ", SJC.buf[1]);
 

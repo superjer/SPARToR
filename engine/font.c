@@ -210,7 +210,7 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
 
   str = buf;
   if( align >= 0 )
-    x -= SJF_TextExtents(str) / ( align > 0 ? 1 : 2 );
+    x -= SJF_TextExtents(str, -1) / ( align > 0 ? 1 : 2 );
 
   int sx;
   int sy;
@@ -247,18 +247,18 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
 
 //returns number of pixels text will consume horizontally
 //non-printable characters will cause weird behavior
-int SJF_TextExtents(const char *str)
+int SJF_TextExtents(const char *str, size_t n)
 {
-  int n = 0;
+  int ext = 0;
   if( str==NULL )
     return 0;
-  while(*str) {
+  while(*str && n-- > 0) {
     if( ISCOLORCODE(str) && str[5] ) {
       str += 5;
       continue;
     }
-    n += SJF.space[(Uint8)*str++];
+    ext += SJF.space[(Uint8)*str++];
   }
-  return n;
+  return ext;
 }
 

@@ -351,7 +351,7 @@ void render()
     y = conh - 12 * v_conscale - 4;
 
     if((ticks/200)%2 && i_hasfocus)
-      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0])*v_conscale, y, '\2');
+      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0], SJC.pos)*v_conscale, y, '\2');
 
     for(i=0;y>0;i++) {
       if(SJC.buf[i])

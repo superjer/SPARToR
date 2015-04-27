@@ -133,7 +133,7 @@ SJF_t SJF = {0,8,12,128,
 " O   O   O   O    O          O    O      O   O    O O    O O O    O O     O O     O        O       O       O             O  O   "
 " OOOO     OOOO    O      OOOO      OOO    OOOO     O      O O    O   O     O     OOOOO     O       O       O             OOOO   "
 " O           O                                                             O                OO     O     OO                     "
-" O           O                                                           OO                        O                            "
+" O           OO                                                          OO                        O                            "
 "                                                                                                                                "
 // -------------------------------------------------------------------------------------------------------------------------------
 "                                                                                                                                "

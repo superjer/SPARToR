@@ -33,7 +33,7 @@ int i_mousex = 0;
 int i_mousey = 0;
 
 int i_hasmouse = 1;
-int i_hasfocus = 1;
+int i_hasfocus = 0;
 int i_minimized = 0;
 
 int i_watch = 0;
@@ -128,22 +128,25 @@ void kbinput(int press, SDL_KeyboardEvent e)
 
   // deal with SDL2 crazy sym codes :(
   int safesym = sym <= 127 ? sym : (sym & (~(1<<30))) + 256;
+  int ctrl = mod & KMOD_CTRL;
+  int alt  = mod & KMOD_ALT;
+  int meta = mod & KMOD_GUI;
 
   if( i_watch && press )
-    SJC_Write("key #%i, mod #%d", safesym, mod);
+    SJC_Write("key #%i, %s %s %s", safesym, ctrl?"ctrl":"", alt?"alt":"", meta?"meta":"");
 
-  if( (sym==SDLK_q && mod&(KMOD_CTRL|KMOD_GUI)) || (sym==SDLK_F4 && mod&KMOD_ALT) )
+  if( (sym==SDLK_q && (ctrl || meta)) || (sym==SDLK_F4 && alt) )
   {
     command("exit");
   }
-  else if( press && (sym==SDLK_F11 || (sym==SDLK_f && mod&KMOD_GUI)) )
+  else if( press && (sym==SDLK_F11 || (sym==SDLK_f && meta)) )
   {
     if( !v_fullscreen )
       command("fullscreen");
     else
       command("window");
   }
-  else if(press && sym==SDLK_BACKQUOTE)
+  else if(press && sym==SDLK_BACKQUOTE && !alt)
   {
     toggleconsole();
   }
@@ -153,32 +156,19 @@ void kbinput(int press, SDL_KeyboardEvent e)
   }
   else if(console_open)
   {
-    if( !press )
-      ; //nothing on key up
-    else if( sym==SDLK_RETURN && SJC_Submit() )
-      command(SJC.buf[1]);
-    else if( sym==SDLK_BACKSPACE )
-      SJC_Rub(0);
-    else if( sym==SDLK_DELETE )
-      SJC_Rub(1);
-    else if( sym==SDLK_UP )
-      SJC_Up();
-    else if( sym==SDLK_DOWN )
-      SJC_Down();
-    else if( sym==SDLK_LEFT )
-      SJC_Left();
-    else if( sym==SDLK_RIGHT )
-      SJC_Right();
-    else if( sym==SDLK_HOME )
-      SJC_Home();
-    else if( sym==SDLK_END )
-      SJC_End();
-    else if( sym==SDLK_ESCAPE )
-      toggleconsole();
-    else if( sym==SDLK_c && mod&KMOD_CTRL )
-      SJC_Copy();
-    else if( sym==SDLK_v && mod&KMOD_CTRL )
-      SJC_Paste();
+    if( !press ) ; //nothing on key up
+    else if( sym==SDLK_ESCAPE                         ) toggleconsole();
+    else if( sym==SDLK_RETURN && SJC_Submit()         ) command(SJC.buf[1]);
+    else if( sym==SDLK_BACKSPACE                      ) SJC_Rub(0);
+    else if( sym==SDLK_DELETE                         ) SJC_Rub(1);
+    else if( sym==SDLK_UP    || (sym==SDLK_p && ctrl) ) SJC_Up();
+    else if( sym==SDLK_DOWN  || (sym==SDLK_n && ctrl) ) SJC_Down();
+    else if( sym==SDLK_LEFT  || (sym==SDLK_h && ctrl) ) SJC_Left();
+    else if( sym==SDLK_RIGHT || (sym==SDLK_l && ctrl) ) SJC_Right();
+    else if( sym==SDLK_HOME  || (sym==SDLK_a && ctrl) ) SJC_Home();
+    else if( sym==SDLK_END   || (sym==SDLK_e && ctrl) ) SJC_End();
+    else if( sym==SDLK_COPY  || (sym==SDLK_c && ctrl) ) SJC_Copy();
+    else if( sym==SDLK_PASTE || (sym==SDLK_v && ctrl) ) SJC_Paste();
   }
   else
   {

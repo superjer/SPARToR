@@ -120,13 +120,13 @@ void recall()
 {
   if( SJC.remempos == SJC.rememend ) { // current position
     SJC.buf[0][0] = '\0';
-    return;
+  } else {
+    free(SJC.buf[0]);
+    SJC.size[0] = strlen(SJC.rememory[SJC.remempos])+1;
+    SJC.buf[0] = malloc(SJC.size[0]);
+    strcpy(SJC.buf[0], SJC.rememory[SJC.remempos]);
   }
-
-  free(SJC.buf[0]);
-  SJC.size[0] = strlen(SJC.rememory[SJC.remempos])+1;
-  SJC.buf[0] = malloc(SJC.size[0]);
-  strcpy(SJC.buf[0], SJC.rememory[SJC.remempos]);
+  SJC_End();
 }
 
 void SJC_Up()
@@ -170,6 +170,7 @@ void SJC_Home()
 
 void SJC_End()
 {
+  SJC.pos = 0;
   if( SJC.buf[0] )
     SJC.pos = strlen(SJC.buf[0]);
 }

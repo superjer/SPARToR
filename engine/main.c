@@ -1,7 +1,7 @@
 /**
  **  SPARToR
  **  Network Game Engine
- **  Copyright (C) 2010-2012  Jer Wilson
+ **  Copyright (C) 2010-2015  Jer Wilson
  **
  **  See COPYING for details.
  **
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "SPARToR", "Waiting...", NULL);
 
   echo("SPARToR " VERSION " " GITCOMMIT);
-  echo("Copyright (C) 2010-2012 Jer Wilson");
+  echo("Copyright (C) 2010-2015 Jer Wilson");
   echo("Please visit github.com/superjer for updates and source code.");
   echo("");
   echo(" \\#F00--->  \\#FFFType \\#F80help\\#FFF for help.\\#F00  <---");

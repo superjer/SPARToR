@@ -1,7 +1,7 @@
 /**
  **  McDiddy's: The Game: Vengeance
  **  Implementation example for the SPARToR Network Game Engine
- **  Copyright (c) 2010-2012  Jer Wilson
+ **  Copyright (c) 2010-2015  Jer Wilson
  **
  **  See COPYING for details.
  **

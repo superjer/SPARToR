@@ -120,12 +120,12 @@ int main(int argc, char **argv)
 
   //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "SPARToR", "Waiting...", NULL);
 
-  SJC_Write("SPARToR " VERSION " " GITCOMMIT);
-  SJC_Write("Copyright (C) 2010-2012 Jer Wilson");
-  SJC_Write("Please visit github.com/superjer for updates and source code.");
-  SJC_Write("");
-  SJC_Write(" \\#F00--->  \\#FFFType \\#F80help\\#FFF for help.\\#F00  <---");
-  SJC_Write("");
+  echo("SPARToR " VERSION " " GITCOMMIT);
+  echo("Copyright (C) 2010-2012 Jer Wilson");
+  echo("Please visit github.com/superjer for updates and source code.");
+  echo("");
+  echo(" \\#F00--->  \\#FFFType \\#F80help\\#FFF for help.\\#F00  <---");
+  echo("");
 
   //toggleconsole();
   videoinit();
@@ -472,7 +472,7 @@ void setcmdfr(  Uint32 to) {
   if(hotfr>=cmdfr) // think about this harder! Only move hotfr BACKWARDS? Otherwise unsafe?
     hotfr = cmdfr-1;
   if(surefr>=cmdfr)
-    SJC_Write("*** DESYNC: cmdfr has been set = or before surefr! ***");
+    echo("*** DESYNC: cmdfr has been set = or before surefr! ***");
 }
 
 void jogframebuffer(Uint32  newmetafr,Uint32 newsurefr) {

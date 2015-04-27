@@ -60,7 +60,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
 
   for(j=0;j<maxobjs;j++)
     if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==client_nr )
-      SJC_Write( "%d: Client %i already has a ghost at obj#%d!", hotfr, client_nr, j );
+      echo( "%d: Client %i already has a ghost at obj#%d!", hotfr, client_nr, j );
 
   #define PERS_FLAGS OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ
 
@@ -74,7 +74,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   MKOBJ( en, PERSON, 1, PERS_FLAGS );
   //int enslot = slot0;
 
-  SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
+  echo( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
 
   mo->ghost    = ghostslot;
   mo->party[0] = azslot;

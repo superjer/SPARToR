@@ -41,11 +41,11 @@ void host_send_state(int clientid)
   fr[metafr%maxframes].cmds[clientid].flags |= CMDF_NEW;
   // send state!
   data = packframe(surefr, &n);
-  SJC_Write("Frame %u packed into %d bytes, ready to send state.", surefr, n);
+  echo("Frame %u packed into %d bytes, ready to send state.", surefr, n);
 
   if( n+10 > (size_t)pkt->maxlen ) //TODO is this just PACKET_SIZE?
   {
-    SJC_Write("Error: Packed frame is too big to send!");
+    echo("Error: Packed frame is too big to send!");
     goto cleanup;
   }
 
@@ -58,13 +58,13 @@ void host_send_state(int clientid)
 
   /* if( !SDLNet_UDP_Send(hostsock, -1, pkt) ) */
   {
-    SJC_Write("Error: Could not send state packet!");
-    SJC_Write(SDL_GetError());
+    echo("Error: Could not send state packet!");
+    echo(SDL_GetError());
     goto cleanup;
   }
 
   //dirty all unsure frames
-  SJC_Write("%u: Dirtying all frames from %u to %u", hotfr, surefr, cmdfr);
+  echo("%u: Dirtying all frames from %u to %u", hotfr, surefr, cmdfr);
 
   for(u=surefr+1;u<cmdfr;u++)
     fr[u%maxframes].dirty = 1;
@@ -96,7 +96,7 @@ void host_outbox_write()
 
       if( outbox_len + 4 + n >= 80000 )
       {
-        SJC_Write("%u: Packed too many cmds! Will get the rest next frame...", hotfr);
+        echo("%u: Packed too many cmds! Will get the rest next frame...", hotfr);
         free(data);
         break;
       }
@@ -126,19 +126,19 @@ void host_inbox_read(int clientid, CLIENT_t *cl)
   if( !cl->connected || !cl->buflen )
     return;
 
-  SJC_Write("Inbox from client %d has %d bytes", clientid, cl->buflen);
+  echo("Inbox from client %d has %d bytes", clientid, cl->buflen);
 
   Uint32 packfr = unpackbytes(cl->buf, cl->buflen, &n, 4);
 
   if( packfr<metafr-30 )
   {
-    SJC_Write("Ignoring too old cmd from client %d", clientid);
+    echo("Ignoring too old cmd from client %d", clientid);
     return;
   }
 
   if( packfr>metafr+10 ) // check for ring buffer safety!
   {
-    SJC_Write("Ignoring too new cmd from client %d", clientid);
+    echo("Ignoring too new cmd from client %d", clientid);
     return;
   }
 
@@ -161,7 +161,7 @@ void host_inbox_read(int clientid, CLIENT_t *cl)
 
     if( pcmd->datasz > sizeof pcmd->data )
     {
-      SJC_Write("Treachery: datasz too large (%d) from client %d", pcmd->datasz, clientid);
+      echo("Treachery: datasz too large (%d) from client %d", pcmd->datasz, clientid);
       return;
     }
 

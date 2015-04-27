@@ -62,8 +62,8 @@ void client()
       }
       pkt->len = n;
       if( !SDLNet_UDP_Send(clientsock,-1,pkt) ) {
-        SJC_Write("Error: Could not send cmd update packet!");
-        SJC_Write(SDL_GetError());
+        echo("Error: Could not send cmd update packet!");
+        echo(SDL_GetError());
       }
       fr[sentfrmod].dirty = 0; //TODO: really share this var?
     }
@@ -76,8 +76,8 @@ void client()
 
     if( status==-1 )
     {
-      SJC_Write("Network Error: Failed to check for new packets.");
-      SJC_Write(SDL_GetError());
+      echo("Network Error: Failed to check for new packets.");
+      echo(SDL_GetError());
     }
 
     if( status!=1 )
@@ -86,7 +86,7 @@ void client()
     switch(pkt->data[0])
     {
       case 'M': //message
-        SJC_Write("Server says: %s",pkt->data+1);
+        echo("Server says: %s",pkt->data+1);
         break;
 
       case 'S': //state
@@ -96,7 +96,7 @@ void client()
         Uint32 newsurefr = unpackbytes(pkt->data+6,4,NULL,4);
         sentfr = newmetafr-1;
         jogframebuffer( newmetafr, newsurefr );
-        SJC_Write("Receiving state of frame %d, %d bytes, syncing up at frame %d as client %d",
+        echo("Receiving state of frame %d, %d bytes, syncing up at frame %d as client %d",
                   surefr,pkt->len-10,metafr,me);
 
         unpackframe(surefr,pkt->data+10,pkt->len-10);
@@ -113,7 +113,7 @@ void client()
 
           if( unpacked<0 )
           {
-            SJC_Write("Failed to unpack frame cmds!");
+            echo("Failed to unpack frame cmds!");
             break;
           }
 
@@ -125,7 +125,7 @@ void client()
         break;
 
       default:
-        SJC_Write("Error: Packet is garbled!");
+        echo("Error: Packet is garbled!");
     }
   }
 }

@@ -23,14 +23,14 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
     for(j=0;j<maxobjs;j++)
       if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==i )
-        SJC_Write( "%d: Client %i already has a ghost at obj#%d!", hotfr, i, j );
+        echo( "%d: Client %i already has a ghost at obj#%d!", hotfr, i, j );
 
     //FIXME context is hardcoded as 1 for GHOST and PLAYER:
     MKOBJ( gh, GHOST,  1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT );
     int ghostslot = slot0;
     MKOBJ( pl, PLAYER, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_PVEL|OBJF_PLAT|OBJF_CLIP );
 
-    SJC_Write( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, slot0 );
+    echo( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, i, ghostslot, slot0 );
 
     gh->pos            = (V){  0,  0,  0};
     gh->vel            = (V){  0,  0,  0};

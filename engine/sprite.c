@@ -80,7 +80,7 @@ void sprblit3d( SPRITE_T *spr, int x, int y, int z )
 int load_sprites(int texnum)
 {
   if( strlen(textures[texnum].filename) > 95 ) {
-    SJC_Write("load_sprites: filename too long: %s", textures[texnum].filename);
+    echo("load_sprites: filename too long: %s", textures[texnum].filename);
     return -1;
   }
 
@@ -197,7 +197,7 @@ int load_sprites(int texnum)
       also = 1;
 
     } else {
-      SJC_Write("Unknown command: %s",tokens[i]);
+      echo("Unknown command: %s",tokens[i]);
       return fail("load_sprites: unknown command");
     }
 
@@ -294,7 +294,7 @@ int load_sprites(int texnum)
         targ->flags |= SPRF_FLOOR;
 
       } else {
-        SJC_Write("tokens %d: %s",i,tokens[i]);
+        echo("tokens %d: %s",i,tokens[i]);
         return fail("Unknown property name");
 
       }
@@ -396,7 +396,7 @@ static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base)
 
 static int fail(const char *msg)
 {
-  SJC_Write("%s(%d) %s",filename,line_num,msg);
+  echo("%s(%d) %s",filename,line_num,msg);
   fclose(f);
   return -1;
 }

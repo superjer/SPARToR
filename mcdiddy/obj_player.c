@@ -85,7 +85,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   if( !oldme ) { //FIXME why's this null?
-    SJC_Write("Warning: oldme is NULL!");
+    echo("Warning: oldme is NULL!");
     return;
   }
 

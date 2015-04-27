@@ -107,7 +107,7 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
 void renumber_sprites()
 {
   if( !sprites || !old_sprites ) {
-    SJC_Write("Can't renumber sprites!");
+    echo("Can't renumber sprites!");
     return;
   }
 

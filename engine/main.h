@@ -44,7 +44,7 @@
 #define safe_free(x) do { free(x); x = NULL; } while(0)
 #define safe_copy(to,from) do { to = NULL; if(from) { to = malloc(strlen(from)+1); strcpy(to,from); } } while(0)
 
-#define assert(expr) { if(!(expr)) SJC_Write( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
+#define assert(expr) { if(!(expr)) echo( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
 
 
 #define TOKEN_PASTE_(a,b) a ## b

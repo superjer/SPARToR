@@ -109,8 +109,8 @@ void videoinit()
   }
 #endif
 
-  SJC_Write("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
-  SJC_Write("OpenGL version %s", glGetString(GL_VERSION));
+  echo("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
+  echo("OpenGL version %s", glGetString(GL_VERSION));
 }
 
 void render()
@@ -469,7 +469,7 @@ void setvideo(int w, int h, int go_full, int quiet)
   SJF_Init();
   mod_setvideo(w,h);
   if( !quiet )
-    SJC_Write("Video mode set to %d x %d",w,h);
+    echo("Video mode set to %d x %d",w,h);
 }
 
 void setvideosoon(int w, int h, int go_full)
@@ -553,12 +553,12 @@ int make_sure_texture_is_loaded(const char *texfile)
 
     // is slot j the one?
     if( !textures[j].filename ) {
-      //SJC_Write("Texture %s is new, using slot %d",texfile,j);
+      //echo("Texture %s is new, using slot %d",texfile,j);
       textures[j].filename = malloc( strlen(texfile) + 1 );
       strcpy(textures[j].filename,texfile);
       load_sprites(j);
     } else if( !strcmp(textures[j].filename,texfile) ) {
-      //SJC_Write("Texture %s was loaded before, reusing slot %d",texfile,j);
+      //echo("Texture %s was loaded before, reusing slot %d",texfile,j);
       if( textures[j].generated )
         return j; // nothing to do!
     } else
@@ -576,7 +576,7 @@ int make_sure_texture_is_loaded(const char *texfile)
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h, 0, SJDL_GLFormatOf(surf), GL_UNSIGNED_BYTE, surf->pixels);
       SDL_FreeSurface(surf);
     } else
-      SJC_Write("Failed to read texture %s",textures[j].filename);
+      echo("Failed to read texture %s",textures[j].filename);
 
     // map system texture if there is a match(es)
     for( k=0; k<num_sys_tex; k++ )

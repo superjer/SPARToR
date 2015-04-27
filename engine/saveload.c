@@ -88,26 +88,26 @@ int save_context(const char *name,int context,int savefr)
 
   // attempt to backup existing file by moving it to backup directory
   if( !(bakfile = sjtempnam(bakdir,name,".txt")) ) {
-    SJC_Write("Failed to create temporary name");
+    echo("Failed to create temporary name");
     return -1;
   }
 
   // fail if any error occurs other than that the file does not already exist
   if( -1 == rename(path,bakfile) ) {
     if( errno != ENOENT ) {
-      SJC_Write("Failed to backup old file %s",path);
+      echo("Failed to backup old file %s",path);
       free( bakfile );
       return -1;
     }
   } else
-    SJC_Write("Old file backed up to %s",bakfile);
+    echo("Old file backed up to %s",bakfile);
 
   free( bakfile );
 
   // now that the existing file, if any, is safe, open file to write to
   FILE *f = fopen( path, "w" );
   if( !f ) {
-    SJC_Write("Failed to open file for writing: %s",path);
+    echo("Failed to open file for writing: %s",path);
     return -1;
   }
 
@@ -125,7 +125,7 @@ int save_context(const char *name,int context,int savefr)
     if( n < spr_count )
       in_use[n] = 0; // zero means used, -1 means unusued
     else
-      SJC_Write("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)",n,spr_count);
+      echo("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)",n,spr_count);
   }
 
   // get count of used sprites, and number each one sequentially in in_use[]
@@ -166,19 +166,19 @@ int save_context(const char *name,int context,int savefr)
   }
 
   fclose(f);
-  SJC_Write("Current context saved to %s",path);
+  echo("Current context saved to %s",path);
   return 0;
 
   fail:
   fclose(f);
-  SJC_Write("There was an error while writing the file!");
+  echo("There was an error while writing the file!");
   return -1;
 }
 
 
 int fail(FILE *f,const char *msg)
 {
-  SJC_Write("Context loading error: %s",msg);
+  echo("Context loading error: %s",msg);
   fclose(f);
   return -1;
 }
@@ -193,7 +193,7 @@ int load_context(const char *name,int context,int loadfr)
 
   FILE *f = fopen( path, "r" );
   if( !f ) {
-    SJC_Write("Failed to open file for reading: %s",path);
+    echo("Failed to open file for reading: %s",path);
     return -1;
   }
 
@@ -250,7 +250,7 @@ int load_context(const char *name,int context,int loadfr)
     else
       n = from_b85(b85str);
 
-    if( n >= nspr ) SJC_Write("sprite number is too high! (%d/%d)",n,nspr);
+    if( n >= nspr ) echo("sprite number is too high! (%d/%d)",n,nspr);
 
     dmap[i].spr   = map[i].spr   = (n < nspr ? sprnumbers[n] : 0); // avoid overread if tex is too high
     dmap[i].flags = map[i].flags = flags;
@@ -351,7 +351,7 @@ void push_context(CONTEXT_t *co)
 
 void pop_context(CONTEXT_t *co)
 {
-  if( !constack->map ) { SJC_Write("No context to pop!"); return; }
+  if( !constack->map ) { echo("No context to pop!"); return; }
   destroy_context( co, 1 );
   *co = *constack;
   memmove( constack, constack+1, sizeof *constack * (UNDOLEVELS-1) );

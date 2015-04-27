@@ -34,7 +34,7 @@ SJGLOB_T *SJglob( const char *path, const char *pattern, int flags )
 
   handle = FindFirstFile( str, &findata );
   if( handle == INVALID_HANDLE_VALUE )
-    SJC_Write( "FindFirstFile failed (%d)", GetLastError() );
+    echo( "FindFirstFile failed (%d)", GetLastError() );
   else {
     size_t i;
 
@@ -50,7 +50,7 @@ SJGLOB_T *SJglob( const char *path, const char *pattern, int flags )
       if( !FindNextFile(handle,&findata) ) {
         DWORD err = GetLastError();
         if( err != ERROR_NO_MORE_FILES )
-          SJC_Write( "FindNextFile failed (%d)", err );
+          echo( "FindNextFile failed (%d)", err );
         break;
       }
     }

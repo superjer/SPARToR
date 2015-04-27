@@ -59,10 +59,10 @@ void inputinit()
   if( (numjoysticks=SDL_NumJoysticks())>0 ) {
     joysticks = realloc(joysticks, sizeof(*joysticks)*numjoysticks);
     SDL_JoystickEventState(SDL_ENABLE);
-    SJC_Write("%d controller/joystick%s detected:", numjoysticks, (numjoysticks>1?"s":""));
+    echo("%d controller/joystick%s detected:", numjoysticks, (numjoysticks>1?"s":""));
     for( i=0; i<numjoysticks; i++ ) {
       joysticks[i] = SDL_JoystickOpen(i);
-      SJC_Write("  #%i: %.20s", i, SDL_JoystickName(i));
+      echo("  #%i: %.20s", i, SDL_JoystickName(i));
     }
   }
   */
@@ -115,7 +115,7 @@ void textinput(SDL_TextInputEvent e)
 
 void textedit(SDL_TextEditingEvent e)
 {
-  SJC_Write("textedit: %s", e.text);
+  echo("textedit: %s", e.text);
 }
 
 void kbinput(int press, SDL_KeyboardEvent e)
@@ -133,7 +133,7 @@ void kbinput(int press, SDL_KeyboardEvent e)
   int meta = mod & KMOD_GUI;
 
   if( i_watch && press )
-    SJC_Write("key #%i, %s %s %s", safesym, ctrl?"ctrl":"", alt?"alt":"", meta?"meta":"");
+    echo("key #%i, %s %s %s", safesym, ctrl?"ctrl":"", alt?"alt":"", meta?"meta":"");
 
   if( (sym==SDLK_q && (ctrl || meta)) || (sym==SDLK_F4 && alt) )
   {
@@ -183,37 +183,37 @@ void padadd(SDL_ControllerDeviceEvent e)
 
   if( e.which > MAX_PADS )
   {
-    SJC_Write("padadd: Gamepad ID is too high: %d", e.which);
+    echo("padadd: Gamepad ID is too high: %d", e.which);
     return;
   }
 
   if( !(pads[e.which] = SDL_GameControllerOpen(e.which)) )
   {
-    SJC_Write("Failed to add gamepad #%d", e.which);
-    SJC_Write("%s", SDL_GetError());
+    echo("Failed to add gamepad #%d", e.which);
+    echo("%s", SDL_GetError());
     return;
   }
 
-  SJC_Write("Opened gamepad #%d", e.which);
+  echo("Opened gamepad #%d", e.which);
 }
 
 void padremap(SDL_ControllerDeviceEvent e)
 {
   // when the hell does this happen and what does it mean??!?!?
-  SJC_Write("-----> SURPRISE!! padremap: %d", e.which);
+  echo("-----> SURPRISE!! padremap: %d", e.which);
 }
 
 void padremove(SDL_ControllerDeviceEvent e)
 {
   if( e.which > MAX_PADS )
   {
-    SJC_Write("padremove: Gamepad ID is too high: %d", e.which);
+    echo("padremove: Gamepad ID is too high: %d", e.which);
     return;
   }
 
   if( !pads[e.which] )
   {
-    SJC_Write("padremove: Not a gamepad: %d", e.which);
+    echo("padremove: Not a gamepad: %d", e.which);
     return;
   }
 
@@ -226,7 +226,7 @@ void padinput(int press, SDL_ControllerButtonEvent e)
   if( i_watch && press )
   {
     const char *padname = e.button<PADNAMECOUNT ? padnames[e.button] : "unknown";
-    SJC_Write("pad #%d \"%s\"", e.button, padname);
+    echo("pad #%d \"%s\"", e.button, padname);
   }
 
   if( kwik && press )
@@ -255,7 +255,7 @@ void padaxis(SDL_ControllerAxisEvent e)
   int ax = e.axis;
 
   if( i_watch )
-    SJC_Write("joystick #%d, axis #%d, stat %d, value %d", e.which, ax, *stat, val);
+    echo("joystick #%d, axis #%d, stat %d, value %d", e.which, ax, *stat, val);
 
   if( val> 21000 && !(*stat&POS_ON) ) { *stat|= POS_ON; kwik ? kwikbind(INP_JAXP, ax) : putcmd( INP_JAXP, ax, 1 ); }
   if( val< 20000 &&  (*stat&POS_ON) ) { *stat&=~POS_ON;                                 putcmd( INP_JAXP, ax, 0 ); }
@@ -266,7 +266,7 @@ void padaxis(SDL_ControllerAxisEvent e)
 void mouseinput(int press, SDL_MouseButtonEvent mbutton)
 {
   if( i_watch && press )
-    SJC_Write("mbutton #%d, x %d, y %d", mbutton.button, i_mousex, i_mousey);
+    echo("mbutton #%d, x %d, y %d", mbutton.button, i_mousex, i_mousey);
 
   i_mousex = mbutton.x;
   i_mousey = mbutton.y;
@@ -321,11 +321,11 @@ void kwikbind(int device, int sym)
 
   switch( device )
   {
-    case INP_KEYB: SJC_Write("Key #%d \"%s\" selected",  sym, keyname); break;
-    case INP_JBUT: SJC_Write("Pad #%d \"%s\" selected",  sym, padname); break;
-    case INP_JAXP: SJC_Write("Axis #%d (+) selected"            , sym); break;
-    case INP_JAXN: SJC_Write("Axis #%d (-) selected"            , sym); break;
-    case INP_MBUT: SJC_Write("Mouse button #%d selected"        , sym); break;
-    default:       SJC_Write("Unknown device input #%d selected", sym); break;
+    case INP_KEYB: echo("Key #%d \"%s\" selected",  sym, keyname); break;
+    case INP_JBUT: echo("Pad #%d \"%s\" selected",  sym, padname); break;
+    case INP_JAXP: echo("Axis #%d (+) selected"            , sym); break;
+    case INP_JAXN: echo("Axis #%d (-) selected"            , sym); break;
+    case INP_MBUT: echo("Mouse button #%d selected"        , sym); break;
+    default:       echo("Unknown device input #%d selected", sym); break;
   }
 }

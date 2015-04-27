@@ -284,7 +284,7 @@ static void music_test( int *buf, int len )
     }
 
     /*
-    SJC_Write("Note: %2s%d %c ADSR=%2d,%2d,%2d,%2d %10s%c%.f",
+    echo("Note: %2s%d %c ADSR=%2d,%2d,%2d,%2d %10s%c%.f",
         music_notes[note].name,
         music_notes[note].octave,
         vibrato ? 'V' : ' ',
@@ -404,7 +404,7 @@ void audioinit()
   desired.userdata = NULL;
 
   if( SDL_OpenAudio(&desired, &spec) < 0 ) {
-    SJC_Write("Unable to open audio: %s\n", SDL_GetError());
+    echo("Unable to open audio: %s\n", SDL_GetError());
     return;
   } else {
     SDL_PauseAudio(0);
@@ -422,7 +422,7 @@ void audioinit()
     SFMT(AUDIO_S16MSB)
   }
 
-  SJC_Write("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
+  echo("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
             spec.freq, sfmt, spec.channels, spec.silence, spec.samples, spec.size);
 
   SJGLOB_T *files = SJglob( GAME "/sounds", "*.wav", SJGLOB_MARK|SJGLOB_NOESCAPE );
@@ -461,7 +461,7 @@ void play(const char *name)
     }
 
   if( !cvt ) {
-    SJC_Write("Could not find sound: %s",name);
+    echo("Could not find sound: %s",name);
     return;
   }
 
@@ -512,7 +512,7 @@ void make_sure_sound_is_loaded(const char *file)
 
   // Load the sound file and convert it to 16-bit stereo at 22kHz
   if( SDL_LoadWAV(file, &wave, &data, &dlen) == NULL ) {
-    SJC_Write("Couldn't load %s: %s", file, SDL_GetError());
+    echo("Couldn't load %s: %s", file, SDL_GetError());
     goto fail;
   }
 

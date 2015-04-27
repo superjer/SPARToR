@@ -67,13 +67,13 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     case 'o': // orthographic
       push_context(co);
       co->projection = ORTHOGRAPHIC;
-      SJC_Write("Setting context projection to ORTHOGRAPHIC");
+      echo("Setting context projection to ORTHOGRAPHIC");
       break;
 
     case 'd': // dimetric
       push_context(co);
       co->projection = DIMETRIC;
-      SJC_Write("Setting context projection to DIMETRIC");
+      echo("Setting context projection to DIMETRIC");
       break;
 
     case 'b': { // bounds
@@ -86,7 +86,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       const char *error = create_context(&tmp, co, x, y, z);
 
       if( error )
-        SJC_Write("%s", error);
+        echo("%s", error);
       else
         memcpy(co, &tmp, sizeof tmp);
 
@@ -108,7 +108,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       break; }
 
     default:
-      SJC_Write("Unknown edit command!");
+      echo("Unknown edit command!");
       break;
     }
 
@@ -138,7 +138,7 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
   int  upz    = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
   int  sprnum = (int) unpackbytes(c->data,MAXCMDDATA,&n,4);
 
-  if( letter!='p' ) { SJC_Write("Unknown edit command!"); return; }
+  if( letter!='p' ) { echo("Unknown edit command!"); return; }
 
   int tool_num = (sprites[sprnum].flags & TOOL_MASK);
 
@@ -156,7 +156,7 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
   if( dnz > upz )  { SWAP(upz,dnz,int); shz = clipz-(upz-dnz+1)%clipz; }
 
   if( dnx<0 || dny<0 || dnz<0 || upx>=co->x || upy>=co->y || upz>=co->z ) {
-    SJC_Write("Paint command out of bounds!");
+    echo("Paint command out of bounds!");
     return;
   }
 
@@ -167,7 +167,7 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
     gh->clipboard_data = malloc( clipx*clipy*clipz*(sizeof *gh->clipboard_data) ); //FIXME: mem leak
   }
 
-  if( tool_num == TOOL_PSTE && !gh->clipboard_data ) { SJC_Write("Clipboard is empty"); return; }
+  if( tool_num == TOOL_PSTE && !gh->clipboard_data ) { echo("Clipboard is empty"); return; }
 
   push_context(co);
 

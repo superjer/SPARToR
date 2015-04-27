@@ -82,7 +82,7 @@ Uint8 *packframecmds(Uint32 packfr, size_t *n)
     }
 
     if( c->flags & CMDF_NEW )
-      SJC_Write("%u: Packed CMDF_NEW for client %d", packfr, i);
+      echo("%u: Packed CMDF_NEW for client %d", packfr, i);
   }
 
   return data;
@@ -96,7 +96,7 @@ int unpackframe(Uint32 packfr, Uint8 *data, size_t len)
 
   if( maxobjs != (int)unpackbytes(data, len, &n, 4) )
   {
-    SJC_Write("Your maxobjs setting (%d) differs from server's!", maxobjs);
+    echo("Your maxobjs setting (%d) differs from server's!", maxobjs);
     return 1;
   }
 
@@ -114,7 +114,7 @@ int unpackframe(Uint32 packfr, Uint8 *data, size_t len)
       {
         if( len<n+pfr->objs[i].size )
         {
-          SJC_Write("Packed data ended early!");
+          echo("Packed data ended early!");
           return 1;
         }
 
@@ -137,7 +137,7 @@ int unpackframecmds(Uint32 packfr, Uint8 *data, size_t len)
 
   if( maxclients != (int)unpackbytes(data, len, &n, 4) )
   {
-    SJC_Write("Your maxclients setting (%d) differs from server's! packfr=%d", maxclients, packfr);
+    echo("Your maxclients setting (%d) differs from server's! packfr=%d", maxclients, packfr);
     return -1;
   }
 
@@ -156,7 +156,7 @@ int unpackframecmds(Uint32 packfr, Uint8 *data, size_t len)
 
       if( c->datasz > sizeof c->data )
       {
-        SJC_Write("Treachery: datasz too large (%d) from server", c->datasz);
+        echo("Treachery: datasz too large (%d) from server", c->datasz);
         break;
       }
 
@@ -165,7 +165,7 @@ int unpackframecmds(Uint32 packfr, Uint8 *data, size_t len)
     }
 
     if( c->flags & CMDF_NEW )
-      SJC_Write("%u: Unpacked CMDF_NEW for client %d", packfr, i);
+      echo("%u: Unpacked CMDF_NEW for client %d", packfr, i);
   }
 
   return n;
@@ -218,7 +218,7 @@ Uint64 unpackbytes(Uint8 *_data, size_t _len, size_t *_offset, int width)
 
   if( len<*offset+width )
   {
-    SJC_Write("Not enough packed bytes to read!");
+    echo("Not enough packed bytes to read!");
     return 0;
   }
 
@@ -241,5 +241,5 @@ void inspectbytes( Uint8 *data, int n )
 {
   int i = 0;
   for( ; i<n; i++ )
-    SJC_Write("Byte %d: %d",i,data[i]);
+    echo("Byte %d: %d",i,data[i]);
 }

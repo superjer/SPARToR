@@ -110,7 +110,7 @@ void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   if( !oldpe ) { //FIXME why's this null?
-    SJC_Write("Warning: oldpe is NULL!");
+    echo("Warning: oldpe is NULL!");
     return;
   }
 

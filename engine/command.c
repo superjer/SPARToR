@@ -64,16 +64,16 @@ void command(const char *s)
 
     }else if( strcmp(q,"exec")==0 ) {
       char *file = tok(p," ");
-      if( !file ) { SJC_Write("You must specify a name in " GAME "/console/*.txt"); return; }
+      if( !file ) { echo("You must specify a name in " GAME "/console/*.txt"); return; }
       exec_commands(file);
 
     }else if( strcmp(q,"realtime")==0 ) {
       eng_realtime = eng_realtime ? 0 : 1;
-      SJC_Write("Realtime mode %s",eng_realtime?"on":"off");
+      echo("Realtime mode %s",eng_realtime?"on":"off");
 
     }else if( strcmp(q,"watch")==0 ) {
       i_watch = i_watch ? 0 : 1;
-      SJC_Write("Input watch %s",i_watch?"on":"off");
+      echo("Input watch %s",i_watch?"on":"off");
 
     }else if( strcmp(q,"exit")==0 || strcmp(q,"quit")==0 ) {
       cleanup();
@@ -85,7 +85,7 @@ void command(const char *s)
 
       if( !err )
       {
-        SJC_Write("Started host on port %d", nport);
+        echo("Started host on port %d", nport);
         netmode = NM_HOST;
       }
 
@@ -104,7 +104,7 @@ void command(const char *s)
         err = net_connect(hostname, nport);
         if( !err )
         {
-          SJC_Write("Connecting to %s on port %d", hostname, nport);
+          echo("Connecting to %s on port %d", hostname, nport);
           netmode = NM_CLIENT;
         }
       }
@@ -113,22 +113,22 @@ void command(const char *s)
       if( p && *p )
       {
         int ret = net_write(0, (Uint8*)p, strlen(p));
-        if( ret ) SJC_Write("Net write error: %d", ret);
+        if( ret ) echo("Net write error: %d", ret);
       }
 
     }else if( strcmp(q,"disconnect")==0 ) {
       if( netmode == NM_HOST ) {
         net_stop();
-        SJC_Write("Host stopped.");
+        echo("Host stopped.");
       }else if( netmode == NM_CLIENT ) {
         net_stop();
-        SJC_Write("Disconnected from host.");
+        echo("Disconnected from host.");
       }else
-        SJC_Write("Nothing to disconnect from.");
+        echo("Nothing to disconnect from.");
       netmode = NM_NONE;
 
     }else if( strcmp(q,"reconnect")==0 ) {
-      SJC_Write("Not implemented.");
+      echo("Not implemented.");
 
     }else if( strcmp(q,"log")==0 ) {
       echo("Switching to log file \"%s\"", p);
@@ -181,7 +181,7 @@ void command(const char *s)
       int y = sy ? atoi(sy) : -1;
 
       if( x < 0 || y < 0 )
-        SJC_Write("Please specify x and y position");
+        echo("Please specify x and y position");
       else
         setwinpos(x, y);
 
@@ -196,37 +196,37 @@ void command(const char *s)
       bind( arg0, arg1 );
 
     }else if( strcmp(q,"slow")==0 ) {
-      SJC_Write("Speed is now slow");
+      echo("Speed is now slow");
       ticksaframe = 300;
       jogframebuffer(metafr,surefr);
 
     }else if( strcmp(q,"fast")==0 ) {
-      SJC_Write("Speed is now fast");
+      echo("Speed is now fast");
       ticksaframe = 30;
       jogframebuffer(metafr,surefr);
 
     }else if( strcmp(q,"help")==0 ) {
-      SJC_Write("Press your ~ key to open and close this console. Commands you can type:");
-      SJC_Write("     \\#08Flisten               \\#FFFstart a server");
-      SJC_Write("     \\#08Fconnect              \\#FFFconnect to a server");
-      SJC_Write("     \\#08Ffullscreen           \\#FFFgo fullscreen");
-      SJC_Write("     \\#08Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
-      SJC_Write("     \\#08Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
-      SJC_Write("     \\#08Fbind                 \\#FFFchoose input keys");
-      SJC_Write("See commands.txt for more commands");
+      echo("Press your ~ key to open and close this console. Commands you can type:");
+      echo("     \\#08Flisten               \\#FFFstart a server");
+      echo("     \\#08Fconnect              \\#FFFconnect to a server");
+      echo("     \\#08Ffullscreen           \\#FFFgo fullscreen");
+      echo("     \\#08Ffullscreen 1024 768  \\#FFFgo fullscreen at 1024x768");
+      echo("     \\#08Fwindow 3x            \\#FFFgo windowed at 3x up-scale");
+      echo("     \\#08Fbind                 \\#FFFchoose input keys");
+      echo("See commands.txt for more commands");
 
     }else if( strcmp(q,"report")==0 ) {
       int i;
       for( i=0; i<maxobjs; i++ ) {
         OBJ_t *o = fr[surefr%maxframes].objs+i;
         if( o->type )
-          SJC_Write( "#%-3i %-20s C:%-3i F:%-5x", i, flexer[o->type].name, o->context, o->flags );
+          echo( "#%-3i %-20s C:%-3i F:%-5x", i, flexer[o->type].name, o->context, o->flags );
       }
 
     }else if( strcmp(q,"save")==0 ) {
       char *name = tok(p," ");
       if( name==NULL ) {
-        SJC_Write("Please specify a file name to save");
+        echo("Please specify a file name to save");
         break;
       }
       save_context( name, mycontext, hotfr );
@@ -234,7 +234,7 @@ void command(const char *s)
     }else if( strcmp(q,"load")==0 ) {
       char *name = tok(p," ");
       if( name==NULL ) {
-        SJC_Write("Please specify a file name to load");
+        echo("Please specify a file name to load");
         break;
       }
       load_context( name, mycontext, hotfr );
@@ -242,22 +242,22 @@ void command(const char *s)
     }else if( strcmp(q,"spr")==0 ) {
       char *num = tok(p," ");
       if( num==NULL ) {
-        SJC_Write("There are %d sprites",spr_count);
+        echo("There are %d sprites",spr_count);
         break;
       }
       size_t n = atoi(num);
       if( n >= spr_count ) {
-        SJC_Write("Invalid sprite number #%d (max %d)",n,spr_count-1);
+        echo("Invalid sprite number #%d (max %d)",n,spr_count-1);
         break;
       }
-      SJC_Write("Sprite #%d \"%s\"  texture %d \"%s\" flags %d",
+      echo("Sprite #%d \"%s\"  texture %d \"%s\" flags %d",
                 n,sprites[n].name,sprites[n].texnum,textures[sprites[n].texnum].filename,sprites[n].flags);
-      SJC_Write("  pos %d %d  size %d %d  anchor %d %d",
+      echo("  pos %d %d  size %d %d  anchor %d %d",
                 sprites[n].rec.x,sprites[n].rec.y,sprites[n].rec.w,sprites[n].rec.h,sprites[n].ancx,sprites[n].ancy);
-      SJC_Write("  floor %d  flange %d  bump %d",
+      echo("  floor %d  flange %d  bump %d",
                 sprites[n].flags&SPRF_FLOOR,sprites[n].flange,sprites[n].bump);
       if( sprites[n].more )
-        SJC_Write("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
+        echo("  gridwide %d  gridlast %d  piping %d  stretch %d (%d %d %d %d)",
                   sprites[n].more->gridwide,sprites[n].more->gridlast,
                   sprites[n].more->piping,sprites[n].more->stretch,
                   sprites[n].more->stretch_t,sprites[n].more->stretch_r,sprites[n].more->stretch_b,sprites[n].more->stretch_l);
@@ -265,12 +265,12 @@ void command(const char *s)
     }else if( strcmp(q,"fovy")==0 ) {
       char *num = tok(p," ");
       if( num==NULL ) {
-        SJC_Write("fovy is %f, eyedist is %d",v_fovy,v_eyedist);
+        echo("fovy is %f, eyedist is %d",v_fovy,v_eyedist);
         break;
       }
       float n = atof(num);
       if( n < 0.0001f || n > 90.0f ) {
-        SJC_Write("Value out of range (0.0001-90)");
+        echo("Value out of range (0.0001-90)");
         break;
       }
       v_fovy = n;
@@ -278,12 +278,12 @@ void command(const char *s)
 
     }else if( strcmp(q,"pwd")==0 || strcmp(q,"cwd")==0 ) {
       char buf[PATH_MAX+1];
-      SJC_Write("%s", getcwd(buf, PATH_MAX));
+      echo("%s", getcwd(buf, PATH_MAX));
 
     }else if( strcmp(q,"cd")==0 || strcmp(q,"chdir")==0 ) {
       char buf[PATH_MAX+1];
       chdir(p);
-      SJC_Write("Changed to %s", getcwd(buf, PATH_MAX));
+      echo("Changed to %s", getcwd(buf, PATH_MAX));
 
     }else if( strcmp(q,"fontscale")==0 ) {
       float scale = atof(p);
@@ -345,7 +345,7 @@ static void bind( char *dev_sym, char *press_cmdname )
   else {
     parse_dev_sym(&device,&sym,dev_sym);
 
-    if( !device ) { SJC_Write("Unrecognized key, button, or stick: %s", dev_sym); return; }
+    if( !device ) { echo("Unrecognized key, button, or stick: %s", dev_sym); return; }
 
     if(      press_cmdname[0]=='+' ) { press = 1; cmdname = press_cmdname+1; }
     else if( press_cmdname[0]=='-' ) { press = 0; cmdname = press_cmdname+1; }
@@ -361,11 +361,11 @@ static void bind( char *dev_sym, char *press_cmdname )
     if( 0==strcmp(inputnames[cmd].name,cmdname) )
       break;
 
-  if( cmd==numinputnames ) { SJC_Write("Not a command: %s",cmdname); return; }
+  if( cmd==numinputnames ) { echo("Not a command: %s",cmdname); return; }
 
   if( !device ) {
     input_bindsoon( inputnames[cmd].presscmd, inputnames[cmd].releasecmd );
-    SJC_Write("Press a key, button, or stick to use for [%s] ...",cmdname);
+    echo("Press a key, button, or stick to use for [%s] ...",cmdname);
     return;
   }
 
@@ -381,10 +381,10 @@ void exec_commands( char *name )
   char line[1000];
 
   printed = snprintf( path, PATH_MAX, GAME "/console/%s.txt", name );
-  if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
+  if( printed<0 ) { echo("Error making path from %s",path); return; }
 
   f = fopen(path, "r");
-  if( !f ) { SJC_Write("Couldn't open %s",path); return; }
+  if( !f ) { echo("Couldn't open %s",path); return; }
 
   while( fgets(line,1000,f) )
     command(line);
@@ -393,10 +393,10 @@ void exec_commands( char *name )
 
   // FIXME LAME HACK FOR NOW
   printed = snprintf( path, PATH_MAX, "user/console/%s.txt", name );
-  if( printed<0 ) { SJC_Write("Error making path from %s",path); return; }
+  if( printed<0 ) { echo("Error making path from %s",path); return; }
 
   f = fopen(path, "r");
-  if( !f ) { SJC_Write("Couldn't open %s",path); return; }
+  if( !f ) { echo("Couldn't open %s",path); return; }
 
   while( fgets(line,1000,f) )
     command(line);

@@ -138,7 +138,7 @@ void mod_setup(Uint32 setupfr)
 
   fr[setupfr+1].cmds[0].flags |= CMDF_NEW; //server is a client
 
-  SJC_Write("Default controls: \\#F80A, S, Numpad Arrows, F11");
+  echo("Default controls: \\#F80A, S, Numpad Arrows, F11");
 }
 
 void mod_recvobj(OBJ_t *o)
@@ -150,7 +150,7 @@ void mod_recvobj(OBJ_t *o)
       co = o->data;
       co->map  = hack_map; // FIXME: horrible hack FOR NOW!
       co->dmap = hack_dmap;//        when receiving map, use data we already have
-      SJC_Write("mod_recvobj(): reusing map data before network connect (hack)");
+      echo("mod_recvobj(): reusing map data before network connect (hack)");
       break;
   }
 }
@@ -205,7 +205,7 @@ void mod_showbinds()
     if( !cmdname )
       sprintf(cbuf,"%d",cmd);
 
-    SJC_Write("bind %s%s %s%s",devname,symname,plusminus,cmdname);
+    echo("bind %s%s %s%s",devname,symname,plusminus,cmdname);
   }
 }
 
@@ -278,7 +278,7 @@ static int gui_click( int press )
     return 0;
 
   POPUP_t *pop = fr[hotfr%maxframes].objs[elem].data;
-  SJC_Write("Clicked on button: %s",pop->text);
+  echo("Clicked on button: %s",pop->text);
   return 1;
 }
 
@@ -416,9 +416,9 @@ int mod_command(char *q,char *args)
     if( !x || !y || !z ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
       if( chr == 'b' )
-        SJC_Write("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
+        echo("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
       else
-        SJC_Write("The current blocksize is (X,Y,Z): %d %d %d", co->bsx, co->bsy, co->bsz);
+        echo("The current blocksize is (X,Y,Z): %d %d %d", co->bsx, co->bsy, co->bsz);
       return 0;
     }
 
@@ -440,7 +440,7 @@ int mod_command(char *q,char *args)
 
     if( !tileuw || !tileuh ) {
       CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
-      SJC_Write("The current tilespacing is (W,H): %d %d", co->tileuw, co->tileuh);
+      echo("The current tilespacing is (W,H): %d %d", co->tileuw, co->tileuh);
       return 0;
     }
 
@@ -468,7 +468,7 @@ int mod_command(char *q,char *args)
   }else if( strcmp(q,"resprite")==0 ){
     reload_sprites();
     renumber_sprites();
-    SJC_Write("Was %d sprites, now %d sprites.",old_spr_count,spr_count);
+    echo("Was %d sprites, now %d sprites.",old_spr_count,spr_count);
     unload_sprites(old_sprites,old_spr_count);
     return 0;
   }
@@ -524,7 +524,7 @@ void mod_predraw(Uint32 vidfr)
 void mod_draw(int objid,Uint32 vidfrmod,OBJ_t *o)
 {
   if( !fr[vidfrmod].objs[o->context].type ) {
-    SJC_Write("No context: can not draw object %d",objid);
+    echo("No context: can not draw object %d",objid);
     return;
   }
 

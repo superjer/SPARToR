@@ -33,15 +33,15 @@ SJF_t SJF = {0,8,12,128,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 }, //<p> - <127>
 {
 "                                                                                                                                "
-"                                                                                                                                "
-" OOOO            OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
-" O  O            OOOOO   O   O   O  OO   O   O   O   O   O   O   O O O   O   O   OOO O   O O O   O OOO   O O O   O   O   O   O  "
-" O  O     OOO    OOOOO   O OOO   O O O   O OOO   O OOO   O OOO   O O O   OO OO   OOO O   O O O   O OOO   O   O   O O O   O O O  "
-" O  O     OOO    OOOOO   O OOO   O O O   O   O   O  OO   O O O   O   O   OO OO   OOO O   O  OO   O OOO   O   O   O O O   O O O  "
-" O  O     OOO    OOOOO   O OOO   O O O   O OOO   O OOO   O O O   O O O   OO OO   O O O   O O O   O OOO   O O O   O O O   O O O  "
-" O  O            OOOOO   O   O   O  OO   O   O   O OOO   O   O   O O O   O   O   O   O   O O O   O   O   O O O   O O O   O   O  "
-" OOOO            OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
-"                                                                                                                                "
+"                        O                                                                                                       "
+" OOOO            OOOOO  O        OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
+" O  O            OOOOO  O        O  OO   O   O   O   O   O   O   O O O   O   O   OOO O   O O O   O OOO   O O O   O   O   O   O  "
+" O  O     OOO    OOOOO  O        O O O   O OOO   O OOO   O OOO   O O O   OO OO   OOO O   O O O   O OOO   O   O   O O O   O O O  "
+" O  O     OOO    OOOOO  O        O O O   O   O   O  OO   O O O   O   O   OO OO   OOO O   O  OO   O OOO   O   O   O O O   O O O  "
+" O  O     OOO    OOOOO  O        O O O   O OOO   O OOO   O O O   O O O   OO OO   O O O   O O O   O OOO   O O O   O O O   O O O  "
+" O  O            OOOOO  O        O  OO   O   O   O OOO   O   O   O O O   O   O   O   O   O O O   O   O   O O O   O O O   O   O  "
+" OOOO            OOOOO  O        OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
+"                        O                                                                                                       "
 "                                                                                                                                "
 "                                                                                                                                "
 // -------------------------------------------------------------------------------------------------------------------------------
@@ -101,8 +101,8 @@ SJF_t SJF = {0,8,12,128,
 "                                                                                          OOOO   O       OOOO                   "
 " OOOO     OOO    OOOO     OOOO   OOOOO   O   O   O   O   O   O   O   O   O   O   OOOOO    O      O          O      O            "
 " O   O   O   O   O   O   O         O     O   O   O   O   O   O   O   O   O   O       O    O       O         O     O O           "
-" O   O   O   O   O   O   O         O     O   O   O   O   O   O    O O     O O       O     O       O         O    O   O          "
-" OOOO    O   O   OOOO     OOO      O     O   O   O   O   O O O     O      O O      O      O        O        O                   "
+" O   O   O   O   O   O   O         O     O   O   O   O   O   O    O O    O   O      O     O       O         O    O   O          "
+" OOOO    O   O   OOOO     OOO      O     O   O   O   O   O O O     O      OOO      O      O        O        O                   "
 " O       O   O   O O         O     O     O   O    O O    O O O    O O      O      O       O         O       O                   "
 " O       O   O   O  O        O     O     O   O    O O    O O O   O   O     O     O        O         O       O                   "
 " O        OOO    O   O   OOOO      O      OOO      O      O O    O   O     O     OOOOO    O          O      O                   "
@@ -247,7 +247,7 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
 
 //returns number of pixels text will consume horizontally
 //non-printable characters will cause weird behavior
-int SJF_TextExtents(const char *str, size_t n)
+int SJF_TextExtents(const char *str, int n)
 {
   int ext = 0;
   if( str==NULL )
@@ -255,6 +255,7 @@ int SJF_TextExtents(const char *str, size_t n)
   while(*str && n-- > 0) {
     if( ISCOLORCODE(str) && str[5] ) {
       str += 5;
+      n -= 4;
       continue;
     }
     ext += SJF.space[(Uint8)*str++];

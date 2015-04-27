@@ -45,7 +45,7 @@ extern SJF_t SJF;
 void SJF_Init();
 void SJF_DrawCharScaled(int scale, int x, int y, char ch);
 void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...);
-int SJF_TextExtents(const char *str, size_t n);
+int SJF_TextExtents(const char *str, int n);
 
 #endif
 

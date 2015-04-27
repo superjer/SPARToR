@@ -348,20 +348,17 @@ void render()
     glEnable(GL_TEXTURE_2D);
     glColor4f(1.0f,1.0f,1.0f,1.0f);
     x = 10;
-    y = conh - 12 * v_conscale - 4;
+    int liney = conh - 12 * v_conscale - 4;
+    y = liney;
 
-    if((ticks/200)%2 && i_hasfocus)
-      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0], SJC.pos)*v_conscale, y, '\2');
-
-    for(i=0;y>0;i++) {
-      if(SJC.buf[i])
+    for( i=0;y>0;i++ ) {
+      if( SJC.buf[i] )
         SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s", SJC.buf[i]);
       y -= 12 * v_conscale;
     }
 
-    if( SJC.buf[0] && SJC.buf[0][0] ) {
-      SJF_DrawTextScaled(v_conscale, w-20, conh-20, SJF_LEFT, "%d", SJC.buf[0][strlen(SJC.buf[0])-1]);
-    }
+    if( (ticks/200)%2 && i_hasfocus )
+      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0], SJC.pos)*v_conscale, liney, '\3');
   }
 
   //display stats

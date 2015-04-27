@@ -293,7 +293,7 @@ void command(const char *s)
         v_conscale = scale;
 
     }else if( mod_command(q,p) ) {
-      SJC_Write("Huh?");
+      echo("%s: command not found", q);
 
     }
   } while(0);

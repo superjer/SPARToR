@@ -158,9 +158,10 @@ void kbinput(int press, SDL_KeyboardEvent e)
   }
   else if( console_open )
   {
+    char *scmd;
     if( !press ) ; //nothing on key up
     else if( sym==SDLK_ESCAPE                         ) toggleconsole();
-    else if( sym==SDLK_RETURN && SJC_Submit()         ) command(SJC.buf[1]);
+    else if( sym==SDLK_RETURN && (scmd=SJC_Submit())  ) command(scmd);
     else if( sym==SDLK_BACKSPACE                      ) SJC_Rub(0);
     else if( sym==SDLK_DELETE                         ) SJC_Rub(1);
     else if( sym==SDLK_UP    || (sym==SDLK_p && ctrl) ) SJC_Up();

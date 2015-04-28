@@ -359,16 +359,21 @@ void render()
     x = 10;
     int liney = conh - 12 * v_conscale - 4;
     y = liney;
+    char *prompt = "\1 ";
 
     for( i=0;y>0;i++ )
     {
-      if( SJC.buf[i] )
-        SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s", SJC.buf[i]);
+      SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s%s", i?"":prompt, SJC.buf[i]?SJC.buf[i]:"");
       y -= 12 * v_conscale;
     }
 
     if( (ticks/200)%2 && i_hasfocus )
-      SJF_DrawCharScaled(v_conscale, x+SJF_TextExtents(SJC.buf[0], SJC.pos)*v_conscale, liney, '\3');
+      SJF_DrawCharScaled(
+          v_conscale,
+          x + (SJF_TextExtents(prompt, 999) + SJF_TextExtents(SJC.buf[0], SJC.pos))*v_conscale,
+          liney,
+          '\2'
+      );
   }
 
   //display stats
@@ -385,8 +390,9 @@ void render()
     SJF_DrawText(w-20, 40, SJF_RIGHT, "adv_collide_time %4d", adv_collide_time/denom);
     SJF_DrawText(w-20, 50, SJF_RIGHT, "adv_game_time %4d"   ,    adv_game_time/denom);
     SJF_DrawText(w-20, 60, SJF_RIGHT, "unaccounted_time %4d", unaccounted_time/denom);
-    SJF_DrawText(w-20, 70, SJF_RIGHT, "adv_frames  %2.2f"   , (float)adv_frames/denom);
-    SJF_DrawText(w-20, 80, SJF_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d", metafr%maxframes, metafr, vidfr, hotfr);
+    SJF_DrawText(w-20, 70, SJF_RIGHT, "adv_frames  %2.2f"   ,(float)adv_frames/denom);
+    SJF_DrawText(w-20, 80, SJF_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d"
+                                                            , metafr%maxframes, metafr, vidfr, hotfr);
     SJF_DrawText(w-20, 90, SJF_RIGHT, "textedit: %d"        , SDL_IsTextInputActive());
   }
 

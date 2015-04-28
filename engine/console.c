@@ -60,11 +60,9 @@ void SJC_Write(const char *s, ...)
   vsnprintf(buf, 255, s, args);
   va_end(args);
 
-  SJC.size[1] = strlen(buf)+3;
+  SJC.size[1] = strlen(buf)+1;
   SJC.buf[1] = malloc(SJC.size[1]);
-  SJC.buf[1][0] = (char)1;
-  SJC.buf[1][1] = (char)32;
-  strcpy(SJC.buf[1]+2, buf);
+  strcpy(SJC.buf[1], buf);
 
   va_start(args, s);
   if( logfile )
@@ -195,10 +193,10 @@ void SJC_Paste()
   SDL_free(q);
 }
 
-int SJC_Submit()
+char *SJC_Submit()
 {
   if( !SJC.buf[0] || !strlen(SJC.buf[0]) )
-    return 0;
+    return NULL;
 
   free(SJC.rememory[SJC.rememend]);
   SJC.rememory[SJC.rememend] = malloc(strlen(SJC.buf[0])+1);
@@ -214,5 +212,14 @@ int SJC_Submit()
 
   fprintf(logfile ? logfile : stderr, "%s%s\n", "> ", SJC.buf[1]);
 
-  return 1;
+  if( strlen(SJC.buf[1])+2 >= SJC.size[1] )
+  {
+    SJC.size[1] += 2;
+    SJC.buf[1] = realloc(SJC.buf[1], SJC.size[1]);
+  }
+  memmove(SJC.buf[1]+2, SJC.buf[1], SJC.size[1]-2);
+  SJC.buf[1][0] = '\1';
+  SJC.buf[1][1] = ' ';
+
+  return SJC.buf[1] + 2;
 }

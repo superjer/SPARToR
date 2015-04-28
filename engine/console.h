@@ -45,6 +45,6 @@ void SJC_Home();
 void SJC_End();
 void SJC_Copy();
 void SJC_Paste();
-int SJC_Submit();
+char *SJC_Submit();
 
 #endif

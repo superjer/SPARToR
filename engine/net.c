@@ -317,7 +317,7 @@ void create_part(int connexid, int partid, int count, Uint8 *data, size_t datale
   pack(conn->outconga, 4);
   pack(count, 2);
   pack(partid, 2);
-  pack(conn->inconga, 4); echo("PACKED inconga: %d, inpart: %d", conn->inconga, conn->inpart);
+  pack(conn->inconga, 4); //echo("PACKED inconga: %d, inpart: %d", conn->inconga, conn->inpart);
   pack(conn->inpart, 2);
   assert(HEADER_SIZE == n);
   memcpy(pkt->data + n, data, datalen);
@@ -441,7 +441,7 @@ void accept_from(int connexid)
     return;
   }
 
-  echo("YO peerconga is %d", peerconga);
+  //echo("YO peerconga is %d", peerconga);
 
   // update our idea of where the peer is
   if( conn->peerconga < peerconga &&
@@ -464,8 +464,8 @@ void accept_from(int connexid)
 
   if( partid >= r->count ) { echo("partid too high!"); return; }
 
-  echo("accept_from: conga %d, peerconga %d, count %d, partid %d, r->pkt %p, r->pkt[partid] %p",
-      conga, peerconga, count, partid, r->pkt, r->pkt[partid]);
+  /* echo("accept_from: conga %d, peerconga %d, count %d, partid %d, r->pkt %p, r->pkt[partid] %p", */
+  /*     conga, peerconga, count, partid, r->pkt, r->pkt[partid]); */
 
   if( r->pkt[partid] && r->pkt[partid]->len )
   {

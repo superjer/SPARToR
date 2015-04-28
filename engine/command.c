@@ -331,8 +331,12 @@ void command(const char *s)
     else if( strcmp(q, "cd")==0 || strcmp(q, "chdir")==0 )
     {
       char buf[PATH_MAX+1];
-      chdir(p);
-      echo("Changed to %s", getcwd(buf, PATH_MAX));
+      if( !p || !*p )
+        echo("Please specify a path");
+      else if( chdir(p) )
+        echo("Failed to change path to: %s", p);
+      else
+        echo("Changed path to: %s", getcwd(buf, PATH_MAX));
     }
     else if( strcmp(q, "fontscale")==0 )
     {

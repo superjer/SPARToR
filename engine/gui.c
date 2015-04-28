@@ -20,7 +20,8 @@ void gui_update( Uint32 guifr )
 {
   /*
   OBJ_t *ob = fr[guifr%maxframes].objs + gui_hover;
-  if( ob->type != OBJT_POPUP ) {
+  if( ob->type != OBJT_POPUP )
+  {
     POPUP_t *pop = ob->data;
     pop->hover = 0;
   }

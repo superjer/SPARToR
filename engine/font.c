@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2015  Jer Wilson
  **
@@ -22,7 +22,7 @@
 #define UNHEX(x) (unsigned char)(17*((x)>'9' ? ((x)&~('a'^'A'))-'A'+10 : (x)-'0'))
 
 
-SJF_t SJF = {0,8,12,128,
+SJF_t SJF = {0, 8, 12, 128,
   { 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<space> - </>
@@ -154,8 +154,8 @@ void SJF_Init()
   Uint32 black = 0xFF000000, white = 0xFFFFFFFF, clear = 0x00000000;
 #endif
 
-  for(u=0; u<128; u++)
-    for(v=0; v<128; v++)
+  for( u=0; u<128; u++ )
+    for( v=0; v<128; v++ )
       if( SJF.raw[u+v*128]!=' ' )
         pixels[u+v*NATIVE_TEX_SZ] = white;
       else if( (u<127 && SJF.raw[(u+1)+(v  )*128]!=' ')
@@ -167,13 +167,13 @@ void SJF_Init()
         pixels[u+v*NATIVE_TEX_SZ] = clear;
 
   //make into a GL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-  glDeleteTextures(1,&SJF.tex);
-  glGenTextures(1,&SJF.tex);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+  glDeleteTextures(1, &SJF.tex);
+  glGenTextures(1, &SJF.tex);
 
-  glBindTexture(GL_TEXTURE_2D,SJF.tex);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, SJF.tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, NATIVE_TEX_SZ, NATIVE_TEX_SZ, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
@@ -185,13 +185,13 @@ void SJF_DrawCharScaled(int scale, int x, int y, char ch)
   int w  = 8;
   int h  = 12;
 
-  glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D,SJF.tex);
+  glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
+  glBindTexture(GL_TEXTURE_2D, SJF.tex);
   glBegin(GL_QUADS);
-  glTexCoord2i(sx   ,sy  ); glVertex2i(x         ,y        );
-  glTexCoord2i(sx+w ,sy  ); glVertex2i(x+w*scale ,y        );
-  glTexCoord2i(sx+w ,sy+h); glVertex2i(x+w*scale ,y+h*scale);
-  glTexCoord2i(sx   ,sy+h); glVertex2i(x         ,y+h*scale);
+  glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
+  glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
+  glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
+  glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
   glEnd();
 }
 
@@ -217,16 +217,17 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
   int w;
   int h = 12;
 
-  glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D,SJF.tex);
+  glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
+  glBindTexture(GL_TEXTURE_2D, SJF.tex);
   glBegin(GL_QUADS);
-  glColor4f(1,1,1,1);
+  glColor4f(1, 1, 1, 1);
   while( *str )
   {
-    // colors?
-    if( ISCOLORCODE(str) ) {
+    if( ISCOLORCODE(str) )
+    {
       glColor3ub( UNHEX(str[2]), UNHEX(str[3]), UNHEX(str[4]) );
-      if( str[5] ) {
+      if( str[5] )
+      {
         str += 5;
         continue;
       }
@@ -252,8 +253,11 @@ int SJF_TextExtents(const char *str, int n)
   int ext = 0;
   if( str==NULL )
     return 0;
-  while(*str && n-- > 0) {
-    if( ISCOLORCODE(str) && str[5] ) {
+
+  while( *str && n-- > 0 )
+  {
+    if( ISCOLORCODE(str) && str[5] )
+    {
       str += 5;
       n -= 4;
       continue;
@@ -262,4 +266,3 @@ int SJF_TextExtents(const char *str, int n)
   }
   return ext;
 }
-

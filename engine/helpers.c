@@ -28,12 +28,14 @@ int pointlis_add( thing **list, thing item )
   if( !list[0] ) list[0] = calloc( POINTLIS_CHUNK, sizeof **list );
 
   size_t n = 0;
-  while( list[0][n] ) {
+  while( list[0][n] )
+  {
     if( list[0][n] == item ) return 0; // found!
     n++;
   }
 
-  if( n % POINTLIS_CHUNK == POINTLIS_CHUNK-1 ) { // need to grow
+  if( n % POINTLIS_CHUNK == POINTLIS_CHUNK-1 ) // need to grow
+  {
     list[0] = realloc( list[0], (n+1+POINTLIS_CHUNK) * sizeof **list );
     memset( list[0]+n+1, 0, POINTLIS_CHUNK * sizeof **list );
   }
@@ -47,14 +49,14 @@ char *tok_( char **restrict buf, const char *restrict sep )
   if( !*buf || !**buf ) return NULL;
 
   char *p = *buf;
-  char *found = strpbrk(p,sep);
+  char *found = strpbrk(p, sep);
 
   if( found )
     *buf = found;
   else
     while( *(*buf)++ ) ; // no body
 
-  size_t seplen = strspn(*buf,sep);
+  size_t seplen = strspn(*buf, sep);
   **buf = '\0';
   *buf += seplen;
 

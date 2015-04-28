@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2015  Jer Wilson
  **
@@ -34,11 +34,15 @@ SJGLOB_T *SJglob( const char *path, const char *pattern, int flags )
 
   handle = FindFirstFile( str, &findata );
   if( handle == INVALID_HANDLE_VALUE )
+  {
     echo( "FindFirstFile failed (%d)", GetLastError() );
-  else {
+  }
+  else
+  {
     size_t i;
 
-    for( i=0; i<1000; i++ ) {
+    for( i=0; i<1000; i++ )
+    {
       files->gl_pathv[i] = malloc( strlen(path) + strlen(findata.cFileName) + 3 ); // room for a / in the middle, at the end, and a ^@
       strcpy( files->gl_pathv[i], path );
       strcat( files->gl_pathv[i], "/" );
@@ -47,14 +51,15 @@ SJGLOB_T *SJglob( const char *path, const char *pattern, int flags )
         strcat( files->gl_pathv[i], "/" );
       files->gl_pathc++;
 
-      if( !FindNextFile(handle,&findata) ) {
+      if( !FindNextFile(handle, &findata) )
+      {
         DWORD err = GetLastError();
         if( err != ERROR_NO_MORE_FILES )
           echo( "FindNextFile failed (%d)", err );
         break;
       }
     }
-    
+
     FindClose( handle );
   }
 

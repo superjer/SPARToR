@@ -115,7 +115,7 @@ void videoinit()
 
 void render()
 {
-  int x,y,w,h;
+  int x, y, w, h;
   int i;
   Uint32 vidfr = metafr;
   Uint32 vidfrmod = vidfr%maxframes;
@@ -138,7 +138,8 @@ void render()
   v_h = h;
   pad_left = 0;
   pad_top  = 0;
-  if( v_center ) {
+  if( v_center )
+  {
     pad_left = (w - NATIVEW*v_scale)/2;
     pad_top  = (h - NATIVEH*v_scale)/2;
   }
@@ -147,12 +148,12 @@ void render()
   glLoadIdentity();
   glScalef(1.0f/512.0f, 1.0f/512.0f, 1);
 
-  glColor4f(1.0f,1.0f,1.0f,1.0f);
+  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
   glEnable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
-  glAlphaFunc(GL_GREATER,0.01);
+  glAlphaFunc(GL_GREATER, 0.01);
   glEnable(GL_ALPHA_TEST);
 
   glDepthFunc(GL_LEQUAL);
@@ -161,7 +162,7 @@ void render()
   glClear(GL_DEPTH_BUFFER_BIT);
 
   // viewport and matrixes for game objects
-  glViewport(pad_left,h-NATIVEH*v_scale-pad_top,NATIVEW*v_scale,NATIVEH*v_scale);
+  glViewport(pad_left, h-NATIVEH*v_scale-pad_top, NATIVEW*v_scale, NATIVEH*v_scale);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
@@ -169,8 +170,8 @@ void render()
   float diagdist = 45.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
   v_eyedist = sqrtf( 3*diagdist*diagdist );
 
-  //glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
-  gluPerspective(v_fovy,(GLdouble)NATIVEW/NATIVEH,v_eyedist,v_eyedist*2+4000);
+  //glOrtho(0, NATIVEW, NATIVEH, 0, NEARVAL, FARVAL);
+  gluPerspective(v_fovy, (GLdouble)NATIVEW/NATIVEH, v_eyedist, v_eyedist*2+4000);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -178,29 +179,30 @@ void render()
   //old dimetric mode:
   //int camx = NATIVEW/2-(int)v_camx;
   //int camy = NATIVEH/2-(int)v_camy;
-  //glTranslatef(camx,camy,0);
+  //glTranslatef(camx, camy, 0);
 
   v_eyex = v_targx + v_eyedist;
   v_eyey = v_targy - v_eyedist;
   v_eyez = v_targz + v_eyedist;
 
-  gluLookAt(v_eyex ,v_eyey ,v_eyez ,
-            v_targx,v_targy,v_targz,
-            0      ,-1     ,0      );
+  gluLookAt(v_eyex , v_eyey , v_eyez ,
+            v_targx, v_targy, v_targz,
+            0      , -1     , 0      );
 
   // store values for unprojecting, etc.
-  glGetDoublev(GL_MODELVIEW_MATRIX,v_modeltrix);
-  glGetDoublev(GL_PROJECTION_MATRIX,v_projtrix);
-  glGetIntegerv(GL_VIEWPORT,v_viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, v_modeltrix);
+  glGetDoublev(GL_PROJECTION_MATRIX, v_projtrix);
+  glGetIntegerv(GL_VIEWPORT, v_viewport);
 
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
   mod_predraw(vidfr);
 
   //display objects
-  for(i=0;i<maxobjs;i++) {
+  for( i=0; i<maxobjs; i++ )
+  {
     OBJ_t *o = fr[vidfrmod].objs+i;
     if( o->flags&OBJF_VIS )
-      mod_draw(i,vidfrmod,o); // have the mod draw the actual thing
+      mod_draw(i, vidfrmod, o); // have the mod draw the actual thing
   }
 
   mod_postdraw(vidfr);
@@ -208,15 +210,18 @@ void render()
   glDisable(GL_DEPTH_TEST);
 
   //display hulls and object numbers
-  if( v_drawhulls ) {
+  if( v_drawhulls )
+  {
     glBindTexture( GL_TEXTURE_2D, 0 );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-    if( mycontext ) {
+    if( mycontext )
+    {
       CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
-      int x,y,z;
+      int x, y, z;
 
-      for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ ) {
+      for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ )
+      {
         int pos = co->x*co->y*z + co->x*y + x;
         int flags = co->dmap[pos].flags;
 
@@ -248,12 +253,14 @@ void render()
       }
     }
 
-    for(i=0;i<maxobjs;i++) {
+    for( i=0; i<maxobjs; i++ )
+    {
       OBJ_t *o = fr[vidfrmod].objs+i;
 
-      if( (o->flags & OBJF_POS) && (o->flags & OBJF_HULL) ) {
-        V *pos  = flex(o,pos );
-        V *hull = flex(o,hull);
+      if( (o->flags & OBJF_POS) && (o->flags & OBJF_HULL) )
+      {
+        V *pos  = flex(o, pos );
+        V *hull = flex(o, hull);
         int x  = pos->x + hull[0].x;
         int y  = pos->y + hull[0].y;
         int z  = pos->z + hull[0].z;
@@ -279,35 +286,37 @@ void render()
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    for(i=0;i<maxobjs;i++) {
+    for( i=0; i<maxobjs; i++ )
+    {
       OBJ_t *o = fr[vidfrmod].objs+i;
 
-      if( o->flags & OBJF_POS ) {
-        V *pos  = flex(o,pos);
-        V screenpos = get_screen_pos(pos->x,pos->y,pos->z);
+      if( o->flags & OBJF_POS )
+      {
+        V *pos  = flex(o, pos);
+        V screenpos = get_screen_pos(pos->x, pos->y, pos->z);
 
         SJF_DrawText(screenpos.x, screenpos.y-10, SJF_CENTER, "%d", i);
       }
     }
 
-    glColor4f(1,1,1,1);
+    glColor4f(1, 1, 1, 1);
   }
 
   // translate back for HUD
-  //glTranslatef(-camx,-camy,0);
+  //glTranslatef(-camx, -camy, 0);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,NATIVEW,NATIVEH,0,NEARVAL,FARVAL);
+  glOrtho(0, NATIVEW, NATIVEH, 0, NEARVAL, FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
   mod_huddraw(vidfr);
 
   // viewport and matrixes for outerdraw
-  glViewport(0,0,w,h);
+  glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0,w,h,0,NEARVAL,FARVAL);
+  glOrtho(0, w, h, 0, NEARVAL, FARVAL);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
@@ -319,39 +328,40 @@ void render()
     int outerb = h;   int innerb = pad_top  + NATIVEH*v_scale;
     glDisable(GL_TEXTURE_2D);
     glPushAttrib(GL_COLOR_BUFFER_BIT);
-    glColor4f(0,0,0,1.0f);
+    glColor4f(0, 0, 0, 1.0f);
     glBegin(GL_QUADS);
-    glVertex2i(outerl,outert); glVertex2i(outerr,outert); glVertex2i(outerr,innert); glVertex2i(outerl,innert); //top
-    glVertex2i(outerl,innerb); glVertex2i(outerr,innerb); glVertex2i(outerr,outerb); glVertex2i(outerl,outerb); //bottom
-    glVertex2i(outerl,innert); glVertex2i(innerl,innert); glVertex2i(innerl,innerb); glVertex2i(outerl,innerb); //left
-    glVertex2i(innerr,innert); glVertex2i(outerr,innert); glVertex2i(outerr,innerb); glVertex2i(innerr,innerb); //right
+    glVertex2i(outerl, outert); glVertex2i(outerr, outert); glVertex2i(outerr, innert); glVertex2i(outerl, innert); //top
+    glVertex2i(outerl, innerb); glVertex2i(outerr, innerb); glVertex2i(outerr, outerb); glVertex2i(outerl, outerb); //bottom
+    glVertex2i(outerl, innert); glVertex2i(innerl, innert); glVertex2i(innerl, innerb); glVertex2i(outerl, innerb); //left
+    glVertex2i(innerr, innert); glVertex2i(outerr, innert); glVertex2i(outerr, innerb); glVertex2i(innerr, innerb); //right
     glEnd();
     glPopAttrib();
     glEnable(GL_TEXTURE_2D);
-    glColor4f(1.0f,1.0f,1.0f,1.0f);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
   }
 
   SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
-  mod_outerdraw(vidfr,w,h);
+  mod_outerdraw(vidfr, w, h);
 
   //display console
-  if(console_open)
+  if( console_open )
   {
     int conh = h/2 - 40;
-    if(conh<40) conh = 40;
-    glColor4f(0.15,0.15,0.15,0.85);
+    if( conh<40 ) conh = 40;
+    glColor4f(0.15, 0.15, 0.15, 0.85);
     glDisable(GL_TEXTURE_2D);
     glBegin(GL_QUADS);
     glVertex2i(0,   0); glVertex2i(w,   0);
     glVertex2i(w,conh); glVertex2i(0,conh);
     glEnd();
     glEnable(GL_TEXTURE_2D);
-    glColor4f(1.0f,1.0f,1.0f,1.0f);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     x = 10;
     int liney = conh - 12 * v_conscale - 4;
     y = liney;
 
-    for( i=0;y>0;i++ ) {
+    for( i=0;y>0;i++ )
+    {
       if( SJC.buf[i] )
         SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s", SJC.buf[i]);
       y -= 12 * v_conscale;
@@ -366,23 +376,25 @@ void render()
   render_time += tmp - render_start;
   total_start = tmp;
   Uint32 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
-  if( v_showstats ) {
+  if( v_showstats )
+  {
     Uint32 denom = vidfrmod+1;
-    SJF_DrawText(w-20,10,SJF_RIGHT,"idle_time %4d"       ,        idle_time/denom);
-    SJF_DrawText(w-20,20,SJF_RIGHT,"render_time %4d"     ,      render_time/denom);
-    SJF_DrawText(w-20,30,SJF_RIGHT,"adv_move_time %4d"   ,    adv_move_time/denom);
-    SJF_DrawText(w-20,40,SJF_RIGHT,"adv_collide_time %4d", adv_collide_time/denom);
-    SJF_DrawText(w-20,50,SJF_RIGHT,"adv_game_time %4d"   ,    adv_game_time/denom);
-    SJF_DrawText(w-20,60,SJF_RIGHT,"unaccounted_time %4d", unaccounted_time/denom);
-    SJF_DrawText(w-20,70,SJF_RIGHT,"adv_frames  %2.2f"   ,(float)adv_frames/denom);
-    SJF_DrawText(w-20,80,SJF_RIGHT,"fr: idx=%d meta=%d vid=%d hot=%d",metafr%maxframes,metafr,vidfr,hotfr);
-    SJF_DrawText(w-20,90,SJF_RIGHT,"textedit: %d"        ,SDL_IsTextInputActive());
+    SJF_DrawText(w-20, 10, SJF_RIGHT, "idle_time %4d"       ,        idle_time/denom);
+    SJF_DrawText(w-20, 20, SJF_RIGHT, "render_time %4d"     ,      render_time/denom);
+    SJF_DrawText(w-20, 30, SJF_RIGHT, "adv_move_time %4d"   ,    adv_move_time/denom);
+    SJF_DrawText(w-20, 40, SJF_RIGHT, "adv_collide_time %4d", adv_collide_time/denom);
+    SJF_DrawText(w-20, 50, SJF_RIGHT, "adv_game_time %4d"   ,    adv_game_time/denom);
+    SJF_DrawText(w-20, 60, SJF_RIGHT, "unaccounted_time %4d", unaccounted_time/denom);
+    SJF_DrawText(w-20, 70, SJF_RIGHT, "adv_frames  %2.2f"   , (float)adv_frames/denom);
+    SJF_DrawText(w-20, 80, SJF_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d", metafr%maxframes, metafr, vidfr, hotfr);
+    SJF_DrawText(w-20, 90, SJF_RIGHT, "textedit: %d"        , SDL_IsTextInputActive());
   }
 
   //display audio waveform
-  if( v_oscillo ) {
+  if( v_oscillo )
+  {
     glBindTexture( GL_TEXTURE_2D, 0 );
-    glColor4f(0,1,0,1);
+    glColor4f(0, 1, 0, 1);
     glBegin(GL_LINE_STRIP);
     int *wf = a_waveform;
     if( wf ) for( i=0; i<a_waveform_len; i++ )
@@ -393,7 +405,8 @@ void render()
   SDL_GL_SwapWindow(screen);
   setdrawnfr(vidfr);
 
-  if( (int)vidfrmod==maxframes-1 ) { // reset time stats
+  if( (int)vidfrmod==maxframes-1 ) // reset time stats
+  {
     total_time       = 0;
     idle_time        = 0;
     render_time      = 0;
@@ -467,38 +480,45 @@ void setvideo(int w, int h, int go_full, int quiet)
   if( v_scale<1 )
     v_scale = 1;
   SJF_Init();
-  mod_setvideo(w,h);
+  mod_setvideo(w, h);
   if( !quiet )
-    echo("Video mode set to %d x %d",w,h);
+    echo("Video mode set to %d x %d", w, h);
 }
 
 void setvideosoon(int w, int h, int go_full)
 {
-  if( !w || !h ) {
-    if( go_full ) {
+  if( !w || !h )
+  {
+    if( go_full )
+    {
       soon_w = desktop_w;
       soon_h = desktop_h;
-    } else {
+    }
+    else
+    {
       soon_w = prev_w;
       soon_h = prev_h;
     }
-  } else {
+  }
+  else
+  {
     soon_w = w;
     soon_h = h;
   }
+
   soon_full = go_full;
   soon = 2;
 }
 
-void setwinpos(int x,int y)
+void setwinpos(int x, int y)
 {
   SDL_SetWindowPosition(screen, x, y);
 }
 
 // find ray from point on screen (mouse?) into world space
-V get_screen_ray(double x,double y)
+V get_screen_ray(double x, double y)
 {
-  double farx,fary,farz,nearx,neary,nearz;
+  double farx, fary, farz, nearx, neary, nearz;
   V ray;
 
   //or find point matching depth buffer?
@@ -519,9 +539,9 @@ V get_screen_ray(double x,double y)
 }
 
 // find position on screen of in-world point
-V get_screen_pos(double x,double y,double z)
+V get_screen_pos(double x, double y, double z)
 {
-  double winx,winy,winz;
+  double winx, winy, winz;
   V out;
 
   gluProject(           x,           y,          z,
@@ -538,13 +558,15 @@ V get_screen_pos(double x,double y,double z)
 int make_sure_texture_is_loaded(const char *texfile)
 {
   SDL_Surface *surf;
-  size_t j,k;
+  size_t j, k;
 
-  glPixelStorei(GL_UNPACK_ALIGNMENT,4);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-  for( j=0; ; j++ ) {
+  for( j=0; ; j++ )
+  {
     // need more space?
-    if( j >= tex_count ) {
+    if( j >= tex_count )
+    {
       size_t new_count = tex_count < 8 ? 8 : tex_count*2;
       textures = realloc( textures, new_count * sizeof *textures );
       memset( textures + tex_count, 0, (new_count - tex_count) * sizeof *textures );
@@ -552,31 +574,41 @@ int make_sure_texture_is_loaded(const char *texfile)
     }
 
     // is slot j the one?
-    if( !textures[j].filename ) {
-      //echo("Texture %s is new, using slot %d",texfile,j);
+    if( !textures[j].filename )
+    {
+      //echo("Texture %s is new, using slot %d", texfile, j);
       textures[j].filename = malloc( strlen(texfile) + 1 );
-      strcpy(textures[j].filename,texfile);
+      strcpy(textures[j].filename, texfile);
       load_sprites(j);
-    } else if( !strcmp(textures[j].filename,texfile) ) {
-      //echo("Texture %s was loaded before, reusing slot %d",texfile,j);
+    }
+    else if( !strcmp(textures[j].filename, texfile) )
+    {
+      //echo("Texture %s was loaded before, reusing slot %d", texfile, j);
       if( textures[j].generated )
         return j; // nothing to do!
-    } else
+    }
+    else
+    {
       continue;
+    }
 
     // alert GL to presence of new texture
-    glGenTextures(1,&textures[j].glname);
+    glGenTextures(1, &textures[j].glname);
     textures[j].generated = 1;
 
     // load texture into GL
-    glBindTexture(GL_TEXTURE_2D,textures[j].glname);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    if( (surf = IMG_Load(textures[j].filename)) ) {
+    glBindTexture(GL_TEXTURE_2D, textures[j].glname);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    if( (surf = IMG_Load(textures[j].filename)) )
+    {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h, 0, SJDL_GLFormatOf(surf), GL_UNSIGNED_BYTE, surf->pixels);
       SDL_FreeSurface(surf);
-    } else
-      echo("Failed to read texture %s",textures[j].filename);
+    }
+    else
+    {
+      echo("Failed to read texture %s", textures[j].filename);
+    }
 
     // map system texture if there is a match(es)
     for( k=0; k<num_sys_tex; k++ )

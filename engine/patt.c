@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2015  Jer Wilson
  **
@@ -25,8 +25,8 @@ void spatt(uint32_t seed)
   init_genrand(seed);
 }
 
-unsigned long sqrti(unsigned long x)  
-{  
+unsigned long sqrti(unsigned long x)
+{
   register unsigned long n=x;
   register unsigned long root=0;
 
@@ -46,5 +46,5 @@ unsigned long sqrti(unsigned long x)
   if( n>=root+0x00000010 ) { n-=root+0x00000010; root+=0x00000020; }   root>>=1;
   if( n>=root+0x00000004 ) { n-=root+0x00000004; root+=0x00000008; }   root>>=1;
   if( n> root            ) {                     root+=0x00000002; }   return root>>1;
-}  
+}
 

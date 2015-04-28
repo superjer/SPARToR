@@ -32,9 +32,13 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   sl->vel.y += 0.6f;      //gravity
 
   if( sl->dead )          //decay
+  {
     sl->dead++;
-  else for(i=0;i<maxobjs;i++) { //find players, bullets to hit
-    if(fr[b].objs[i].type==OBJT_PLAYER) {
+  }
+  else for( i=0;i<maxobjs;i++ ) //find players, bullets to hit
+  {
+    if( fr[b].objs[i].type==OBJT_PLAYER )
+    {
       PLAYER_t *pl = fr[b].objs[i].data;
       int up_stabbed = pl->stabbing<0
                     && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
@@ -42,19 +46,24 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       int dn_stabbed = pl->stabbing>0
                     && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
                     && fabsf(sl->pos.y + sl->hull[0].y - pl->pos.y - pl->hull[1].y)<=4.0f ;
-      if( up_stabbed ) {
+      if( up_stabbed )
+      {
         pl->vel.y = sl->vel.y;
         sl->vel.y = -5.0f;
         kill = 1;
         play("stab");
-      } else if( dn_stabbed ) {
+      }
+      else if( dn_stabbed )
+      {
         pl->vel.y = -4.5f;
         pl->hovertime = 7;
         sl->vel.y = 0.0f;
         kill = 1;
         play("stab");
       }
-    } else if(fr[b].objs[i].type==OBJT_BULLET) {
+    }
+    else if( fr[b].objs[i].type==OBJT_BULLET )
+    {
       BULLET_t *bu = fr[b].objs[i].data;
       if( fabsf(sl->pos.x - bu->pos.x)>8.0f || fabsf(sl->pos.y - bu->pos.y)>8.0f )
         continue; // no hit
@@ -65,7 +74,8 @@ void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     }
   }
 
-  if( kill ) {
+  if( kill )
+  {
     sl->vel.x /= 100; //preserve direction while dead
     sl->dead = 1;
     ob->flags &= ~OBJF_PLAT;

@@ -10,10 +10,10 @@ STRUCT()
 
 #define TYPE GHOST
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     int client;
     int avatar;
@@ -26,19 +26,19 @@ STRUCT()
 
 #define TYPE DUMMY
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
 #include "endstruct.h"
 
 #define TYPE PLAYER
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(V,pvel,)
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(V, pvel, )
+  EXPOSE(int, model, )
   HIDE(
     int ghost;
     char goingl;
@@ -62,10 +62,10 @@ STRUCT()
 
 #define TYPE BULLET
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     int owner;
     Uint8 ttl;
@@ -75,10 +75,10 @@ STRUCT()
 
 #define TYPE SLUG
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     int dead;
     int spawner;
@@ -87,10 +87,10 @@ STRUCT()
 
 #define TYPE AMIGO
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     char state;
     int statetime;
@@ -102,10 +102,10 @@ STRUCT()
 
 #define TYPE AMIGOSWORD
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     int owner;
     int spincounter;

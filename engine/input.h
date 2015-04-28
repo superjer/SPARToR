@@ -30,20 +30,20 @@ extern int i_minimized;
 extern int i_watch;
 
 void inputinit();
-void putcmd(int device,int sym,int press);
+void putcmd(int device, int sym, int press);
 void winevent(SDL_WindowEvent e);
 void textinput(SDL_TextInputEvent e);
 void textedit(SDL_TextEditingEvent e);
-void kbinput(int press,SDL_KeyboardEvent e);
+void kbinput(int press, SDL_KeyboardEvent e);
 void padadd(SDL_ControllerDeviceEvent e);
 void padremap(SDL_ControllerDeviceEvent e);
 void padremove(SDL_ControllerDeviceEvent e);
-void padinput(int press,SDL_ControllerButtonEvent e);
+void padinput(int press, SDL_ControllerButtonEvent e);
 void padaxis(SDL_ControllerAxisEvent e);
-void mouseinput(int press,SDL_MouseButtonEvent mbutton);
+void mouseinput(int press, SDL_MouseButtonEvent mbutton);
 void mousemove(SDL_MouseMotionEvent mmotion);
 void readinput();
-void input_bindsoon(int presscmd,int releasecmd);
-void kwikbind(int device,int sym);
+void input_bindsoon(int presscmd, int releasecmd);
+void kwikbind(int device, int sym);
 
 #endif

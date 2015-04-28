@@ -43,7 +43,8 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
   int samegrid = cb->spr >= spr_num && cb->spr <= spr->more->gridlast;
   const char *sprname = samegrid ? sprites[cb->spr].name : "";
 
-  if( spr->more->piping ) {
+  if( spr->more->piping )
+  {
     // always make connections to parts of the same drawing area, never remove existing connections
     int conn_u = drawy>0       || strstr(sprname,"12");
     int conn_r = drawx<draww-1 || strstr(sprname, "3");
@@ -51,7 +52,8 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
     int conn_l = drawx>0       || strstr(sprname, "9");
 
     int i;
-    for( i = spr_num; i <= spr->more->gridlast; i++ ) {
+    for( i = spr_num; i <= spr->more->gridlast; i++ )
+    {
       sprname = sprites[i].name;
       if(    (strstr(sprname,"12") && 1) == conn_u
           && (strstr(sprname, "3") && 1) == conn_r
@@ -61,7 +63,8 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
     }
   }
 
-  if( spr->more->stretch ) {
+  if( spr->more->stretch )
+  {
     int stretch_t = spr->more->stretch_t;
     int stretch_r = spr->more->stretch_r;
     int stretch_b = spr->more->stretch_b;
@@ -106,7 +109,8 @@ SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, i
 
 void renumber_sprites()
 {
-  if( !sprites || !old_sprites ) {
+  if( !sprites || !old_sprites )
+  {
     echo("Can't renumber sprites!");
     return;
   }
@@ -115,9 +119,12 @@ void renumber_sprites()
 
   // find and renumber ALL sprites, past and future
   int i, j, k;
-  for( i=0; i<maxframes; i++ ) {
-    for( j=0; j<maxobjs; j++ ) {
-      if( fr[i].objs[j].type == OBJT_CONTEXT ) {
+  for( i=0; i<maxframes; i++ )
+  {
+    for( j=0; j<maxobjs; j++ )
+    {
+      if( fr[i].objs[j].type == OBJT_CONTEXT )
+      {
         CONTEXT_t *co = fr[i].objs[j].data;
         CB *map  = co->map;
         CB *dmap = co->dmap;

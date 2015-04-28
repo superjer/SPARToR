@@ -42,10 +42,10 @@ static FILE  *f;
 static char *tokens[SPR_MAX_TOKENS];
 
 
-static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base);
+static SPRITE_T *new_sprite(int texnum, const char *name, const SPRITE_T *base);
 static int fail(const char *msg);
 static int tokenize(char *s);
-static int read_anchor(int i,SPRITE_T *arg);
+static int read_anchor(int i, SPRITE_T *arg);
 static void read_num(int *num, const char *token);
 
 
@@ -79,7 +79,8 @@ void sprblit3d( SPRITE_T *spr, int x, int y, int z )
 
 int load_sprites(int texnum)
 {
-  if( strlen(textures[texnum].filename) > 95 ) {
+  if( strlen(textures[texnum].filename) > 95 )
+  {
     echo("load_sprites: filename too long: %s", textures[texnum].filename);
     return -1;
   }
@@ -107,7 +108,8 @@ int load_sprites(int texnum)
 
   line_num = 0;
 
-  for( ;; ) { // each line in the file
+  for( ;; ) // each line in the file
+  {
     if( mode==DEFAULT || mode==NOMORE )
       mode = READY;
 
@@ -116,7 +118,7 @@ int load_sprites(int texnum)
 
     line_num++;
     memset(line, 0, 1000);
-    if( !fgets(line,1000,f) )
+    if( !fgets(line, 1000, f) )
       break;
 
     if( line[998] )
@@ -131,33 +133,43 @@ int load_sprites(int texnum)
       continue;
 
     // read the first token, which should be a command or identifier
-    if( tokens[i][0] != '.' ) { // sprite name found
-      if( also ) {
-        spr = new_sprite(texnum,tokens[i],&prev_spr);
+    if( tokens[i][0] != '.' ) // sprite name found
+    {
+      if( also )
+      {
+        spr = new_sprite(texnum, tokens[i], &prev_spr);
         also = 0;
-      } else if( mode == GRIDITEM ) {
-        spr = new_sprite(texnum,tokens[i],&gdefs);
+      }
+      else if( mode == GRIDITEM )
+      {
+        spr = new_sprite(texnum, tokens[i], &gdefs);
         spr->rec.x += gdefs.rec.w * (gridoffs % gridcols);
         spr->rec.y += gdefs.rec.h * (gridoffs / gridcols);
         gridoffs++;
-      } else {
-        spr = new_sprite(texnum,tokens[i],&defs);
       }
-      targ = spr;
+      else
+      {
+        spr = new_sprite(texnum, tokens[i], &defs);
+      }
 
-    } else if( !strcmp(tokens[i],".default") ) {
+      targ = spr;
+    }
+    else if( !strcmp(tokens[i], ".default") )
+    {
       mode = DEFAULT;
       targ = &defs;
-
-    } else if( !strcmp(tokens[i],".grid") ) {
+    }
+    else if( !strcmp(tokens[i], ".grid") )
+    {
       if( mode != READY )
         return fail("load_sprites: Not ready for a .grid command");
       mode = GRID;
       memcpy( &gdefs, &defs, sizeof defs );
       gridoffs = 0;
       targ = &gdefs;
-
-    } else if( !strcmp(tokens[i],".end") ) {
+    }
+    else if( !strcmp(tokens[i], ".end") )
+    {
       if( mode != GRIDITEM )
         return fail("load_sprites: .end command encountered without a .grid");
 
@@ -165,14 +177,16 @@ int load_sprites(int texnum)
         return fail("unexpected tokens after .end command");
 
       // set special properties of the first sprite in the grid, now that the grid is complete
-      if( gridstart>=0 ) {
+      if( gridstart>=0 )
+      {
         SPRITE_T *start = sprites + gridstart;
         start->more = calloc( 1, sizeof *(start->more) );
         start->more->gridwide = gridcols;
         start->more->gridlast = spr_count-1;
         start->more->stretch = stretch;
         start->more->piping = piping;
-        if( stretch ) {
+        if( stretch )
+        {
           start->more->stretch_t = stretch_t;
           start->more->stretch_r = stretch_r;
           start->more->stretch_b = stretch_b;
@@ -184,25 +198,30 @@ int load_sprites(int texnum)
       mode = NOMORE;
       stretch = 0;
       piping = 0;
-
-    } else if( !strcmp(tokens[i],".") ) {
+    }
+    else if( !strcmp(tokens[i], ".") )
+    {
       if( count > 2 )
         return fail("load_sprites: too many tokens after . command");
       i++;
       gridoffs += (count == 2 ? atoi(tokens[i]) : 1);
-
-    } else if( !strcmp(tokens[i],".also") ) {
+    }
+    else if( !strcmp(tokens[i], ".also") )
+    {
       if( count > 1 )
         return fail("unexpected tokens after .also command");
       also = 1;
-
-    } else {
-      echo("Unknown command: %s",tokens[i]);
+    }
+    else
+    {
+      echo("Unknown command: %s", tokens[i]);
       return fail("load_sprites: unknown command");
     }
 
-    while( ++i < count ) {
-      if( isdigit(tokens[i][0]) || tokens[i][0]=='-' ) {
+    while( ++i < count )
+    {
+      if( isdigit(tokens[i][0]) || tokens[i][0]=='-' )
+      {
         if( count-i != 2 && count-i != 4 && count-i < 6 )
           return fail("Expecting 2, 4 or 6+ values, when no name found");
 
@@ -211,42 +230,48 @@ int load_sprites(int texnum)
         read_num(&targ->rec.w, tokens[++i]);
         read_num(&targ->rec.h, tokens[++i]);  if( i>=count-1 ) break;
 
-        i = read_anchor(i+1,targ);
-
-      } else if( !strcmp(tokens[i],"pos") ) {
+        i = read_anchor(i+1, targ);
+      }
+      else if( !strcmp(tokens[i], "pos") )
+      {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'pos'");
 
         read_num(&targ->rec.x, tokens[++i]);
         read_num(&targ->rec.y, tokens[++i]);
-
-      } else if( !strcmp(tokens[i],"size") ) {
+      }
+      else if( !strcmp(tokens[i], "size") )
+      {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'size'");
 
         read_num(&targ->rec.w, tokens[++i]);
         read_num(&targ->rec.h, tokens[++i]);
-
-      } else if( !strcmp(tokens[i],"bump") ) {
+      }
+      else if( !strcmp(tokens[i], "bump") )
+      {
         if( count-i < 2 )
           return fail("Expecting 1 arg for 'bump'");
 
         read_num(&targ->bump, tokens[++i]);
-
-      } else if( !strcmp(tokens[i],"flange") ) {
+      }
+      else if( !strcmp(tokens[i], "flange") )
+      {
         if( count-i < 2 )
           return fail("Expecting 1 arg for 'flange'");
 
         read_num(&targ->flange, tokens[++i]);
         targ->flags |= SPRF_FLOOR;
-
-      } else if( !strcmp(tokens[i],"anchor") ) {
+      }
+      else if( !strcmp(tokens[i], "anchor") )
+      {
         if( count-i < 3 )
           return fail("Expecting 2 args for 'anchor'");
 
-        i = read_anchor(i+1,targ);
-
-      } else if( !strcmp(tokens[i],"cols") ) {
+        i = read_anchor(i+1, targ);
+      }
+      else if( !strcmp(tokens[i], "cols") )
+      {
         if( count-i < 2 )
           return fail("Expecting column count after 'cols'");
 
@@ -254,8 +279,9 @@ int load_sprites(int texnum)
 
         if( gridcols < 1 )
           return fail("Column count must be a number greater than zero");
-
-      } else if( !strcmp(tokens[i],"stretch") ) {
+      }
+      else if( !strcmp(tokens[i], "stretch") )
+      {
         if( count-i < 5 )
           return fail("Expecting top, right, bottom, left sizes after 'stretch'");
 
@@ -264,44 +290,50 @@ int load_sprites(int texnum)
         stretch_r = atoi(tokens[++i]);
         stretch_b = atoi(tokens[++i]);
         stretch_l = atoi(tokens[++i]);
-
-      } else if( !strcmp(tokens[i],"pipe") ) {
+      }
+      else if( !strcmp(tokens[i], "pipe") )
+      {
         piping = 1;
-
-      } else if( !strcmp(tokens[i],"tool") ) {
+      }
+      else if( !strcmp(tokens[i], "tool") )
+      {
         if( count-i < 2 )
           return fail("Expecting tool name after 'tool'");
 
         i++;
-        if(      !strncmp(tokens[i],"nu",2) ) { targ->flags |= TOOL_NUL ; } // undefined behavior if multiple tools are specified for a sprite!
-        else if( !strncmp(tokens[i],"so",2) ) { targ->flags |= TOOL_SOL ; }
-        else if( !strncmp(tokens[i],"pl",2) ) { targ->flags |= TOOL_PLAT; }
-        else if( !strncmp(tokens[i],"op",2) ) { targ->flags |= TOOL_OPN ; }
-        else if( !strncmp(tokens[i],"co",2) ) { targ->flags |= TOOL_COPY; }
-        else if( !strncmp(tokens[i],"ps",2) ) { targ->flags |= TOOL_PSTE; }
-        else if( !strncmp(tokens[i],"ob",2) ) { targ->flags |= TOOL_OBJ ; }
-        else if( !strncmp(tokens[i],"er",2) ) { targ->flags |= TOOL_ERAS; }
-        else if( !strncmp(tokens[i],"vi",2) ) { targ->flags |= TOOL_VIS ; }
+        if(      !strncmp(tokens[i], "nu", 2) ) { targ->flags |= TOOL_NUL ; } // undefined behavior if multiple tools are specified for a sprite!
+        else if( !strncmp(tokens[i], "so", 2) ) { targ->flags |= TOOL_SOL ; }
+        else if( !strncmp(tokens[i], "pl", 2) ) { targ->flags |= TOOL_PLAT; }
+        else if( !strncmp(tokens[i], "op", 2) ) { targ->flags |= TOOL_OPN ; }
+        else if( !strncmp(tokens[i], "co", 2) ) { targ->flags |= TOOL_COPY; }
+        else if( !strncmp(tokens[i], "ps", 2) ) { targ->flags |= TOOL_PSTE; }
+        else if( !strncmp(tokens[i], "ob", 2) ) { targ->flags |= TOOL_OBJ ; }
+        else if( !strncmp(tokens[i], "er", 2) ) { targ->flags |= TOOL_ERAS; }
+        else if( !strncmp(tokens[i], "vi", 2) ) { targ->flags |= TOOL_VIS ; }
         else return fail("Unknown tool name");
-
-      } else if( !strcmp(tokens[i],"flipx") ) {
+      }
+      else if( !strcmp(tokens[i], "flipx") )
+      {
         targ->flags |= SPRF_FLIPX;
-
-      } else if( !strcmp(tokens[i],"flipy") ) {
+      }
+      else if( !strcmp(tokens[i], "flipy") )
+      {
         targ->flags |= SPRF_FLIPY;
-
-      } else if( !strcmp(tokens[i],"floor") ) {
+      }
+      else if( !strcmp(tokens[i], "floor") )
+      {
         targ->flags |= SPRF_FLOOR;
-
-      } else {
-        echo("tokens %d: %s",i,tokens[i]);
+      }
+      else
+      {
+        echo("tokens %d: %s", i, tokens[i]);
         return fail("Unknown property name");
-
       }
     }
 
     // finish the sprite if we were creating one this iteration
-    if( spr ) {
+    if( spr )
+    {
       memcpy( &prev_spr, spr, sizeof *spr );
 
       if(      spr->flags & SPRF_LFT ) spr->ancx += 0;
@@ -318,7 +350,7 @@ int load_sprites(int texnum)
       // make the SM() macro (for accessing sprites FAST) work by filling in the spr_map
       int i;
       for( i=0; i<sprite_enum_max; i++ )
-        if( 0==strcmp(spr->name,spr_names[i]) )
+        if( 0==strcmp(spr->name, spr_names[i]) )
           spr_map[i] = spr_count-1;
 
       // remember that this was the first sprite in the grid
@@ -353,10 +385,11 @@ void reload_sprites()
 }
 
 // unload either old_sprites (after reloading all sprites) or sprites (when shutting down)
-void unload_sprites(SPRITE_T *sprites,size_t spr_count)
+void unload_sprites(SPRITE_T *sprites, size_t spr_count)
 {
   size_t i;
-  for( i=0; i<spr_count; i++ ) {
+  for( i=0; i<spr_count; i++ )
+  {
     free(sprites[i].name);
     free(sprites[i].more);
   }
@@ -371,14 +404,15 @@ int find_sprite_by_name(const char *name)
   // TODO: index this later!
   size_t i;
   for( i=0; i<spr_count; i++ )
-    if( !strcmp(name,sprites[i].name) )
+    if( !strcmp(name, sprites[i].name) )
       return (int)i;
   return 0;
 }
 
-static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base)
+static SPRITE_T *new_sprite(int texnum, const char *name, const SPRITE_T *base)
 {
-  if( spr_count == spr_alloc ) {
+  if( spr_count == spr_alloc )
+  {
     size_t new_alloc = spr_alloc < 8 ? 8 : spr_alloc*2;
     sprites = realloc( sprites, new_alloc * sizeof *sprites );
     memset( sprites + spr_alloc, 0, (new_alloc - spr_alloc) * sizeof *sprites );
@@ -396,7 +430,7 @@ static SPRITE_T *new_sprite(int texnum,const char *name,const SPRITE_T *base)
 
 static int fail(const char *msg)
 {
-  echo("%s(%d) %s",filename,line_num,msg);
+  echo("%s(%d) %s", filename, line_num, msg);
   fclose(f);
   return -1;
 }
@@ -406,8 +440,10 @@ static int tokenize(char *s)
   int i = 0;
   int afterspace = 1;
 
-  while( *s && *s!='#' && i<SPR_MAX_TOKENS ) {
-    if( isspace(*s) ) {
+  while( *s && *s!='#' && i<SPR_MAX_TOKENS )
+  {
+    if( isspace(*s) )
+    {
       *s = '\0';
       afterspace = 1;
       s++;
@@ -425,7 +461,7 @@ static int tokenize(char *s)
   return i;
 }
 
-static int read_anchor(int i,SPRITE_T *targ)
+static int read_anchor(int i, SPRITE_T *targ)
 {
   int flipme = 0;
   int xcaret = 0;
@@ -435,14 +471,14 @@ static int read_anchor(int i,SPRITE_T *targ)
 
   if( *p!='^' ) targ->ancx = 0;
 
-  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->ancx = atoi(p);                }
-  else if( *p=='^'            ) {                                  xcaret = targ->ancx;                 }
-  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP; flipme = 1; }
-  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT;             }
-  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID; flipme = 1; }
-  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN;             }
-  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT; flipme = 1; }
-  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT;             }
+  if( isdigit(*p) || *p=='-'    ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->ancx = atoi(p);                }
+  else if( *p=='^'              ) {                                  xcaret = targ->ancx;                 }
+  else if( !strncmp(p, "to", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP; flipme = 1; }
+  else if( !strncmp(p, "le", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT;             }
+  else if( !strncmp(p, "mi", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID; flipme = 1; }
+  else if( !strncmp(p, "ce", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN;             }
+  else if( !strncmp(p, "bo", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT; flipme = 1; }
+  else if( !strncmp(p, "ri", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT;             }
 
   while( *p && *p!='-' && *p!='+' )
     p++;
@@ -452,19 +488,19 @@ static int read_anchor(int i,SPRITE_T *targ)
 
   if( *p!='^' ) targ->ancy = 0;
 
-  if( isdigit(*p) || *p=='-'  ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->ancy = atoi(p);                }
-  else if( *p=='^'            ) {                                  ycaret = targ->ancy;                 }
-  else if( !strncmp(p,"to",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP;             }
-  else if( !strncmp(p,"le",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT; flipme = 1; }
-  else if( !strncmp(p,"mi",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID;             }
-  else if( !strncmp(p,"ce",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN; flipme = 1; }
-  else if( !strncmp(p,"bo",2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT;             }
-  else if( !strncmp(p,"ri",2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT; flipme = 1; }
+  if( isdigit(*p) || *p=='-'    ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->ancy = atoi(p);                }
+  else if( *p=='^'              ) {                                  ycaret = targ->ancy;                 }
+  else if( !strncmp(p, "to", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_TOP;             }
+  else if( !strncmp(p, "le", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_LFT; flipme = 1; }
+  else if( !strncmp(p, "mi", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_MID;             }
+  else if( !strncmp(p, "ce", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_CEN; flipme = 1; }
+  else if( !strncmp(p, "bo", 2) ) { targ->flags &= ~SPRF_ALIGNYMASK; targ->flags |= SPRF_BOT;             }
+  else if( !strncmp(p, "ri", 2) ) { targ->flags &= ~SPRF_ALIGNXMASK; targ->flags |= SPRF_RGT; flipme = 1; }
 
   while( *p && *p!='-' && *p!='+' )
     p++;
   if( *p ) targ->ancy = atoi(p) + ycaret;
-  
+
   if( flipme ) SWAP( targ->ancx, targ->ancy, int );
 
   return i;
@@ -476,7 +512,8 @@ static int read_anchor(int i,SPRITE_T *targ)
 // It is OK if there's no number after the ^
 static void read_num(int *num, const char *token)
 {
-  if( *token!='^' ) {
+  if( *token!='^' )
+  {
     *num = atoi(token);
     return;
   }

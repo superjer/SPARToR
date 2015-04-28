@@ -70,7 +70,7 @@ void sprblit( SPRITE_T *spr, int x, int y );
 void sprblit3d( SPRITE_T *spr, int x, int y, int z );
 int load_sprites(int texnum);
 void reload_sprites();
-void unload_sprites(SPRITE_T *sprites,size_t spr_count);
+void unload_sprites(SPRITE_T *sprites, size_t spr_count);
 int find_sprite_by_name(const char *name);
 
 

@@ -23,23 +23,28 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   // if there's no active, find one!
   if( !mo->active )
     for( i=0; i<maxobjs; i++ )
-      if( fr[b].objs[i].type==OBJT_PERSON ) {
+      if( fr[b].objs[i].type==OBJT_PERSON )
+      {
         PERSON_t *pe = fr[b].objs[i].data;
-        if( pe->to >= pe->max_to ) {
+        if( pe->to >= pe->max_to )
+        {
           mo->active = i;
           mo->turnstart = hotfr;
           mo->intervalstart = hotfr;
-          mo->pc = in_party(mo,i);
+          mo->pc = in_party(mo, i);
+
           if( mo->pc )
             mo->menulayer = MAIN;
           else
             mo->menulayer = NOLAYER;
+
           break;
         }
       }
 
-  for(i=0; i<maxobjs; i++)
-    if( fr[b].objs[i].type==OBJT_POPUP ) {
+  for( i=0; i<maxobjs; i++ )
+    if( fr[b].objs[i].type==OBJT_POPUP )
+    {
       POPUP_t *pop = fr[b].objs[i].data;
       pop->visible = (pop->layer == mo->menulayer);
     }
@@ -48,9 +53,9 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   if( !mo->active ) mo->intervalstart = hotfr;
 
   // look for a new connected player
-  for(i=0;i<maxclients;i++)
+  for( i=0; i<maxclients; i++ )
     if( fr[b].cmds[i].flags & CMDF_NEW )
-      init_new_player(mo,i,b);
+      init_new_player(mo, i, b);
 }
 
 void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
@@ -58,7 +63,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   int j;
   int slot0;
 
-  for(j=0;j<maxobjs;j++)
+  for( j=0; j<maxobjs; j++ )
     if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==client_nr )
       echo( "%d: Client %i already has a ghost at obj#%d!", hotfr, client_nr, j );
 
@@ -80,15 +85,15 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   mo->party[0] = azslot;
   mo->party[1] = gyslot;
 
-  memset(gh,0,sizeof *gh);
+  memset(gh, 0, sizeof *gh);
   gh->client      = client_nr;
   gh->avatar      = gyslot;
-  gh->pos         = (V){340,0,340};
+  gh->pos         = (V){340, 0, 340};
 
-  memset(az,0,sizeof *az);
-  az->pos         = (V){150,0,150};
-  az->vel         = (V){0,0,0};
-  az->hull[0]     = (V){-5,-34,-5};
+  memset(az, 0, sizeof *az);
+  az->pos         = (V){150, 0, 150};
+  az->vel         = (V){0, 0, 0};
+  az->hull[0]     = (V){-5, -34, -5};
   az->hull[1]     = (V){ 5,  0, 5};
   az->tilex       = 11;
   az->tilez       = 11;
@@ -114,10 +119,10 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   az->max_to      = 100;
   az->max_xp      = 100;
 
-  memset(gy,0,sizeof *gy);
-  gy->pos         = (V){150,0,150};
-  gy->vel         = (V){0,0,0};
-  gy->hull[0]     = (V){-5,-34,-5};
+  memset(gy, 0, sizeof *gy);
+  gy->pos         = (V){150, 0, 150};
+  gy->vel         = (V){0, 0, 0};
+  gy->hull[0]     = (V){-5, -34, -5};
   gy->hull[1]     = (V){ 5,  0, 5};
   gy->tilex       = 13;
   gy->tilez       = 15;
@@ -143,9 +148,9 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   gy->max_to      = 100;
   gy->max_xp      = 100;
 
-  memset(en,0,sizeof *en);
-  en->pos         = (V){150,0,150};
-  en->hull[0]     = (V){-5,-34,-5};
+  memset(en, 0, sizeof *en);
+  en->pos         = (V){150, 0, 150};
+  en->hull[0]     = (V){-5, -34, -5};
   en->hull[1]     = (V){ 5,  0, 5};
   en->tilex       = 15;
   en->tilez       = 15;
@@ -171,12 +176,12 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->max_to      = 100;
   en->max_xp      = 10;
 
-  #define MKMENU(text_,ypos,layer_)                \
+  #define MKMENU(text_, ypos, layer_)              \
     do {                                           \
       MKOBJ( button, POPUP, 0, 0 );                \
-      button->pos     = (V){NATIVEW-62,ypos,0};    \
-      button->hull[0] = (V){0,0,0};                \
-      button->hull[1] = (V){50,18,0};              \
+      button->pos     = (V){NATIVEW-62, ypos, 0};  \
+      button->hull[0] = (V){0, 0, 0};              \
+      button->hull[1] = (V){50, 18, 0};            \
       button->visible = 0;                         \
       button->enabled = 1;                         \
       button->active  = 0;                         \
@@ -184,17 +189,17 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
       button->click   = NULL;                      \
       button->text    = text_;                     \
     } while(0)
-  MKMENU("MOVE"   , 10,MAIN);
-  MKMENU("ATTACK" , 30,MAIN);
-  MKMENU("SPECIAL", 50,MAIN);
-  MKMENU("MAGIC"  , 70,MAIN);
-  MKMENU("ITEM"   , 90,MAIN);
-  MKMENU("ORDERS" ,110,MAIN);
-  MKMENU("STATUS" ,130,MAIN);
+  MKMENU("MOVE"   ,  10, MAIN);
+  MKMENU("ATTACK" ,  30, MAIN);
+  MKMENU("SPECIAL",  50, MAIN);
+  MKMENU("MAGIC"  ,  70, MAIN);
+  MKMENU("ITEM"   ,  90, MAIN);
+  MKMENU("ORDERS" , 110, MAIN);
+  MKMENU("STATUS" , 130, MAIN);
 
-  MKMENU("WALK"  , 10,MOVE);
-  MKMENU("RUN"   , 30,MOVE);
-  MKMENU("SPRINT", 50,MOVE);
+  MKMENU("WALK"   ,  10, MOVE);
+  MKMENU("RUN"    ,  30, MOVE);
+  MKMENU("SPRINT" ,  50, MOVE);
   #undef MKMENU
 }
 

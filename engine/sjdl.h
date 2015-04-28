@@ -29,4 +29,4 @@ void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8  R, Uint8  G, Uint8  B
 void SJDL_GetPixel(SDL_Surface *surf, int x, int y, Uint8 *R, Uint8 *G, Uint8 *B);
 GLenum SJDL_GLFormatOf(SDL_Surface *surf);
 
-#endif 
+#endif

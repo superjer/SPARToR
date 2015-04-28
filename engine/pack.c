@@ -37,7 +37,7 @@ Uint8 *packframe(Uint32 packfr, size_t *n)
   for( i=0; i<maxobjs; i++ )
   {
     while( *n+4+sizeof(size_t)+pfr->objs[i].size >= s-1 )
-      data = realloc(data,(s*=2));
+      data = realloc(data, (s*=2));
 
     pack(pfr->objs[i].type, 2);
 
@@ -104,7 +104,7 @@ int unpackframe(Uint32 packfr, Uint8 *data, size_t len)
   {
     pfr->objs[i].type = unpack(2);
 
-    if(pfr->objs[i].type)
+    if( pfr->objs[i].type )
     {
       pfr->objs[i].flags   = unpack(2);
       pfr->objs[i].context = unpack(4);
@@ -241,5 +241,5 @@ void inspectbytes( Uint8 *data, int n )
 {
   int i = 0;
   for( ; i<n; i++ )
-    echo("Byte %d: %d",i,data[i]);
+    echo("Byte %d: %d", i, data[i]);
 }

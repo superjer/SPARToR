@@ -98,13 +98,13 @@ struct {
 #define DIMETRIC     2
 
 
-typedef struct{
-  float     x,y,z;
+typedef struct {
+  float     x, y, z;
 } V;
 
 
 // frame buffer structures //
-typedef struct{
+typedef struct {
   char      cmd;
   char      mousehi;
   char      mousex;
@@ -114,7 +114,7 @@ typedef struct{
   Uint8     data[MAXCMDDATA];
 } FCMD_t;
 
-typedef struct{
+typedef struct {
   short     type;
   short     flags;
   int       context;
@@ -122,7 +122,7 @@ typedef struct{
   void     *data;
 } OBJ_t;
 
-typedef struct{
+typedef struct {
   int       dirty;
   Uint32    realfr;
   FCMD_t   *cmds;
@@ -131,7 +131,7 @@ typedef struct{
 
 
 // map structures //
-typedef struct{
+typedef struct {
   short     flags;
   int       spr;
   Uint8     data[CBDATASIZE];
@@ -183,11 +183,11 @@ extern int    maxclients;
 
 extern FRAME_t *fr;
 extern Uint32 frameoffset; //offset to sync client with server
-extern Uint32 metafr; //the frame corresponding to "now"
-extern Uint32 surefr; //newest frame we are sure of (i.e. it has all its inputs and has been advanced)
-extern Uint32 drawnfr;//most recently rendered frame
-extern Uint32 hotfr;  //newest fully advanced frame (it's hot and fresh)
-extern Uint32 cmdfr;  //newest frame with cmds inserted (possibly in future)
+extern Uint32 metafr;  //the frame corresponding to "now"
+extern Uint32 surefr;  //newest frame we are sure of (i.e. it has all its inputs and has been advanced)
+extern Uint32 drawnfr; //most recently rendered frame
+extern Uint32 hotfr;   //newest fully advanced frame (it's hot and fresh)
+extern Uint32 cmdfr;   //newest frame with cmds inserted (possibly in future)
 
 extern Uint32 ticks;
 extern int    me;
@@ -218,7 +218,7 @@ void setsurefr( Uint32 to);
 void setdrawnfr(Uint32 to);
 void sethotfr(  Uint32 to);
 void setcmdfr(  Uint32 to);
-void jogframebuffer(Uint32 newmetafr,Uint32 newsurefr);
+void jogframebuffer(Uint32 newmetafr, Uint32 newsurefr);
 
 
 #endif

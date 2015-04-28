@@ -32,8 +32,9 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   if( bu->ttl ) bu->ttl--;
 
-  for(i=0;i<maxobjs;i++)  //find players to hit
-    if(fr[b].objs[i].type==OBJT_PLAYER) {
+  for( i=0; i<maxobjs; i++ )  //find players to hit
+    if( fr[b].objs[i].type==OBJT_PLAYER )
+    {
       PLAYER_t *pl = fr[b].objs[i].data;
       if( i==bu->owner                       || //player owns bullet
           fabsf(bu->pos.x - pl->pos.x)>10.0f || //not touching
@@ -45,7 +46,8 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       bu->ttl = 0; //delete bullet
     }
 
-  if( (bu->ttl==0 || bu->pos.y>co->y*co->bsy) && !bu->dead ) {
+  if( (bu->ttl==0 || bu->pos.y>co->y*co->bsy) && !bu->dead )
+  {
     bu->dead = 1;
     bu->ttl = 90;
     bu->hull[0] = (V){-1,-1,-1};
@@ -53,12 +55,14 @@ void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     ob->flags |= OBJF_CLIP|OBJF_HULL|OBJF_BNDB;
   }
 
-  if(bu->pos.x<=-10.0f || bu->pos.x>=co->x*co->bsx+10.0f || bu->ttl==0) {
+  if( bu->pos.x<=-10.0f || bu->pos.x>=co->x*co->bsx+10.0f || bu->ttl==0 )
+  {
     bu->dead = 1;
     ob->flags |= OBJF_DEL;
   }
-  
-  if( bu->dead ) { // gravity, friction only if dead
+
+  if( bu->dead ) // gravity, friction only if dead
+  {
     if( !oldbu->dead && fr[b].objs[bu->owner].type==OBJT_PLAYER )
       ((PLAYER_t *)fr[b].objs[bu->owner].data)->projectiles--;
 

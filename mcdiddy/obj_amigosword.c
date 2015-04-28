@@ -25,12 +25,14 @@ void obj_amigosword_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   AMIGOSWORD_t *sw = ob->data;
   sw->spincounter++;
-  if( sw->spincounter > 45 ) {
+  if( sw->spincounter > 45 )
+  {
     AMIGO_t *am = fr[b].objs[sw->owner].data;
     sw->vel.x = am->pos.x+40.0f - sw->pos.x;
     sw->vel.y = am->pos.y       - sw->pos.y;
     float normalize = sqrt(sw->vel.x * sw->vel.x + sw->vel.y * sw->vel.y);
-    if( normalize > 4.0f ) {
+    if( normalize > 4.0f )
+    {
       normalize = 4.0f / normalize;
       sw->vel.x *= normalize;
       sw->vel.y *= normalize;

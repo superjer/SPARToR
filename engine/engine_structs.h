@@ -9,7 +9,7 @@ STRUCT()
 
 #define TYPE CONTEXT
 STRUCT()
-  EXPOSE(int,refcount,) // for memory management
+  EXPOSE(int, refcount, ) // for memory management
   HIDE(
     int  bsx;           // block size
     int  bsy;
@@ -27,8 +27,8 @@ STRUCT()
 
 #define TYPE POPUP
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,hull,[2])
+  EXPOSE(V, pos, )
+  EXPOSE(V, hull, [2])
   HIDE(
     int visible;
     int enabled;

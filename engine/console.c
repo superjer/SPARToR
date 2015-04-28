@@ -94,7 +94,8 @@ void SJC_Rub(int right)
 {
   if( SJC.buf[0] == NULL ) return;
 
-  if( right ) {
+  if( right )
+  {
     if( SJC.buf[0] && SJC.pos < strlen(SJC.buf[0]) )
       SJC.pos++;
     else
@@ -118,14 +119,18 @@ void SJC_Clear()
 
 void recall()
 {
-  if( SJC.remempos == SJC.rememend ) { // current position
+  if( SJC.remempos == SJC.rememend ) // current position
+  {
     SJC.buf[0][0] = '\0';
-  } else {
+  }
+  else
+  {
     free(SJC.buf[0]);
     SJC.size[0] = strlen(SJC.rememory[SJC.remempos])+1;
     SJC.buf[0] = malloc(SJC.size[0]);
     strcpy(SJC.buf[0], SJC.rememory[SJC.remempos]);
   }
+
   SJC_End();
 }
 
@@ -192,7 +197,7 @@ void SJC_Paste()
 
 int SJC_Submit()
 {
-  if(!SJC.buf[0] || !strlen(SJC.buf[0]))
+  if( !SJC.buf[0] || !strlen(SJC.buf[0]) )
     return 0;
 
   free(SJC.rememory[SJC.rememend]);

@@ -17,11 +17,12 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   int i, j;
   int slot0;
 
-  for(i=0;i<maxclients;i++) {
+  for( i=0; i<maxclients; i++ )
+  {
     if( !(fr[b].cmds[i].flags & CMDF_NEW) )
       continue;
 
-    for(j=0;j<maxobjs;j++)
+    for( j=0; j<maxobjs; j++ )
       if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==i )
         echo( "%d: Client %i already has a ghost at obj#%d!", hotfr, i, j );
 
@@ -67,7 +68,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   } //end for i<maxclients
 
   //create a slug every now and then
-  if(hotfr%77==0) {
+  if( hotfr%77==0 )
+  {
     MKOBJ( sl, SLUG, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ );
     sl->pos     = (V){(hotfr%2)*368+8,0,0};
     sl->vel     = (V){(hotfr%2)?-0.5f:0.5f,0,0};
@@ -78,7 +80,8 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   }
 
   //create AMIGO!
-  if(hotfr==200) {
+  if( hotfr==200 )
+  {
     MKOBJ( am, AMIGO, 1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDZ );
     am->pos       = (V){16*148,16*5,0};
     am->vel       = (V){0,0,0};
@@ -89,4 +92,3 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     am->statetime = 0;
   }
 }
-

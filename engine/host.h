@@ -9,7 +9,7 @@
 #include "SDL.h"
 #include "SDL_net.h"
 
-typedef struct{
+typedef struct {
   IPaddress addr;
   int connected;
   int lastconga;

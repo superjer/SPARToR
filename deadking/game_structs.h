@@ -17,10 +17,10 @@ STRUCT()
 
 #define TYPE GHOST
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(int, model, )
   HIDE(
     int goingl;
     int goingr;
@@ -37,11 +37,11 @@ STRUCT()
 
 #define TYPE PERSON
 STRUCT()
-  EXPOSE(V,pos,)
-  EXPOSE(V,vel,)
-  EXPOSE(V,hull,[2])
-  EXPOSE(V,pvel,)
-  EXPOSE(int,model,)
+  EXPOSE(V, pos, )
+  EXPOSE(V, vel, )
+  EXPOSE(V, hull, [2])
+  EXPOSE(V, pvel, )
+  EXPOSE(int, model, )
   HIDE(
     int tilex;
     int tilez;

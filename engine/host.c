@@ -66,7 +66,7 @@ void host_send_state(int clientid)
   //dirty all unsure frames
   echo("%u: Dirtying all frames from %u to %u", hotfr, surefr, cmdfr);
 
-  for(u=surefr+1;u<cmdfr;u++)
+  for( u=surefr+1; u<cmdfr; u++ )
     fr[u%maxframes].dirty = 1;
 
   cleanup:

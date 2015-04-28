@@ -33,7 +33,7 @@ extern SJC_t SJC;
 void SJC_Init();
 void SJC_Put(char c);
 void SJC_Replace(const char *c);
-void SJC_Write(const char *s,...);
+void SJC_Write(const char *s, ...);
 void SJC_Log(const char *newfile);
 void SJC_Rub(int right);
 void SJC_Clear();

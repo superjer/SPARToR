@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2015  Jer Wilson
  **
@@ -21,11 +21,11 @@
 #include "sjdl.h"
 
 //create a new surface by copying and scaling another
-SDL_Surface *SJDL_CopyScaled(SDL_Surface *src,Uint32 flags,int scale)
+SDL_Surface *SJDL_CopyScaled(SDL_Surface *src, Uint32 flags, int scale)
 {
-  int u,v,i,j;
-  Uint8 r,g,b;
-  SDL_Surface *dst = SDL_CreateRGBSurface(flags,src->w*scale,src->h*scale,
+  int u, v, i, j;
+  Uint8 r, g, b;
+  SDL_Surface *dst = SDL_CreateRGBSurface(flags, src->w*scale, src->h*scale,
                                           src->format->BitsPerPixel,
                                           src->format->Rmask,
                                           src->format->Gmask,
@@ -33,11 +33,12 @@ SDL_Surface *SJDL_CopyScaled(SDL_Surface *src,Uint32 flags,int scale)
                                           src->format->Amask);
   SDL_LockSurface(src);
   SDL_LockSurface(dst);
-  for(u=0; u<src->w; u++)
-    for(v=0; v<src->h; v++) {
+  for( u=0; u<src->w; u++ )
+    for( v=0; v<src->h; v++ )
+    {
       SJDL_GetPixel(src, u, v, &r, &g, &b);
-      for(i=0; i<scale; i++)
-        for(j=0; j<scale; j++)
+      for( i=0; i<scale; i++ )
+        for( j=0; j<scale; j++ )
           SJDL_SetPixel(dst, u*scale+i, v*scale+j,  r,  g,  b);
     }
   SDL_UnlockSurface(dst);
@@ -54,7 +55,7 @@ void SJGL_SetTex(GLuint tex)
   prev = tex;
   if( prev==(GLuint)-1 ) return;
 
-  glBindTexture(GL_TEXTURE_2D,0); //FIXME: hack 4 win, suddenly also useful for handling an invalid tex
+  glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win, suddenly also useful for handling an invalid tex
 
   if( tex >= tex_count ) { /*echo("Attempted to set invalid texture (%d/%d)",tex,tex_count);*/ return; }
 
@@ -65,7 +66,7 @@ void SJGL_SetTex(GLuint tex)
 // wrapper for SJFL_Blit when there's only one z
 int SJGL_Blit(REC *s, int x, int y, int z)
 {
-  return SJGL_BlitSkew(s,x,y,z,z);
+  return SJGL_BlitSkew(s, x, y, z, z);
 }
 
 
@@ -177,8 +178,9 @@ int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
   //   |     |
   //   k-----n
 
-  if( spr->bump ) {
-    glPolygonOffset(0.0,spr->bump);
+  if( spr->bump )
+  {
+    glPolygonOffset(0.0, spr->bump);
     glEnable(GL_POLYGON_OFFSET_FILL);
   }
 
@@ -205,98 +207,105 @@ int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
 void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)
 {
   Uint32 color = SDL_MapRGB(surf->format, R, G, B);
-  switch(surf->format->BytesPerPixel) {
-  case 1: // 8-bpp
-    {
-      Uint8 *bufp;
-      bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
-      *bufp = color;
-    }
-    break;
-  case 2: // 15-bpp or 16-bpp
-    {
-      Uint16 *bufp;
-      bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
-      *bufp = color;
-    }
-    break;
-  case 3: // 24-bpp mode, usually not used
-    {
-      Uint8 *bufp;
-      bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
-      if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
+  switch(surf->format->BytesPerPixel)
+  {
+    case 1: // 8-bpp
       {
-        bufp[0] = color;
-        bufp[1] = color >> 8;
-        bufp[2] = color >> 16;
-      } else {
-        bufp[2] = color;
-        bufp[1] = color >> 8;
-        bufp[0] = color >> 16;
+        Uint8 *bufp;
+        bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
+        *bufp = color;
       }
-    }
-    break;
-  case 4: // 32-bpp
-    {
-      Uint32 *bufp;
-      bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
-      *bufp = color;
-    }
-    break;
+      break;
+    case 2: // 15-bpp or 16-bpp
+      {
+        Uint16 *bufp;
+        bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
+        *bufp = color;
+      }
+      break;
+    case 3: // 24-bpp mode, usually not used
+      {
+        Uint8 *bufp;
+        bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
+        if( SDL_BYTEORDER == SDL_LIL_ENDIAN )
+        {
+          bufp[0] = color;
+          bufp[1] = color >> 8;
+          bufp[2] = color >> 16;
+        }
+        else
+        {
+          bufp[2] = color;
+          bufp[1] = color >> 8;
+          bufp[0] = color >> 16;
+        }
+      }
+      break;
+    case 4: // 32-bpp
+      {
+        Uint32 *bufp;
+        bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
+        *bufp = color;
+      }
+      break;
   }
-} 
+}
 
 
 //gets a pixel on an sdl surface
 void SJDL_GetPixel(SDL_Surface *surf, int x, int y, Uint8 *R, Uint8 *G, Uint8 *B)
 {
   Uint32 color;
-  switch(surf->format->BytesPerPixel) {
-  case 1: // 8-bpp
-    {
-      Uint8 *bufp;
-      bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
-      color = *bufp;
-    }
-    break;
-  case 2: // 15-bpp or 16-bpp
-    {
-      Uint16 *bufp;
-      bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
-      color = *bufp;
-    }
-    break;
-  case 3: // 24-bpp mode, usually not used
-    {
-      Uint8 *bufp;
-      bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
-      if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
-        color  = bufp[0] | (bufp[1] << 8) | (bufp[2] << 16);
-      else
-        color  = bufp[2] | (bufp[1] << 8) | (bufp[0] << 16);
-    }
-    break;
-  case 4: // 32-bpp
-    {
-      Uint32 *bufp;
-      bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
-      color = *bufp;
-    }
-    break;
+  switch( surf->format->BytesPerPixel )
+  {
+    case 1: // 8-bpp
+      {
+        Uint8 *bufp;
+        bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
+        color = *bufp;
+      }
+      break;
+    case 2: // 15-bpp or 16-bpp
+      {
+        Uint16 *bufp;
+        bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
+        color = *bufp;
+      }
+      break;
+    case 3: // 24-bpp mode, usually not used
+      {
+        Uint8 *bufp;
+        bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
+        if( SDL_BYTEORDER == SDL_LIL_ENDIAN )
+          color  = bufp[0] | (bufp[1] << 8) | (bufp[2] << 16);
+        else
+          color  = bufp[2] | (bufp[1] << 8) | (bufp[0] << 16);
+      }
+      break;
+    case 4: // 32-bpp
+      {
+        Uint32 *bufp;
+        bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
+        color = *bufp;
+      }
+      break;
   }
   SDL_GetRGB(color, surf->format, R, G, B);
-} 
+}
 
 
 // returns the equivalent opengl format of an sdl surface
 GLenum SJDL_GLFormatOf(SDL_Surface *surf)
 {
-  if( surf->format->Amask > 0 ) {
+  if( surf->format->Amask > 0 )
+  {
     if( surf->format->Rmask > surf->format->Bmask )
       return (SDL_BYTEORDER==SDL_LIL_ENDIAN ? GL_BGRA : GL_RGBA);
     else
       return (SDL_BYTEORDER==SDL_LIL_ENDIAN ? GL_RGBA : GL_BGRA);
-  } else {
+  }
+  else
+  {
     if( surf->format->Rmask > surf->format->Bmask )
       return (SDL_BYTEORDER==SDL_LIL_ENDIAN ? GL_BGR : GL_RGB);
     else

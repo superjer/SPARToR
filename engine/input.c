@@ -1,5 +1,5 @@
 /**
- **  SPARToR 
+ **  SPARToR
  **  Network Game Engine
  **  Copyright (C) 2010-2015  Jer Wilson
  **
@@ -56,11 +56,13 @@ void inputinit()
 
   /*
   int i, numjoysticks;
-  if( (numjoysticks=SDL_NumJoysticks())>0 ) {
+  if( (numjoysticks=SDL_NumJoysticks())>0 )
+  {
     joysticks = realloc(joysticks, sizeof(*joysticks)*numjoysticks);
     SDL_JoystickEventState(SDL_ENABLE);
     echo("%d controller/joystick%s detected:", numjoysticks, (numjoysticks>1?"s":""));
-    for( i=0; i<numjoysticks; i++ ) {
+    for( i=0; i<numjoysticks; i++ )
+    {
       joysticks[i] = SDL_JoystickOpen(i);
       echo("  #%i: %.20s", i, SDL_JoystickName(i));
     }
@@ -146,15 +148,15 @@ void kbinput(int press, SDL_KeyboardEvent e)
     else
       command("window");
   }
-  else if(press && sym==SDLK_BACKQUOTE && !alt)
+  else if( press && sym==SDLK_BACKQUOTE && !alt )
   {
     toggleconsole();
   }
-  else if(press && kwik)
+  else if( press && kwik )
   {
     kwikbind( INP_KEYB, safesym );
   }
-  else if(console_open)
+  else if( console_open )
   {
     if( !press ) ; //nothing on key up
     else if( sym==SDLK_ESCAPE                         ) toggleconsole();

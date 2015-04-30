@@ -34,6 +34,7 @@ extern int v_targz;
 
 extern int v_eyedist;
 extern float v_fovy;
+extern int v_perspective;
 
 extern int v_w;
 extern int v_h;

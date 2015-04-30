@@ -54,6 +54,8 @@ int v_targz      = 0;
 
 int v_eyedist    = 1;
 float v_fovy     = 20.0f;
+int v_perspective = 1; // Perspective rendering on by default
+
 
 int v_w;              // width, height of video output
 int v_h;
@@ -170,24 +172,38 @@ void render()
   float diagdist = 45.0f / tanf(v_fovy*0.00872664626f);  // .5 / 1 rad in deg
   v_eyedist = sqrtf( 3*diagdist*diagdist );
 
-  //glOrtho(0, NATIVEW, NATIVEH, 0, NEARVAL, FARVAL);
-  gluPerspective(v_fovy, (GLdouble)NATIVEW/NATIVEH, v_eyedist, v_eyedist*2+4000);
+  if( mycontext )
+  {
+    CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
+    if( co->projection == ORTHOGRAPHIC )
+      v_perspective = 0;
+  }
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  if( v_perspective )
+  {
+    gluPerspective(v_fovy, (GLdouble)NATIVEW/NATIVEH, v_eyedist, v_eyedist*2+4000);
 
-  //old dimetric mode:
-  //int camx = NATIVEW/2-(int)v_camx;
-  //int camy = NATIVEH/2-(int)v_camy;
-  //glTranslatef(camx, camy, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-  v_eyex = v_targx + v_eyedist;
-  v_eyey = v_targy - v_eyedist;
-  v_eyez = v_targz + v_eyedist;
+    v_eyex = v_targx + v_eyedist;
+    v_eyey = v_targy - v_eyedist;
+    v_eyez = v_targz + v_eyedist;
 
-  gluLookAt(v_eyex , v_eyey , v_eyez ,
-            v_targx, v_targy, v_targz,
-            0      , -1     , 0      );
+    gluLookAt(v_eyex , v_eyey , v_eyez ,
+              v_targx, v_targy, v_targz,
+              0      , -1     , 0      );
+  }
+  else
+  {
+    glOrtho(0, NATIVEW, NATIVEH, 0, NEARVAL, FARVAL);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    int camx = NATIVEW/2-(int)v_camx;
+    int camy = NATIVEH/2-(int)v_camy;
+    glTranslatef(camx, camy, 0);
+  }
 
   // store values for unprojecting, etc.
   glGetDoublev(GL_MODELVIEW_MATRIX, v_modeltrix);

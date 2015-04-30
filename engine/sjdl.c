@@ -62,13 +62,36 @@ void SJGL_SetTex(GLuint tex)
   glBindTexture( GL_TEXTURE_2D, textures[tex].glname );
 }
 
+// wrapper for SJFL_Blit when there's only one z
+int SJGL_BlitSpr(SPRITE_T *spr, int x, int y, int z)
+{
+  return SJGL_BlitSprSkew(spr, x, y, z, z);
+}
+
+//uses GL to do draw a sprite
+int SJGL_BlitSprSkew(SPRITE_T *spr, int x, int y, int zlo, int zhi)
+{
+  REC *s = &spr->rec;
+  int x2 = ( s->w > 0 ? x+s->w : x-s->w );
+  int y2 = ( s->h > 0 ? y+s->h : y-s->h );
+
+  glBegin(GL_QUADS);
+
+  glTexCoord2i(s->x     , s->y     ); glVertex3i(x , y , zhi);
+  glTexCoord2i(s->x+s->w, s->y     ); glVertex3i(x2, y , zhi);
+  glTexCoord2i(s->x+s->w, s->y+s->h); glVertex3i(x2, y2, zlo);
+  glTexCoord2i(s->x     , s->y+s->h); glVertex3i(x , y2, zlo);
+
+  glEnd();
+
+  return 0;
+}
 
 // wrapper for SJFL_Blit when there's only one z
 int SJGL_Blit(REC *s, int x, int y, int z)
 {
   return SJGL_BlitSkew(s, x, y, z, z);
 }
-
 
 //uses GL to do draw a sprite
 int SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi)

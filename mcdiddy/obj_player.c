@@ -95,12 +95,9 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     return;
   }
 
-  gh->pos.x = newme->pos.x; //put ghost in the right spot
-  gh->pos.y = newme->pos.y;
-  gh->pos.z = newme->pos.z;
-  gh->vel.x = 0;
-  gh->vel.y = 0;
-  gh->vel.z = 0;
+  gh->vel.x = newme->pos.x - gh->pos.x; // get ghost heading in right direction
+  gh->vel.y = newme->pos.y - gh->pos.y;
+  gh->vel.z = newme->pos.z - gh->pos.z;
 
   if( gh->client==me ) //local client match
   {

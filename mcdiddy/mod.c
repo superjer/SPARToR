@@ -787,14 +787,21 @@ static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int
   if( !spr ) return;
   SJGL_SetTex( spr->texnum );
 
-  x = x * co->bsx + co->bsx/2;
-  y = y * co->bsy;
-  z = z * co->bsz + co->bsz/2;
-
-  if( spr->flags&SPRF_FLOOR )
-    SJGL_Box3D( spr, x, y, z );
+  if( !v_perspective )
+  {
+    SJGL_BlitSpr( spr, x * co->bsx, y * co->bsy, z * co->bsz );
+  }
   else
-    SJGL_Wall3D( spr, x, y, z );
+  {
+    x = x * co->bsx + co->bsx/2;
+    y = y * co->bsy;
+    z = z * co->bsz + co->bsz/2;
+
+    if( spr->flags & SPRF_FLOOR )
+      SJGL_Box3D( spr, x, y, z );
+    else
+      SJGL_Wall3D( spr, x, y, z );
+  }
 }
 
 static int sprite_at(int texnum, int x, int y)

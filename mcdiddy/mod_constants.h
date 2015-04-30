@@ -8,8 +8,8 @@
 
 #define NATIVEW    384
 #define NATIVEH    240
-#define NEARVAL    (-99999)
-#define FARVAL     ( 99999)
+#define NEARVAL    (-999)
+#define FARVAL     ( 999)
 #define GAMENAME   "mcdiddy"
 
 #define CBDATASIZE 4     //context block (CB) payload size

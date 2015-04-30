@@ -21,6 +21,8 @@
 
 SDL_Surface *SJDL_CopyScaled(SDL_Surface *src, Uint32 flags, int scale);
 void SJGL_SetTex(GLuint tex);
+int  SJGL_BlitSpr(SPRITE_T *spr, int x, int y, int z);
+int  SJGL_BlitSprSkew(SPRITE_T *spr, int x, int y, int zlo, int zhi);
 int  SJGL_Blit(REC *s, int x, int y, int z);
 int  SJGL_BlitSkew(REC *s, int x, int y, int zlo, int zhi);
 int  SJGL_Box3D( SPRITE_T *spr, int x, int y, int z);

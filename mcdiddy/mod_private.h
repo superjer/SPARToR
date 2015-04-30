@@ -12,6 +12,7 @@
 #include "main.h"
 
 
+// FIXME: does not respect no-free-slots-situation and CRASHES!
 #define MKOBJ( ptr, t, con, f ) t ## _t *ptr;                                       \
                                 slot0 = findfreeslot(b);                            \
                                 fr[b].objs[slot0].type = OBJT_ ## t;                \

@@ -10,6 +10,7 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#include "main.h"
 #include "obj_.h"
 
 #define SPRITECOUNT 10

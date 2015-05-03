@@ -1,4 +1,3 @@
-
 #ifndef SPARTOR_MAIN_H_
 #define SPARTOR_MAIN_H_
 
@@ -46,12 +45,25 @@
 
 #define assert(expr) { if(!(expr)) echo( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
 
-
 #define TOKEN_PASTE_(a,b) a ## b
 #define TOKEN_PASTE(a,b) TOKEN_PASTE_(a,b)
 #define STRINGIFY_(a) #a
 #define STRINGIFY(a) STRINGIFY_(a)
 
+// list of object types
+enum {
+  #define EXPOSE(T,N,A)
+  #define HIDE(X)
+  #define STRUCT() TOKEN_PASTE(OBJT_,TYPE),
+  #define ENDSTRUCT(TYPE)
+  #include "engine_structs.h"
+  #include "game_structs.h"
+  #undef EXPOSE
+  #undef HIDE
+  #undef STRUCT
+  #undef ENDSTRUCT
+  OBJT_MAX
+};
 
 struct {
   const char *name;
@@ -65,7 +77,6 @@ struct {
   FLEXER_EXTRAS
 #endif
 } flexer[OBJT_MAX];
-
 
 //OBJect Flags
 #define OBJF_POS  (1<< 0) //has position
@@ -97,11 +108,9 @@ struct {
 #define ORTHOGRAPHIC 1
 #define DIMETRIC     2
 
-
 typedef struct {
   float     x, y, z;
 } V;
-
 
 // frame buffer structures //
 typedef struct {
@@ -129,14 +138,12 @@ typedef struct {
   OBJ_t    *objs;
 } FRAME_t;
 
-
 // map structures //
 typedef struct {
   short     flags;
   int       spr;
   Uint8     data[CBDATASIZE];
 } CB;
-
 
 // texture structures //
 typedef struct {
@@ -150,7 +157,6 @@ typedef struct {
   int    num;
 } SYS_TEX_T;
 
-
 // input structures //
 typedef struct {
   char   name[16];
@@ -158,7 +164,7 @@ typedef struct {
   int    releasecmd;
 } INPUTNAME_t;
 
-
+// object struct definitions
 #define EXPOSE(T,N,A) T N A;
 #define HIDE(X) X
 #define STRUCT() typedef struct {
@@ -172,8 +178,6 @@ typedef struct {
 
 //get a pointer to a member in 'flexible' struct -- whee polymorphism sort of
 #define flex(o,memb) ((void *)((char *)((o)->data) + flexer[(o)->type].memb))
-
-
 
 //externs
 extern Uint32 ticksaframe;
@@ -203,14 +207,12 @@ extern Uint32 adv_frames;
 
 extern int    eng_realtime;
 
-
 //prototypes
 void toggleconsole();
 void advance();
 int  findfreeslot(int frame1);
 void clearframebuffer();
 void cleanup();
-
 
 //frame setters
 void setmetafr( Uint32 to);
@@ -220,6 +222,4 @@ void sethotfr(  Uint32 to);
 void setcmdfr(  Uint32 to);
 void jogframebuffer(Uint32 newmetafr, Uint32 newsurefr);
 
-
 #endif
-

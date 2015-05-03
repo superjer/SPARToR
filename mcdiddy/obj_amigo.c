@@ -11,6 +11,7 @@
  **/
 
 #include "obj_.h"
+#include "helpers.h"
 
 //FIXME REMOVE! force amigo to flykick
 int flykick = 0;
@@ -81,7 +82,6 @@ void obj_amigo_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 
 void obj_amigo_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
-  int        slot0;
   AMIGO_t   *am            = ob->data;
   float      amigo_gravity = 0.6f;
 
@@ -145,15 +145,15 @@ if( am->pos.x > cowidth+20.0f ) am->pos.x -= cowidth+39.0f;
 
     case AMIGO_FLYKICK:
     {
-      amigo_gravity = 0.0f;
-      am->vel.y = 0.0f;
-      am->hatcounter += fabsf(am->vel.x)*10;
-      am->vel.x += am->vel.x < -2.0f ? 0.1f : 0.05;
-      if( am->vel.x > 0.0f )
-        am->vel.x = 0.0f;
       if( am->statetime==1 )
       {
-        MKOBJ( sw, AMIGOSWORD, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
+        AMIGOSWORD_t *sw = mkobj(AMIGOSWORD, &am->sword, ob->context, b, OBJF_POS|OBJF_VEL|OBJF_VIS );
+        if( !sw )
+        {
+          echo("FLYKICK failed, no slot for sword");
+          am->state = AMIGO_HELLO;
+          break;
+        }
         sw->pos = am->pos;
         sw->vel = (V){1.5f,-2.5f,0.0f};
         sw->hull[0] = (V){0,0,0};
@@ -161,10 +161,18 @@ if( am->pos.x > cowidth+20.0f ) am->pos.x -= cowidth+39.0f;
         sw->model = 0;
         sw->owner = objid;
         sw->spincounter = 0;
-        am->sword = slot0;
       }
+
+      amigo_gravity = 0.0f;
+      am->vel.y = 0.0f;
+      am->hatcounter += fabsf(am->vel.x)*10;
+      am->vel.x += am->vel.x < -2.0f ? 0.1f : 0.05;
+      if( am->vel.x > 0.0f )
+        am->vel.x = 0.0f;
+
       GETOBJ( sw, AMIGOSWORD, am->sword );
       am->sword_dist = (V){ fabsf(sw->pos.x - am->pos.x), fabsf(sw->pos.y - am->pos.y), 0 };
+
       if( am->statetime>90 )
       {
         if( am->sword_dist.x < 41.0f && am->sword_dist.y < 11.0f )

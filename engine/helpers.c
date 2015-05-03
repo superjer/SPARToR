@@ -10,16 +10,13 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-
 #include <stdlib.h>
 #include <string.h>
-
+#include "main.h"
 
 #define POINTLIS_CHUNK 80
 
-
 typedef void *thing;
-
 
 // build a unique list of pointers with no storage limit and no storage overhead
 // returns true if adding for the 1st time
@@ -61,4 +58,19 @@ char *tok_( char **restrict buf, const char *restrict sep )
   *buf += seplen;
 
   return p;
+}
+
+void *mkobj_( size_t sz, int type, int *slot, int context, int frame, int flags)
+{
+  // in case slot is NULL
+  int slot_;
+  if( !slot ) slot = &slot_;
+
+  *slot = findfreeslot(frame);
+  if( *slot < 0 ) return NULL;
+  fr[frame].objs[*slot].type = type;
+  fr[frame].objs[*slot].flags = flags;
+  fr[frame].objs[*slot].context = context;
+  fr[frame].objs[*slot].size = sz;
+  return fr[frame].objs[*slot].data = calloc(1, sz);
 }

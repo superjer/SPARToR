@@ -13,11 +13,11 @@
 #include "obj_.h"
 #include "sprite.h"
 #include "audio.h"
+#include "helpers.h"
 
 //FIXME REMOVE! change local player model
 int    setmodel = -1;
 //
-
 
 void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
 {
@@ -61,10 +61,48 @@ void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   }
 }
 
+void create_bullet(Uint32 objid, Uint32 b, OBJ_t *ob)
+{
+  PLAYER_t *pl = ob->data;
+  BULLET_t *bu = mkobj(BULLET, NULL, ob->context, b, OBJF_POS|OBJF_VEL|OBJF_VIS);
+  if( !bu ) return;
+
+  play("mp5_shot");
+
+  if( pl->facingr )
+  {
+    bu->pos = (V){pl->pos.x+19,pl->pos.y-19,pl->pos.z};
+    bu->vel = (V){ 6,0,0};
+  }
+  else
+  {
+    bu->pos = (V){pl->pos.x-19,pl->pos.y-19,pl->pos.z};
+    bu->vel = (V){-6,0,0};
+  }
+
+  if( pl->goingu ) // aiming
+  {
+    bu->vel.y += -8;
+    bu->pos.y += -6;
+  }
+
+  if( pl->goingd )
+  {
+    bu->vel.y +=  8;
+    bu->pos.y += 10;
+  }
+
+  bu->model       = 1;
+  bu->owner       = objid;
+  bu->ttl         = 50;
+  pl->cooldown = 5;
+  pl->gunback  = 2;
+  pl->projectiles++;
+}
+
 void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 {
   int i;
-  int slot0;
   PLAYER_t *oldme = oa->data;
   PLAYER_t *newme = ob->data;
   GHOST_t *gh = fr[b].objs[newme->ghost].data;
@@ -142,7 +180,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->stabbing += (newme->stabbing>0 ? -1 : 1);
   }
 
-  if(        newme->stabbing && newme->goingu )          //expand hull for stabbing
+  if( newme->stabbing && newme->goingu )          //expand hull for stabbing
   {
     newme->hull[0].y = -44;
     newme->hull[1].y =   0;
@@ -222,49 +260,16 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->walkcounter = (newme->walkcounter+1) % 14;
     if( newme->walkcounter==0 )
       play("footstep1");
-    if( newme->walkcounter==7 )
+    else if( newme->walkcounter==7 )
       play("footstep2");
   }
 
   // -- FIRE --
   if( newme->cooldown>0 )
     newme->cooldown--;
-  if( newme->firing && newme->cooldown==0 && newme->projectiles<5 ) // create bullet
-  {
-    MKOBJ( bu, BULLET, ob->context, OBJF_POS|OBJF_VEL|OBJF_VIS );
-    play("mp5_shot");
 
-    if( newme->facingr )
-    {
-      bu->pos = (V){newme->pos.x+19,newme->pos.y-19,newme->pos.z};
-      bu->vel = (V){ 6,0,0};
-    }
-    else
-    {
-      bu->pos = (V){newme->pos.x-19,newme->pos.y-19,newme->pos.z};
-      bu->vel = (V){-6,0,0};
-    }
-
-    if( newme->goingu ) // aiming
-    {
-      bu->vel.y += -8;
-      bu->pos.y += -6;
-    }
-
-    if( newme->goingd )
-    {
-      bu->vel.y +=  8;
-      bu->pos.y += 10;
-    }
-
-    bu->dead        = 0;
-    bu->model       = 1;
-    bu->owner       = objid;
-    bu->ttl         = 50;
-    newme->cooldown = 5;
-    newme->gunback  = 2;
-    newme->projectiles++;
-  }
+  if( newme->firing && newme->cooldown==0 && newme->projectiles<20 )
+    create_bullet(objid, b, ob);
 
   for( i=0; i<objid; i++ )  //find other players to interact with -- who've already MOVED
     if( fr[b].objs[i].type==OBJT_PLAYER )
@@ -302,4 +307,3 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
     newme->vel.y += 0.7f;
   }
 }
-

@@ -11,6 +11,7 @@
  **/
 
 #include "obj_.h"
+#include "helpers.h"
 
 int in_party(MOTHER_t *mo, int objid);
 void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b);
@@ -61,7 +62,6 @@ void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
 {
   int j;
-  int slot0;
 
   for( j=0; j<maxobjs; j++ )
     if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==client_nr )
@@ -70,14 +70,20 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   #define PERS_FLAGS OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ
 
   //FIXME context is hardcoded as 1 for these things
-  MKOBJ( gh, GHOST,  1, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT );
-  int ghostslot = slot0;
-  MKOBJ( az, PERSON, 1, PERS_FLAGS );
-  int azslot = slot0;
-  MKOBJ( gy, PERSON, 1, PERS_FLAGS );
-  int gyslot = slot0;
-  MKOBJ( en, PERSON, 1, PERS_FLAGS );
-  //int enslot = slot0;
+  int ghostslot;
+  int azslot;
+  int gyslot;
+
+  GHOST_t *gh = mkobj(GHOST, &ghostslot, 1, b, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT);
+  PERSON_t *az = mkobj(PERSON, &azslot, 1, b, PERS_FLAGS);
+  PERSON_t *gy = mkobj(PERSON, &gyslot, 1, b, PERS_FLAGS);
+  PERSON_t *en = mkobj(PERSON, NULL, 1, b, PERS_FLAGS);
+
+  if( !gh || !az || !gy || !en )
+  {
+    echo("Error creating initial objects");
+    return;
+  }
 
   echo( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
 
@@ -176,19 +182,17 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   en->max_to      = 100;
   en->max_xp      = 10;
 
-  #define MKMENU(text_, ypos, layer_)              \
-    do {                                           \
-      MKOBJ( button, POPUP, 0, 0 );                \
-      button->pos     = (V){NATIVEW-62, ypos, 0};  \
-      button->hull[0] = (V){0, 0, 0};              \
-      button->hull[1] = (V){50, 18, 0};            \
-      button->visible = 0;                         \
-      button->enabled = 1;                         \
-      button->active  = 0;                         \
-      button->layer   = layer_;                    \
-      button->click   = NULL;                      \
-      button->text    = text_;                     \
+  #define MKMENU(text_, ypos, layer_)                \
+    do {                                             \
+      POPUP_t *button = mkobj(POPUP, NULL, 0, b, 0); \
+      if( !button ) break;                           \
+      button->pos     = (V){NATIVEW-62, ypos, 0};    \
+      button->hull[1] = (V){50, 18, 0};              \
+      button->enabled = 1;                           \
+      button->layer   = layer_;                      \
+      button->text    = text_;                       \
     } while(0)
+
   MKMENU("MOVE"   ,  10, MAIN);
   MKMENU("ATTACK" ,  30, MAIN);
   MKMENU("SPECIAL",  50, MAIN);
@@ -200,6 +204,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
   MKMENU("WALK"   ,  10, MOVE);
   MKMENU("RUN"    ,  30, MOVE);
   MKMENU("SPRINT" ,  50, MOVE);
+
   #undef MKMENU
 }
 

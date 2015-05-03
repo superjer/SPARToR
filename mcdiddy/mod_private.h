@@ -11,20 +11,6 @@
 #include "SDL.h"
 #include "main.h"
 
-
-// FIXME: does not respect no-free-slots-situation and CRASHES!
-#define MKOBJ( ptr, t, con, f ) t ## _t *ptr;                                       \
-                                slot0 = findfreeslot(b);                            \
-                                fr[b].objs[slot0].type = OBJT_ ## t;                \
-                                fr[b].objs[slot0].flags = f;                        \
-                                fr[b].objs[slot0].context = con;                    \
-                                fr[b].objs[slot0].size = sizeof *ptr;               \
-                                ptr = fr[b].objs[slot0].data = malloc(sizeof *ptr)  ;
-#define GETOBJ( ptr, t, n )     t ## _t *sw = fr[b].objs[(n)].data;           \
-                                assert( fr[b].objs[(n)].type == OBJT_ ## t )  ;
-#define FOBJ( n )               fr[b].objs[(n)]
-
-
 //cmd types
 enum { CMDT_NONE = 0,
 

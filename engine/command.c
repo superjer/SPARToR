@@ -127,6 +127,10 @@ void command(const char *s)
         if( ret ) echo("Net write error: %d", ret);
       }
     }
+    else if( strcmp(q, "resend")==0 )
+    {
+      net_resend = 1;
+    }
     else if( strcmp(q, "disconnect")==0 )
     {
       if( netmode == NM_HOST )

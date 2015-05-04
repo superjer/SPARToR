@@ -28,7 +28,8 @@ enum CONN_STATES {
   CONN_CONNECTED,
 };
 
-int net_retries = 0;
+int net_retries;
+int net_resend;
 
 static UDPsocket  sock = NULL;
 static UDPpacket *pkt;
@@ -44,7 +45,7 @@ static void welcome();
 static void acknowlege(int connexid);
 static void accept_from(int connexid);
 static void unlose_packet(int connexid);
-static void reevaluate_inconga(int connexid);
+static void reevaluate_need(int connexid);
 
 int net_start(int port, int _maxconns)
 {
@@ -111,6 +112,7 @@ int net_connect(const char *hostname, int port)
   memset(conns + connexid, 0, sizeof *conns);
   conns[connexid].state = CONN_NEW;
   conns[connexid].addr = ipaddr;
+  conns[connexid].needconga = 1;
 
   return 0;
 }
@@ -172,9 +174,9 @@ void net_loop()
       accept_from(i);
   }
 
-  return;
   static Uint32 ticksoup = 0;
-  ticksoup += tickdiff;
+  if( net_resend ) { ticksoup += 5001; net_resend = 0; }
+  /* ticksoup += tickdiff; */
 
   // resend packets or something?
   if( ticksoup > 5000 )
@@ -212,6 +214,7 @@ int net_write(int connexid, Uint8 *data, size_t len)
   int i;
 
   conn->outconga++;
+  /* echo("create ringoutseg: %d.%d", conn->outconga, parts); */
   create_ring(conn->ringout + conn->outconga % RING_SIZE, parts);
 
   for( i=0; i<parts; i++ )
@@ -219,6 +222,20 @@ int net_write(int connexid, Uint8 *data, size_t len)
     size_t partlen = (i == parts-1) ? ((len-1) % PAYLOAD_SIZE + 1) : PAYLOAD_SIZE;
     create_part(connexid, i, parts, data + i*PAYLOAD_SIZE, partlen);
   }
+
+#if 0
+  int peermod = conn->peerconga % RING_SIZE;
+  int outmod = conn->outconga % RING_SIZE;
+  echo("%s: %s%c %s%c %s%c %s%c %s%c %s%c \\#FFF peerpart\\#FF7%d",
+      __func__,
+      peermod==0 ? "\\#FF7" : outmod==0 ? "\\#7F2" : "\\#62F", conn->ringout[0].count + '0',
+      peermod==1 ? "\\#FF7" : outmod==1 ? "\\#7F2" : "\\#62F", conn->ringout[1].count + '0',
+      peermod==2 ? "\\#FF7" : outmod==2 ? "\\#7F2" : "\\#62F", conn->ringout[2].count + '0',
+      peermod==3 ? "\\#FF7" : outmod==3 ? "\\#7F2" : "\\#62F", conn->ringout[3].count + '0',
+      peermod==4 ? "\\#FF7" : outmod==4 ? "\\#7F2" : "\\#62F", conn->ringout[4].count + '0',
+      peermod==5 ? "\\#FF7" : outmod==5 ? "\\#7F2" : "\\#62F", conn->ringout[5].count + '0',
+      conn->peerpart);
+#endif
 
   return 0;
 }
@@ -307,7 +324,6 @@ void create_part(int connexid, int partid, int count, Uint8 *data, size_t datale
   size_t n = 0;
 
   RINGSEG_t *r = conn->ringout + conn->outconga % RING_SIZE;
-  r->count = partid;
 
   UDPpacket *pkt = r->pkt[partid] = SDLNet_AllocPacket(len);
   pkt->len = len;
@@ -317,14 +333,14 @@ void create_part(int connexid, int partid, int count, Uint8 *data, size_t datale
   pack(conn->outconga, 4);
   pack(count, 2);
   pack(partid, 2);
-  pack(conn->inconga, 4);
-  pack(conn->inpart, 2);
+  pack(conn->needconga, 4);
+  pack(conn->needpart, 2);
   assert(HEADER_SIZE == n);
   memcpy(pkt->data + n, data, datalen);
 
-#if 0 //packet loss?!
+#if 1 //packet loss?!
   static int sendsies = 0;
-  if( sendsies++ == 1 )
+  if( ++sendsies == 3 )
   {
     echo("JE REFUSE!");
     return;
@@ -379,6 +395,7 @@ void welcome()
   memset(conns + connexid, 0, sizeof *conns);
   conns[connexid].state = CONN_CONNECTED;
   conns[connexid].addr = pkt->address;
+  conns[connexid].needconga = 1;
 
   errout:
   snprintf((char *)pkt->data, PACKET_SIZE, "%s", reply);
@@ -445,18 +462,34 @@ void accept_from(int connexid)
       __func__, conga, partid, count, peerconga, peerpart);
 
   // update our idea of where the peer is
-  if( conn->peerconga < peerconga &&
-      (conn->peerconga == peerconga || conn->peerpart < peerpart) )
+  if( conn->peerconga < peerconga || (conn->peerconga == peerconga && conn->peerpart < peerpart) )
   {
+    echo("peer update: %d.%d to %d.%d", conn->peerconga, conn->peerpart, peerconga, peerpart);
     conn->peerconga = peerconga;
     conn->peerpart = peerpart;
   }
 
   if( conga > conn->readconga + RING_SIZE - 1 )
+  {
+    echo("%s: can't accept packet b/c ring is full", __func__);
     return; // not ready for such a future packet
+  }
 
   if( conga <= conn->readconga )
+  {
+    echo("%s: packet too late", __func__);
     return; // this is way too late
+  }
+
+  if( conn->inconga < conga )
+  {
+    conn->inconga = conga;
+    conn->inpart = partid;
+  }
+  else if( conn->inconga == conga && conn->inpart < partid )
+  {
+    conn->inpart = partid; // may be useless
+  }
 
   RINGSEG_t *r = conn->ringin + conga % RING_SIZE;
 
@@ -482,22 +515,22 @@ void accept_from(int connexid)
   r->pkt[partid]->len    = pkt->len;
   memcpy(r->pkt[partid]->data, pkt->data, pkt->len);
 
-  reevaluate_inconga(connexid);
+  reevaluate_need(connexid);
 }
 
 void unlose_packet(int connexid)
 {
   CONNEX_t *conn = conns + connexid;
-  int peerpart = conn->peerpart;
 
   if( conn->peerconga > conn->outconga )
-    echo("Peer claims future packet: %d, outconga is %d", conn->peerconga, conn->outconga);
-
-  if( conn->peerconga == conn->outconga ) echo("peerconga = outconga"); ///////////////////////////
+    echo("Peer needs future packet: %d, outconga is %d", conn->peerconga, conn->outconga);
 
   // nothing to do if peer is caught up
-  if( conn->peerconga >= conn->outconga )
+  if( conn->peerconga > conn->outconga )
+  {
+    echo("Already caught up: peer wants %d.%d", conn->peerconga, conn->peerpart);
     return;
+  }
 
   // maybe peer wants a packet lost to history?
   if( conn->peerconga < conn->outconga - RING_SIZE + 1 )
@@ -510,71 +543,81 @@ void unlose_packet(int connexid)
 
   RINGSEG_t *r = conn->ringout + conn->peerconga % RING_SIZE;
 
+#if 0
+  int peermod = conn->peerconga % RING_SIZE;
+  int outmod = conn->outconga % RING_SIZE;
+  echo("%s: %s%c %s%c %s%c %s%c %s%c %s%c \\#FFF peerpart\\#FF7%d",
+      __func__,
+      peermod==0 ? "\\#FF7" : outmod==0 ? "\\#7F2" : "\\#62F", conn->ringout[0].count + '0',
+      peermod==1 ? "\\#FF7" : outmod==1 ? "\\#7F2" : "\\#62F", conn->ringout[1].count + '0',
+      peermod==2 ? "\\#FF7" : outmod==2 ? "\\#7F2" : "\\#62F", conn->ringout[2].count + '0',
+      peermod==3 ? "\\#FF7" : outmod==3 ? "\\#7F2" : "\\#62F", conn->ringout[3].count + '0',
+      peermod==4 ? "\\#FF7" : outmod==4 ? "\\#7F2" : "\\#62F", conn->ringout[4].count + '0',
+      peermod==5 ? "\\#FF7" : outmod==5 ? "\\#7F2" : "\\#62F", conn->ringout[5].count + '0',
+      conn->peerpart);
+#endif
+
   // check for bad part id
-  if( peerpart < 0 || peerpart >= r->count )
+  if( conn->peerpart < 0 || conn->peerpart >= r->count )
   {
-    echo("Peer part out of range: %d / %d -- peerconga: %d", peerpart, r->count, conn->peerconga);
+    echo("Peer part out of range: %d.%d/%d",
+        conn->peerconga, conn->peerpart, r->count);
     return;
   }
 
-  peerpart++;
+  echo("Resending outconga %d.%d", conn->peerconga, conn->peerpart);
 
-  // do we need to roll over to the next conga?
-  if( peerpart == r->count )
-  {
-    r = conn->ringout + (conn->peerconga+1) % RING_SIZE;
-    peerpart = 0;
-  }
-
-  // nothing to send?
-  if( peerpart >= r->count )
-    return;
-
-  echo("Resending outconga %d, part %d", r - conn->ringout, peerpart);
-
-  if( !SDLNet_UDP_Send(sock, -1, r->pkt[peerpart]) )
+  if( !SDLNet_UDP_Send(sock, -1, r->pkt[conn->peerpart]) )
   {
     echo("Error: Could not send unlost packet");
     echo("%s", SDL_GetError());
   }
 }
 
-void reevaluate_inconga(int connexid)
+void reevaluate_need(int connexid)
 {
   CONNEX_t *conn = conns + connexid;
-  int inconga = conn->inconga;
-  int inpart  = conn->inpart;
+
+  int readmod = conn->readconga % RING_SIZE;
+  int needmod = conn->needconga % RING_SIZE;
+  echo("%s: %s%c %s%c %s%c %s%c %s%c %s%c \\#FFF needpart\\#7F2%d",
+      __func__,
+      readmod==0 ? "\\#FF7" : needmod==0 ? "\\#7F2" : "\\#F26", conn->ringin[0].count + '0',
+      readmod==1 ? "\\#FF7" : needmod==1 ? "\\#7F2" : "\\#F26", conn->ringin[1].count + '0',
+      readmod==2 ? "\\#FF7" : needmod==2 ? "\\#7F2" : "\\#F26", conn->ringin[2].count + '0',
+      readmod==3 ? "\\#FF7" : needmod==3 ? "\\#7F2" : "\\#F26", conn->ringin[3].count + '0',
+      readmod==4 ? "\\#FF7" : needmod==4 ? "\\#7F2" : "\\#F26", conn->ringin[4].count + '0',
+      readmod==5 ? "\\#FF7" : needmod==5 ? "\\#7F2" : "\\#F26", conn->ringin[5].count + '0',
+      conn->needpart);
 
   for( ;; )
   {
-    RINGSEG_t *r = conn->ringin + inconga % RING_SIZE;
+    RINGSEG_t *r = conn->ringin + conn->needconga % RING_SIZE;
 
     // get out when we hit an empty ring segment
-    // unless we're behind readconga which indicates we're looking at a deleted ring segment
-    if( conn->inconga > conn->readconga && r->count == 0 )
+    if( conn->needconga > conn->readconga && r->count == 0 )
     {
-      echo("%s: \\#F3FexitA \\#888conn->readconga%d conn->inconga%d conn->inpart%d",
-          __func__, conn->readconga, conn->inconga, conn->inpart);
+      echo("%s: \\#F3FexitA \\#888conn->readconga%d conn->needconga%d conn->needpart%d",
+          __func__, conn->readconga, conn->needconga, conn->needpart);
       return;
     }
 
     // move to next conga once we've seen all the parts
-    if( inpart >= r->count )
+    if( conn->needpart >= r->count )
     {
-      inconga++;
-      inpart = 0;
+      conn->needconga++;
+      conn->needpart = 0;
       continue;
     }
 
     // get out when we hit a missing part
-    if( !r->pkt[inpart] )
+    if( !r->pkt[conn->needpart] )
     {
-      echo("%s: \\#39FexitB \\#888conn->readconga%d conn->inconga%d conn->inpart%d",
-          __func__, conn->readconga, conn->inconga, conn->inpart);
+      echo("%s: \\#39FexitB \\#888conn->readconga%d conn->needconga%d conn->needpart%d",
+          __func__, conn->readconga, conn->needconga, conn->needpart);
       return;
     }
 
-    conn->inconga = inconga;
-    conn->inpart = inpart++;
+    conn->needpart++;
   }
 }

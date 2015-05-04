@@ -16,7 +16,7 @@
 #define HEADER_SIZE 15
 //#define PAYLOAD_SIZE (PACKET_SIZE - HEADER_SIZE)
 #define PAYLOAD_SIZE 10
-#define RING_SIZE 4
+#define RING_SIZE 6
 
 typedef struct {
   int         count;            // number of packets in the ring segment
@@ -31,6 +31,8 @@ typedef struct {
   int       readconga;          // the next conga for the game to read
   int       inconga;            // the latest conga we have
   int       inpart;             // the latest part we have
+  int       needconga;          // the earliest conga we need
+  int       needpart;           // the earliest part we need
   int       peerconga;          // the latest sequential conga of ours the peer has
   int       peerpart;           // the latest sequential part of ours the peer has
   RINGSEG_t ringout[RING_SIZE]; // ring buffer outgoing
@@ -38,6 +40,7 @@ typedef struct {
 } CONNEX_t;
 
 extern int net_retries;
+extern int net_resend;
 
 int    net_start(int port, int _maxconns);               // start up networking
 void   net_stop();                                       // stop networking

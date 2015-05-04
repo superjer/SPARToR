@@ -211,6 +211,7 @@ int net_write(int connexid, Uint8 *data, size_t len)
   int parts = (len-1) / PAYLOAD_SIZE + 1;
   int i;
 
+  conn->outconga++;
   create_ring(conn->ringout + conn->outconga % RING_SIZE, parts);
 
   for( i=0; i<parts; i++ )
@@ -219,7 +220,6 @@ int net_write(int connexid, Uint8 *data, size_t len)
     create_part(connexid, i, parts, data + i*PAYLOAD_SIZE, partlen);
   }
 
-  conn->outconga++;
   return 0;
 }
 
@@ -317,7 +317,7 @@ void create_part(int connexid, int partid, int count, Uint8 *data, size_t datale
   pack(conn->outconga, 4);
   pack(count, 2);
   pack(partid, 2);
-  pack(conn->inconga, 4); //echo("PACKED inconga: %d, inpart: %d", conn->inconga, conn->inpart);
+  pack(conn->inconga, 4);
   pack(conn->inpart, 2);
   assert(HEADER_SIZE == n);
   memcpy(pkt->data + n, data, datalen);
@@ -441,7 +441,8 @@ void accept_from(int connexid)
     return;
   }
 
-  //echo("YO peerconga is %d", peerconga);
+  echo("%s: \\#74F%d.%d/%d \\#FFFpeer \\#F92%d.%d",
+      __func__, conga, partid, count, peerconga, peerpart);
 
   // update our idea of where the peer is
   if( conn->peerconga < peerconga &&
@@ -459,8 +460,10 @@ void accept_from(int connexid)
 
   RINGSEG_t *r = conn->ringin + conga % RING_SIZE;
 
+  /* echo("conga%d \\#F00r->count%d", conga, r->count); */
   if( !r->count )
     create_ring(r, count);
+  /* echo("conga%d \\#F80r->count%d", conga, r->count); */
 
   if( partid >= r->count ) { echo("partid too high!"); return; }
 
@@ -473,7 +476,8 @@ void accept_from(int connexid)
     return; // already received this packet
   }
 
-  r->pkt[partid] = SDLNet_AllocPacket(pkt->len); // TODO: this is dumb; we're never going to send this or anything; so why?
+  // TODO: this is dumb; we're never going to send this or anything; so does not need to be a real pkt
+  r->pkt[partid] = SDLNet_AllocPacket(pkt->len);
   r->pkt[partid]->maxlen = pkt->maxlen;
   r->pkt[partid]->len    = pkt->len;
   memcpy(r->pkt[partid]->data, pkt->data, pkt->len);
@@ -539,19 +543,22 @@ void reevaluate_inconga(int connexid)
 {
   CONNEX_t *conn = conns + connexid;
   int inconga = conn->inconga;
-  int inpart  = conn->inpart + 1;
-  RINGSEG_t *r;
+  int inpart  = conn->inpart;
 
   for( ;; )
   {
-    r = conn->ringin + inconga % RING_SIZE;
-    inpart++;
+    RINGSEG_t *r = conn->ringin + inconga % RING_SIZE;
 
-    //echo("reevaluate_inconga: inconga %d, r->count %d", inconga, r->count);
-
-    if( r->count == 0 )
+    // get out when we hit an empty ring segment
+    // unless we're behind readconga which indicates we're looking at a deleted ring segment
+    if( conn->inconga > conn->readconga && r->count == 0 )
+    {
+      echo("%s: \\#F3FexitA \\#888conn->readconga%d conn->inconga%d conn->inpart%d",
+          __func__, conn->readconga, conn->inconga, conn->inpart);
       return;
+    }
 
+    // move to next conga once we've seen all the parts
     if( inpart >= r->count )
     {
       inconga++;
@@ -559,10 +566,15 @@ void reevaluate_inconga(int connexid)
       continue;
     }
 
+    // get out when we hit a missing part
     if( !r->pkt[inpart] )
+    {
+      echo("%s: \\#39FexitB \\#888conn->readconga%d conn->inconga%d conn->inpart%d",
+          __func__, conn->readconga, conn->inconga, conn->inpart);
       return;
+    }
 
     conn->inconga = inconga;
-    conn->inpart = inpart;
+    conn->inpart = inpart++;
   }
 }

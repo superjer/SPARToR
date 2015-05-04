@@ -105,5 +105,7 @@ $(OBJDIR_DK)/%.o: %.c
 clean:
 	-$(RM) $(OBJS_MC) $(OBJS_DK) $(OBJSRES_MC) $(OBJSRES_DK)
 
-distclean: clean
+mrproper: clean
 	-$(RM) -r $(EXE_MC) $(EXE_DK) $(OBJDIR_MC) $(OBJDIR_DK)
+
+distclean: mrproper

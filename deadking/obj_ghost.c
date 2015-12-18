@@ -33,26 +33,26 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
   GHOST_t   *gh = ob->data;
   CONTEXT_t *co = fr[b].objs[ob->context].data;
 
+  static V dimetric_hull[2] = {{-64, 0, -64}, {64, 72, 64}};
+  static V ortho_hull[2]    = {{-NATIVEW/2, -NATIVEH/2, 0}, {NATIVEW/2, NATIVEH/2, 0}};
+
+  if( co->projection == DIMETRIC     )
+    memcpy( gh->hull, dimetric_hull, sizeof (V[2]) );
+  if( co->projection == ORTHOGRAPHIC )
+    memcpy( gh->hull, ortho_hull,    sizeof (V[2]) );
+
   if( gh->client==me )
   {
     myghost     = objid;
     mycontext   = ob->context;
+
+    v_camx = gh->pos.x;
+    v_camy = gh->pos.y;
+
+    v_targx = gh->pos.x;
+    v_targy = gh->pos.y;
+    v_targz = gh->pos.z;
   }
-
-  static V v2_dimetric[2] = {{-64, 0, -64}, {64, 72, 64}};
-  static V v2_ortho[2]    = {{-NATIVEW/2, -NATIVEH/2, 0}, {NATIVEW/2, NATIVEH/2, 0}};
-
-  if( co->projection == DIMETRIC     )
-    memcpy( gh->hull, v2_dimetric, sizeof (V[2]) );
-  if( co->projection == ORTHOGRAPHIC )
-    memcpy( gh->hull, v2_ortho,    sizeof (V[2]) );
-
-  v_camx = gh->pos.x;
-  v_camy = gh->pos.y;
-
-  v_targx = gh->pos.x;
-  v_targy = gh->pos.y;
-  v_targz = gh->pos.z;
 
   switch( fr[b].cmds[gh->client].cmd )
   {
@@ -140,7 +140,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       pop_context(co);
       break;
 
-    case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
+    case CMDT_0EPAINT: //FIXME: UNSAFE check for edit rights, data values
       ghost_paint( c, gh, co );
       break;
   }
@@ -151,13 +151,13 @@ static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
   size_t n = 0;
   int  i, j, k;
   char letter = (char)unpackbytes(c->data, MAXCMDDATA, &n, 1);
-  int  dnx    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  dny    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  dnz    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  upx    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  upy    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  upz    = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
-  int  sprnum = (int) unpackbytes(c->data, MAXCMDDATA, &n, 4);
+  int  dnx    = (int) unpack(4);
+  int  dny    = (int) unpack(4);
+  int  dnz    = (int) unpack(4);
+  int  upx    = (int) unpack(4);
+  int  upy    = (int) unpack(4);
+  int  upz    = (int) unpack(4);
+  int  sprnum = (int) unpack(4);
 
   if( letter!='p' ) { echo("Unknown edit command!"); return; }
 

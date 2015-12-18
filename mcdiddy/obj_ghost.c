@@ -124,7 +124,7 @@ void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
       pop_context(co);
       break;
 
-    case CMDT_0EPANT: //FIXME: UNSAFE check for edit rights, data values
+    case CMDT_0EPAINT: //FIXME: UNSAFE check for edit rights, data values
       ghost_paint( c, gh, pl, co );
       break;
   }

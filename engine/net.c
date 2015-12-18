@@ -522,13 +522,10 @@ void unlose_packet(int connexid)
 {
   CONNEX_t *conn = conns + connexid;
 
-  if( conn->peerconga > conn->outconga )
-    echo("Peer needs future packet: %d, outconga is %d", conn->peerconga, conn->outconga);
-
   // nothing to do if peer is caught up
   if( conn->peerconga > conn->outconga )
   {
-    echo("Already caught up: peer wants %d.%d", conn->peerconga, conn->peerpart);
+    echo("Peer wants future packet %d.%d, I'm on %d", conn->peerconga, conn->peerpart, conn->outconga);
     return;
   }
 

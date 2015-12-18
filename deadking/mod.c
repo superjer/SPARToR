@@ -42,13 +42,13 @@ INPUTNAME_t inputnames[] = {{"left"      , CMDT_1LEFT    , CMDT_0LEFT    },
                             {"camup"     , CMDT_1CAMUP   , CMDT_0CAMUP   },
                             {"camdown"   , CMDT_1CAMDOWN , CMDT_0CAMDOWN },
                          /* {"cons-cmd"  , CMDT_1CON     , CMDT_0CON     }, this may not be necessary, it may even be dangerous */
-                            {"edit-paint", CMDT_1EPANT   , CMDT_0EPANT   },
+                            {"edit-paint", CMDT_1EPAINT  , CMDT_0EPAINT  },
                             {"edit-prev" , CMDT_1EPREV   , CMDT_0EPREV   },
                             {"edit-next" , CMDT_1ENEXT   , CMDT_0ENEXT   },
                             {"edit-texup", CMDT_1EPGUP   , CMDT_0EPGUP   },
                             {"edit-texdn", CMDT_1EPGDN   , CMDT_0EPGDN   },
-                            {"edit-layup", CMDT_1ELAUP   , CMDT_0ELAUP   },
-                            {"edit-laydn", CMDT_1ELADN   , CMDT_0ELADN   },
+                            {"edit-layup", CMDT_1ELAYUP  , CMDT_0ELAYUP  },
+                            {"edit-laydn", CMDT_1ELAYDN  , CMDT_0ELAYDN  },
                             {"edit-show" , CMDT_1ESHOW   , CMDT_0ESHOW   },
                             {"edit-undo" , CMDT_1EUNDO   , CMDT_0EUNDO   }};
 int numinputnames = COUNTOF(inputnames);
@@ -244,7 +244,7 @@ int mod_mkcmd(FCMD_t *c, int device, int sym, int press)
 
     c->cmd = binds[i].cmd;
 
-    if( c->cmd==CMDT_1EPANT || c->cmd==CMDT_0EPANT )
+    if( c->cmd==CMDT_1EPAINT || c->cmd==CMDT_0EPAINT )
       if( gui_click( press ) )
         return -1;
 
@@ -325,19 +325,19 @@ static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
     return -1;
   }
 
-  if( c->cmd==CMDT_0ELAUP || c->cmd==CMDT_0ELADN )
+  if( c->cmd==CMDT_0ELAYUP || c->cmd==CMDT_0ELAYDN )
     return -1;
 
-  if( c->cmd==CMDT_1ELAUP )
+  if( c->cmd==CMDT_1ELAYUP )
     if( ylayer > 0 ) ylayer--;
 
-  if( c->cmd==CMDT_1ELADN )
+  if( c->cmd==CMDT_1ELAYDN )
     if( ylayer < co->y ) ylayer++;
 
   if( c->cmd==CMDT_1ESHOW ) { showlayer = 1; return -1; }
   if( c->cmd==CMDT_0ESHOW ) { showlayer = 0; return -1; }
 
-  if( c->cmd!=CMDT_1EPANT && c->cmd!=CMDT_0EPANT )
+  if( c->cmd!=CMDT_1EPAINT && c->cmd!=CMDT_0EPAINT )
     return 0; //cmd created
 
   //edit-paint command only from here on
@@ -345,7 +345,7 @@ static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
   int dny = downy;
   int dnz = downz;
 
-  if( c->cmd==CMDT_0EPANT ) //always clear mousedown pos on mouseup
+  if( c->cmd==CMDT_0EPAINT ) //always clear mousedown pos on mouseup
     downx = downy = downz = -1;
 
   if( !i_hasmouse )
@@ -353,7 +353,7 @@ static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
 
   if( i_mousex >= v_w-NATIVE_TEX_SZ && i_mousey < NATIVE_TEX_SZ ) //click in texture selector
   {
-    if( c->cmd==CMDT_1EPANT )
+    if( c->cmd==CMDT_1EPAINT )
     {
       int tmp = sprite_at(mytex, i_mousex-(v_w-NATIVE_TEX_SZ), i_mousey);
       if( tmp>=0 ) myspr = tmp;
@@ -369,7 +369,7 @@ static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
   if( co->projection == DIMETRIC     ) tiley = ylayer;
   if( co->projection == ORTHOGRAPHIC ) tilez = ylayer;
 
-  if( c->cmd==CMDT_1EPANT )
+  if( c->cmd==CMDT_1EPAINT )
   {
     downx = tilex;
     downy = tiley;

@@ -16,7 +16,7 @@
 #include "SDL_image.h"
 #include "mod_constants.h"
 
-#define VERSION "0.15.04.04"
+#define VERSION "0.16.02.14"
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif

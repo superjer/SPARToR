@@ -112,7 +112,7 @@ void winevent(SDL_WindowEvent e)
 void textinput(SDL_TextInputEvent e)
 {
   if( e.text[0] > 31 && e.text[0] < 127 )
-    SJC_Put(e.text[0]);
+    console_put(e.text[0]);
 }
 
 void textedit(SDL_TextEditingEvent e)
@@ -160,18 +160,18 @@ void kbinput(int press, SDL_KeyboardEvent e)
   {
     char *scmd;
     if( !press ) ; //nothing on key up
-    else if( sym==SDLK_ESCAPE                         ) toggleconsole();
-    else if( sym==SDLK_RETURN && (scmd=SJC_Submit())  ) command(scmd);
-    else if( sym==SDLK_BACKSPACE                      ) SJC_Rub(0);
-    else if( sym==SDLK_DELETE                         ) SJC_Rub(1);
-    else if( sym==SDLK_UP    || (sym==SDLK_p && ctrl) ) SJC_Up();
-    else if( sym==SDLK_DOWN  || (sym==SDLK_n && ctrl) ) SJC_Down();
-    else if( sym==SDLK_LEFT  || (sym==SDLK_h && ctrl) ) SJC_Left();
-    else if( sym==SDLK_RIGHT || (sym==SDLK_l && ctrl) ) SJC_Right();
-    else if( sym==SDLK_HOME  || (sym==SDLK_a && ctrl) ) SJC_Home();
-    else if( sym==SDLK_END   || (sym==SDLK_e && ctrl) ) SJC_End();
-    else if( sym==SDLK_COPY  || (sym==SDLK_c && ctrl) ) SJC_Copy();
-    else if( sym==SDLK_PASTE || (sym==SDLK_v && ctrl) ) SJC_Paste();
+    else if( sym==SDLK_ESCAPE                           ) toggleconsole();
+    else if( sym==SDLK_RETURN && (scmd=console_submit())) command(scmd);
+    else if( sym==SDLK_BACKSPACE                        ) console_rub(0);
+    else if( sym==SDLK_DELETE                           ) console_rub(1);
+    else if( sym==SDLK_UP    || (sym==SDLK_p && ctrl)   ) console_up();
+    else if( sym==SDLK_DOWN  || (sym==SDLK_n && ctrl)   ) console_down();
+    else if( sym==SDLK_LEFT  || (sym==SDLK_h && ctrl)   ) console_left();
+    else if( sym==SDLK_RIGHT || (sym==SDLK_l && ctrl)   ) console_right();
+    else if( sym==SDLK_HOME  || (sym==SDLK_a && ctrl)   ) console_home();
+    else if( sym==SDLK_END   || (sym==SDLK_e && ctrl)   ) console_end();
+    else if( sym==SDLK_COPY  || (sym==SDLK_c && ctrl)   ) console_copy();
+    else if( sym==SDLK_PASTE || (sym==SDLK_v && ctrl)   ) console_paste();
   }
   else
   {

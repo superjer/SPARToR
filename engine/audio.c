@@ -443,7 +443,7 @@ void audioinit()
     SFMT(AUDIO_S16MSB)
   }
 
-  echo("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
+  debug("Audio freq: %d  format: %s  channels: %d  silence: %d  samples: %d  size: %d",
             spec.freq, sfmt, spec.channels, spec.silence, spec.samples, spec.size);
 
   SJGLOB_T *files = SJglob( GAME "/sounds", "*.wav", SJGLOB_MARK|SJGLOB_NOESCAPE );

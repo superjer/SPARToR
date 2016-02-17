@@ -12,57 +12,78 @@
 
 #include "console.h"
 
-SJC_t SJC;
+#define LEN CONSOLE_BUFLEN
 
-static FILE *logfile = NULL;
+static char   *buf[LEN];
+static size_t  size[LEN];
+static size_t  pos;
+static char   *rememory[LEN];
+static int     rememend;
+static int     remempos;
+static FILE   *logfile = NULL;
 
-static void recall();
-
-void SJC_Put(char c)
+static void recall()
 {
-  if( SJC.buf[0]==NULL || strlen(SJC.buf[0])+1>=SJC.size[0] )
+  if( remempos == rememend ) // current position
   {
-    SJC.size[0] += 32;
-    SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0] );
-
-    if( SJC.size[0] == 32 )
-      SJC.buf[0][0] = '\0';
+    buf[0][0] = '\0';
+  }
+  else
+  {
+    free(buf[0]);
+    size[0] = strlen(rememory[remempos])+1;
+    buf[0] = malloc(size[0]);
+    strcpy(buf[0], rememory[remempos]);
   }
 
-  char *to   = SJC.buf[0] + SJC.pos + 1;
-  char *from = SJC.buf[0] + SJC.pos;
+  console_end();
+}
+
+void console_put(char c)
+{
+  if( buf[0]==NULL || strlen(buf[0])+1>=size[0] )
+  {
+    size[0] += 32;
+    buf[0] = realloc( buf[0], size[0] );
+
+    if( size[0] == 32 )
+      buf[0][0] = '\0';
+  }
+
+  char *to   = buf[0] + pos + 1;
+  char *from = buf[0] + pos;
   memmove(to, from, strlen(from) + 1);
 
-  SJC.buf[0][SJC.pos] = c;
-  SJC.pos++;
+  buf[0][pos] = c;
+  pos++;
 }
 
-void SJC_Replace(const char *s)
+void console_replace(const char *s)
 {
-  if( SJC.buf[0]==NULL || strlen(s)+1>=SJC.size[0] )
+  if( buf[0]==NULL || strlen(s)+1>=size[0] )
   {
-    SJC.size[0] = strlen(s) + 32;
-    SJC.buf[0] = realloc( SJC.buf[0], SJC.size[0] );
+    size[0] = strlen(s) + 32;
+    buf[0] = realloc( buf[0], size[0] );
   }
 
-  strcpy(SJC.buf[0], s);
+  strcpy(buf[0], s);
 }
 
-void SJC_Write(const char *s, ...)
+void console_write(const char *s, ...)
 {
-  static char buf[256];
-  free(SJC.buf[SJC_BUFLEN-1]);
-  memmove(SJC.buf+2, SJC.buf+1, sizeof(char*)*(SJC_BUFLEN-2));
-  memmove(SJC.size+2, SJC.size+1, sizeof(int)*(SJC_BUFLEN-2));
+  static char buf_[256];
+  free(buf[LEN-1]);
+  memmove(buf+2, buf+1, sizeof(char*)*(LEN-2));
+  memmove(size+2, size+1, sizeof(int)*(LEN-2));
 
   va_list args;
   va_start(args, s);
-  vsnprintf(buf, 255, s, args);
+  vsnprintf(buf_, 255, s, args);
   va_end(args);
 
-  SJC.size[1] = strlen(buf)+1;
-  SJC.buf[1] = malloc(SJC.size[1]);
-  strcpy(SJC.buf[1], buf);
+  size[1] = strlen(buf_)+1;
+  buf[1] = malloc(size[1]);
+  strcpy(buf[1], buf_);
 
   va_start(args, s);
   if( logfile )
@@ -78,7 +99,16 @@ void SJC_Write(const char *s, ...)
   va_end(args);
 }
 
-void SJC_Log(const char *newfile)
+void console_debug(const char *s, ...)
+{
+  va_list args;
+  va_start(args, s);
+  vfprintf(stderr, s, args);
+  fputc('\n', stderr);
+  va_end(args);
+}
+
+void console_log(const char *newfile)
 {
   if( logfile ) fclose(logfile);
 
@@ -88,138 +118,132 @@ void SJC_Log(const char *newfile)
     logfile = fopen(newfile, "w");
 }
 
-void SJC_Rub(int right)
+void console_rub(int right)
 {
-  if( SJC.buf[0] == NULL ) return;
+  if( buf[0] == NULL ) return;
 
   if( right )
   {
-    if( SJC.buf[0] && SJC.pos < strlen(SJC.buf[0]) )
-      SJC.pos++;
+    if( buf[0] && pos < strlen(buf[0]) )
+      pos++;
     else
       return;
   }
 
-  if( SJC.pos == 0 ) return;
+  if( pos == 0 ) return;
 
-  char *from = SJC.buf[0] + SJC.pos;
-  char *to   = SJC.buf[0] + SJC.pos - 1;
+  char *from = buf[0] + pos;
+  char *to   = buf[0] + pos - 1;
   memmove(to, from, strlen(from) + 1);
 
-  SJC.pos--;
+  pos--;
 }
 
-void SJC_Clear()
+void console_clear()
 {
-  if( SJC.buf[0]!=NULL )
-      SJC.buf[0][0] = '\0';
+  if( buf[0]!=NULL )
+      buf[0][0] = '\0';
 }
 
-void recall()
+void console_up()
 {
-  if( SJC.remempos == SJC.rememend ) // current position
-  {
-    SJC.buf[0][0] = '\0';
-  }
-  else
-  {
-    free(SJC.buf[0]);
-    SJC.size[0] = strlen(SJC.rememory[SJC.remempos])+1;
-    SJC.buf[0] = malloc(SJC.size[0]);
-    strcpy(SJC.buf[0], SJC.rememory[SJC.remempos]);
-  }
-
-  SJC_End();
-}
-
-void SJC_Up()
-{
-  if( (SJC.rememend+1)%SJC_BUFLEN == SJC.remempos )
+  if( (rememend+1)%LEN == remempos )
     return; // already at oldest
 
-  int pos = (SJC.remempos+SJC_BUFLEN-1) % SJC_BUFLEN;
-  if( !SJC.rememory[pos] )
+  int pos = (remempos+LEN-1) % LEN;
+  if( !rememory[pos] )
     return; // older entry is NULL
 
-  SJC.remempos = pos;
+  remempos = pos;
   recall();
 }
 
-void SJC_Down()
+void console_down()
 {
-  if( SJC.remempos == SJC.rememend )
+  if( remempos == rememend )
     return; // already at newest
 
-  SJC.remempos = (SJC.remempos+1) % SJC_BUFLEN;
+  remempos = (remempos+1) % LEN;
   recall();
 }
 
-void SJC_Left()
+void console_left()
 {
-  if( SJC.pos > 0 )
-    SJC.pos--;
+  if( pos > 0 )
+    pos--;
 }
 
-void SJC_Right()
+void console_right()
 {
-  if( SJC.buf[0] && SJC.pos < strlen(SJC.buf[0]) )
-    SJC.pos++;
+  if( buf[0] && pos < strlen(buf[0]) )
+    pos++;
 }
 
-void SJC_Home()
+void console_home()
 {
-  SJC.pos = 0;
+  pos = 0;
 }
 
-void SJC_End()
+void console_end()
 {
-  SJC.pos = 0;
-  if( SJC.buf[0] )
-    SJC.pos = strlen(SJC.buf[0]);
+  pos = 0;
+  if( buf[0] )
+    pos = strlen(buf[0]);
 }
 
-void SJC_Copy()
+void console_copy()
 {
-  if( SJC.buf[0] )
-    SDL_SetClipboardText(SJC.buf[0]);
+  if( buf[0] )
+    SDL_SetClipboardText(buf[0]);
 }
 
-void SJC_Paste()
+void console_paste()
 {
   char *p = SDL_GetClipboardText();
   char *q = p;
   while( p && *p )
-    SJC_Put(*p++);
+    console_put(*p++);
   SDL_free(q);
 }
 
-char *SJC_Submit()
+char *console_submit()
 {
-  if( !SJC.buf[0] || !strlen(SJC.buf[0]) )
+  if( !buf[0] || !strlen(buf[0]) )
     return NULL;
 
-  free(SJC.rememory[SJC.rememend]);
-  SJC.rememory[SJC.rememend] = malloc(strlen(SJC.buf[0])+1);
-  strcpy(SJC.rememory[SJC.rememend], SJC.buf[0]);
-  SJC.remempos = SJC.rememend = (SJC.rememend+1) % SJC_BUFLEN;
+  free(rememory[rememend]);
+  rememory[rememend] = malloc(strlen(buf[0])+1);
+  strcpy(rememory[rememend], buf[0]);
+  remempos = rememend = (rememend+1) % LEN;
 
-  free(SJC.buf[SJC_BUFLEN-1]);
-  memmove(SJC.buf+1, SJC.buf, sizeof(char*)*(SJC_BUFLEN-1));
-  memmove(SJC.size+1, SJC.size, sizeof(int)*(SJC_BUFLEN-1));
-  SJC.size[0] = 0;
-  SJC.buf[0] = NULL;
-  SJC.pos = 0;
+  free(buf[LEN-1]);
+  memmove(buf+1, buf, sizeof(char*)*(LEN-1));
+  memmove(size+1, size, sizeof(int)*(LEN-1));
+  size[0] = 0;
+  buf[0] = NULL;
+  pos = 0;
 
-  fprintf(logfile ? logfile : stderr, "%s%s\n", "> ", SJC.buf[1]);
+  fprintf(logfile ? logfile : stderr, "%s%s\n", "> ", buf[1]);
 
-  if( strlen(SJC.buf[1])+2 >= SJC.size[1] )
+  if( strlen(buf[1])+2 >= size[1] )
   {
-    SJC.size[1] += 2;
-    SJC.buf[1] = realloc(SJC.buf[1], SJC.size[1]);
+    size[1] += 2;
+    buf[1] = realloc(buf[1], size[1]);
   }
-  memmove(SJC.buf[1]+2, SJC.buf[1], SJC.size[1]-2);
-  SJC.buf[1][0] = '\1';
-  SJC.buf[1][1] = ' ';
+  memmove(buf[1]+2, buf[1], size[1]-2);
+  buf[1][0] = '\1';
+  buf[1][1] = ' ';
 
-  return SJC.buf[1] + 2;
+  return buf[1] + 2;
 }
+
+char **console_getbuf()
+{
+  return buf;
+}
+
+int console_getpos()
+{
+  return pos;
+}
+

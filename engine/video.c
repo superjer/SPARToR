@@ -111,8 +111,8 @@ void videoinit()
   }
 #endif
 
-  echo("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
-  echo("OpenGL version %s", glGetString(GL_VERSION));
+  debug("Desktop resolution detected as %d x %d", desktop_w, desktop_h);
+  debug("OpenGL version %s", glGetString(GL_VERSION));
 }
 
 void render()
@@ -311,7 +311,7 @@ void render()
         V *pos  = flex(o, pos);
         V screenpos = get_screen_pos(pos->x, pos->y, pos->z);
 
-        SJF_DrawText(screenpos.x, screenpos.y-10, SJF_CENTER, "%d", i);
+        drawtext(screenpos.x, screenpos.y-10, FONT_CENTER, "%d", i);
       }
     }
 
@@ -377,16 +377,19 @@ void render()
     y = liney;
     char *prompt = "\1 ";
 
-    for( i=0;y>0;i++ )
+    char **conbuf = console_getbuf();
+    int conpos = console_getpos();
+
+    for( i=0; i<CONSOLE_BUFLEN && y>0; i++ )
     {
-      SJF_DrawTextScaled(v_conscale, x, y, SJF_LEFT, "%s%s", i?"":prompt, SJC.buf[i]?SJC.buf[i]:"");
+      font_text(v_conscale, x, y, FONT_LEFT, "%s%s", i?"":prompt, conbuf[i]?conbuf[i]:"");
       y -= 12 * v_conscale;
     }
 
     if( (ticks/200)%2 && i_hasfocus )
-      SJF_DrawCharScaled(
+      font_char(
           v_conscale,
-          x + (SJF_TextExtents(prompt, 999) + SJF_TextExtents(SJC.buf[0], SJC.pos))*v_conscale,
+          x + (font_extents(prompt, 999) + font_extents(conbuf[0], conpos))*v_conscale,
           liney,
           '\2'
       );
@@ -400,16 +403,16 @@ void render()
   if( v_showstats )
   {
     Uint32 denom = vidfrmod+1;
-    SJF_DrawText(w-20, 10, SJF_RIGHT, "idle_time %4d"       ,        idle_time/denom);
-    SJF_DrawText(w-20, 20, SJF_RIGHT, "render_time %4d"     ,      render_time/denom);
-    SJF_DrawText(w-20, 30, SJF_RIGHT, "adv_move_time %4d"   ,    adv_move_time/denom);
-    SJF_DrawText(w-20, 40, SJF_RIGHT, "adv_collide_time %4d", adv_collide_time/denom);
-    SJF_DrawText(w-20, 50, SJF_RIGHT, "adv_game_time %4d"   ,    adv_game_time/denom);
-    SJF_DrawText(w-20, 60, SJF_RIGHT, "unaccounted_time %4d", unaccounted_time/denom);
-    SJF_DrawText(w-20, 70, SJF_RIGHT, "adv_frames  %2.2f"   ,(float)adv_frames/denom);
-    SJF_DrawText(w-20, 80, SJF_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d"
-                                                            , metafr%maxframes, metafr, vidfr, hotfr);
-    SJF_DrawText(w-20, 90, SJF_RIGHT, "textedit: %d"        , SDL_IsTextInputActive());
+    drawtext(w-20, 10, FONT_RIGHT, "idle_time %4d"       ,        idle_time/denom);
+    drawtext(w-20, 20, FONT_RIGHT, "render_time %4d"     ,      render_time/denom);
+    drawtext(w-20, 30, FONT_RIGHT, "adv_move_time %4d"   ,    adv_move_time/denom);
+    drawtext(w-20, 40, FONT_RIGHT, "adv_collide_time %4d", adv_collide_time/denom);
+    drawtext(w-20, 50, FONT_RIGHT, "adv_game_time %4d"   ,    adv_game_time/denom);
+    drawtext(w-20, 60, FONT_RIGHT, "unaccounted_time %4d", unaccounted_time/denom);
+    drawtext(w-20, 70, FONT_RIGHT, "adv_frames  %2.2f"   ,(float)adv_frames/denom);
+    drawtext(w-20, 80, FONT_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d"
+                                                         , metafr%maxframes, metafr, vidfr, hotfr);
+    drawtext(w-20, 90, FONT_RIGHT, "textedit: %d"        , SDL_IsTextInputActive());
   }
 
   //display audio waveform
@@ -501,10 +504,10 @@ void setvideo(int w, int h, int go_full, int quiet)
   v_scale = (h/NATIVEH < w/NATIVEW) ? h/NATIVEH : w/NATIVEW;
   if( v_scale<1 )
     v_scale = 1;
-  SJF_Init();
+  font_init();
   mod_setvideo(w, h);
   if( !quiet )
-    echo("Video mode set to %d x %d", w, h);
+    debug("Video mode set to %d x %d", w, h);
 }
 
 void setvideosoon(int w, int h, int go_full)

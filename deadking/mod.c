@@ -582,7 +582,7 @@ void mod_huddraw(Uint32 vidfr)
     SJGL_Blit( &(REC){0, 50+6*7, BAR_W(xp), 6}, x+51, NATIVEH-50+13+9*3, 0 );
     #undef BAR_W
 
-    SJF_DrawText( 3, NATIVEH-49, SJF_LEFT, "%s", pe->name );
+    drawtext( 3, NATIVEH-49, FONT_LEFT, "%s", pe->name );
   }
 
   // draw menu background and then menu items
@@ -607,7 +607,7 @@ void mod_huddraw(Uint32 vidfr)
         SJGL_SetTex( 2 ); // FIXME: NO NO NO!
         SJGL_Blit( &(REC){30, 30, hull[1].x, hull[1].y}, pos->x, pos->y, 0 );
       }
-      SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
+      drawtext( pos->x, pos->y, FONT_LEFT, "%s", pop->text );
     }
   }
 }
@@ -734,15 +734,15 @@ void mod_outerdraw(Uint32 vidfr, int w, int h)
   glColor4f(1, 1, 1, 1);
   if( myspr < (int)spr_count )
   {
-    SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+    drawtext( w-sz, sz+ 4, FONT_LEFT,
                   "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-    SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-    SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+    drawtext( w-sz, sz+14, FONT_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+    drawtext( w-sz, sz+24, FONT_LEFT, "Layer %d", ylayer );
   }
 
   glPopAttrib();
 
-  SJF_DrawText(i_mousex+7, i_mousey+15, SJF_LEFT, "%d", ylayer);
+  drawtext(i_mousex+7, i_mousey+15, FONT_LEFT, "%d", ylayer);
 }
 
 void mod_adv(int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)

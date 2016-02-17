@@ -85,7 +85,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
     return;
   }
 
-  echo( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
+  debug( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
 
   mo->ghost    = ghostslot;
   mo->party[0] = azslot;

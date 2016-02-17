@@ -1,5 +1,5 @@
 /**
- **  SuperJer Font
+ **  font
  **
  **  A simple library for drawing a 'system' font on SDL GL surfaces
  **  which requires no outside resources (images, fonts, etc.)
@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#ifndef SPARTOR_SJFONT_H_
-#define SPARTOR_SJFONT_H_
+#ifndef SPARTOR_FONT_H_
+#define SPARTOR_FONT_H_
 
 #ifdef DOGLEW
 #include <GL/glew.h>
@@ -23,29 +23,17 @@
 
 #define NATIVE_TEX_SZ 512
 
-#define SJF_LEFT   -1
-#define SJF_CENTER  0
-#define SJF_RIGHT   1
+#define FONT_LEFT   -1
+#define FONT_CENTER  0
+#define FONT_RIGHT   1
 
-#define SJF_DrawChar(x, y, ch) SJF_DrawCharScaled(1, x, y, ch)
-#define SJF_DrawText(x, y, align, str, ...) SJF_DrawTextScaled(1, x, y, align, str, __VA_ARGS__)
+#define drawchar(x, y, ch) font_char(1, x, y, ch)
+#define drawtext(x, y, align, str, ...) font_text(1, x, y, align, str, __VA_ARGS__)
 
-typedef struct
-{
-  GLuint tex;
-  int w;
-  int h;
-  int pitch;
-  int space[256];
-  char raw[128*128];
-} SJF_t;
-
-extern SJF_t SJF;
-
-void SJF_Init();
-void SJF_DrawCharScaled(int scale, int x, int y, char ch);
-void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...);
-int SJF_TextExtents(const char *str, int n);
+void font_init();
+void font_char(int scale, int x, int y, char ch);
+void font_text(int scale, int x, int y, int align, const char *str, ...);
+int font_extents(const char *str, int n);
 
 #endif
 

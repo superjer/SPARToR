@@ -29,7 +29,7 @@ void mk_ghost_and_player(int client, int context, Uint32 frame)
     return;
   }
 
-  echo( "%d: New client %i created ghost is obj#%d player is obj#%d", frame, client, ghostslot, playerslot );
+  debug( "%d: New client %i created ghost is obj#%d player is obj#%d", frame, client, ghostslot, playerslot );
 
   gh->client         = client;
   gh->avatar         = playerslot;

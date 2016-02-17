@@ -38,6 +38,7 @@ static CONNEX_t  *conns;
 static int        maxconns;
 
 static int get_free_conn();
+static void check_recv();
 static void send_connect();
 static void create_ring(RINGSEG_t *r, int count);
 static void create_part(int connexid, int partid, int count, Uint8 *data, size_t len);
@@ -119,7 +120,6 @@ int net_connect(const char *hostname, int port)
 
 void net_loop()
 {
-  int           status;
   int           i;
   static Uint32 prevticks = 0;
 
@@ -141,6 +141,27 @@ void net_loop()
   }
 
   prevticks = ticks;
+
+  check_recv();
+
+  static Uint32 ticksoup = 0;
+  if( net_resend ) { ticksoup += 5001; net_resend = 0; }
+  /* ticksoup += tickdiff; */
+
+  // resend packets or something?
+  if( ticksoup > 5000 )
+  {
+    ticksoup = 0;
+    for( i=0; i<maxconns; i++ )
+      if( conns[i].state == CONN_CONNECTED ) //TODO something on other states?
+        unlose_packet(i);
+  }
+}
+
+void check_recv()
+{
+  int           status;
+  int           i;
 
   for( ;; )
   {
@@ -172,19 +193,6 @@ void net_loop()
       acknowlege(i);
     else
       accept_from(i);
-  }
-
-  static Uint32 ticksoup = 0;
-  if( net_resend ) { ticksoup += 5001; net_resend = 0; }
-  /* ticksoup += tickdiff; */
-
-  // resend packets or something?
-  if( ticksoup > 5000 )
-  {
-    ticksoup = 0;
-    for( i=0; i<maxconns; i++ )
-      if( conns[i].state == CONN_CONNECTED ) //TODO something on other states?
-        unlose_packet(i);
   }
 }
 

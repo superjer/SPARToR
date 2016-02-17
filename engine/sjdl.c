@@ -62,7 +62,7 @@ void SJGL_SetTex(GLuint tex)
   glBindTexture( GL_TEXTURE_2D, textures[tex].glname );
 }
 
-// wrapper for SJFL_Blit when there's only one z
+// wrapper for SJGL_Blit when there's only one z
 int SJGL_BlitSpr(SPRITE_T *spr, int x, int y, int z)
 {
   return SJGL_BlitSprSkew(spr, x, y, z, z);
@@ -87,7 +87,7 @@ int SJGL_BlitSprSkew(SPRITE_T *spr, int x, int y, int zlo, int zhi)
   return 0;
 }
 
-// wrapper for SJFL_Blit when there's only one z
+// wrapper for SJGL_Blit when there's only one z
 int SJGL_Blit(REC *s, int x, int y, int z)
 {
   return SJGL_BlitSkew(s, x, y, z, z);

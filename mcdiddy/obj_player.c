@@ -129,7 +129,7 @@ void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
 
   if( !oldme ) //FIXME why's this null?
   {
-    echo("Warning: oldme is NULL!");
+    debug("Warning: oldme is NULL!");
     return;
   }
 

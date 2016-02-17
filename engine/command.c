@@ -157,7 +157,7 @@ void command(const char *s)
     else if( strcmp(q, "log")==0 )
     {
       echo("Switching to log file \"%s\"", p);
-      SJC_Log(p);
+      console_log(p);
     }
     else if( strcmp(q, "hulls")==0 )
     {

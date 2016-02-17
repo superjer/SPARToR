@@ -135,7 +135,7 @@ int save_context(const char *name, int context, int savefr)
     if( n < spr_count )
       in_use[n] = 0; // zero means used, -1 means unusued
     else
-      echo("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)", n, spr_count);
+      debug("Warning: sprite #%d is in use but is out of bounds (spr_count=%d)", n, spr_count);
   }
 
   // get count of used sprites, and number each one sequentially in in_use[]

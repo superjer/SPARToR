@@ -595,7 +595,7 @@ void mod_huddraw(Uint32 vidfr)
         SJGL_SetTex( 2 ); // FIXME: NO NO NO!
         SJGL_Blit( &(REC){30, 30, hull[1].x, hull[1].y}, pos->x, pos->y, 0 );
       }
-      SJF_DrawText( pos->x, pos->y, SJF_LEFT, "%s", pop->text );
+      drawtext( pos->x, pos->y, FONT_LEFT, "%s", pop->text );
     }
   }
 }
@@ -722,55 +722,39 @@ void mod_outerdraw(Uint32 vidfr, int w, int h)
   glColor4f(1, 1, 1, 1);
   if( myspr < (int)spr_count )
   {
-    SJF_DrawText( w-sz, sz+ 4, SJF_LEFT,
+    drawtext( w-sz, sz+ 4, FONT_LEFT,
                   "Texture #%d \"%s\"", mytex, mytex < (int)tex_count ? textures[mytex].filename : "ERROR! mytex > tex_count" );
-    SJF_DrawText( w-sz, sz+14, SJF_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
-    SJF_DrawText( w-sz, sz+24, SJF_LEFT, "Layer %d", ylayer );
+    drawtext( w-sz, sz+14, FONT_LEFT, "Sprite #%d \"%s\"", myspr, sprites[myspr].name );
+    drawtext( w-sz, sz+24, FONT_LEFT, "Layer %d", ylayer );
   }
 
   glPopAttrib();
 
-  SJF_DrawText(i_mousex+7, i_mousey+15, SJF_LEFT, "%d", ylayer);
+  drawtext(i_mousex+7, i_mousey+15, FONT_LEFT, "%d", ylayer);
 }
 
 void mod_adv(int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)
 {
   switch( ob->type )
   {
-    case OBJT_MOTHER:
-      assert(ob->size==sizeof(MOTHER_t));
-      assert(objid==0);
-      obj_mother_adv(     objid, a, b, oa, ob );
-      break;
-    case OBJT_GHOST:
-      assert(ob->size==sizeof(GHOST_t));
-      obj_ghost_adv(      objid, a, b, oa, ob );
-      break;
-    case OBJT_DUMMY:
-      assert(ob->size==sizeof(DUMMY_t));
-      obj_dummy_adv(      objid, a, b, oa, ob );
-      break;
-    case OBJT_PLAYER:
-      assert(ob->size==sizeof(PLAYER_t));
-      obj_player_adv(     objid, a, b, oa, ob );
-      break;
-    case OBJT_BULLET:
-      assert(ob->size==sizeof(BULLET_t));
-      obj_bullet_adv(     objid, a, b, oa, ob );
-      break;
-    case OBJT_SLUG:
-      assert(ob->size==sizeof(SLUG_t));
-      obj_slug_adv(       objid, a, b, oa, ob );
-      break;
-    case OBJT_AMIGO:
-      assert(ob->size==sizeof(AMIGO_t));
-      obj_amigo_adv(      objid, a, b, oa, ob );
-      break;
-    case OBJT_AMIGOSWORD:
-      assert(ob->size==sizeof(AMIGOSWORD_t));
-      obj_amigosword_adv( objid, a, b, oa, ob );
-      break;
-  } //end switch ob->type
+    #define DISPATCH(T, func, optional)            \
+      case OBJT_ ## T:                             \
+        assert(ob->size == sizeof(T ## _t));       \
+        optional                                   \
+        obj_ ## func ## _adv(objid, a, b, oa, ob); \
+        break;
+
+    DISPATCH(MOTHER, mother, assert(objid == 0))
+    DISPATCH(GHOST, ghost, )
+    DISPATCH(DUMMY, dummy, )
+    DISPATCH(PLAYER, player, )
+    DISPATCH(BULLET, bullet, )
+    DISPATCH(SLUG, slug, )
+    DISPATCH(AMIGO, amigo, )
+    DISPATCH(AMIGOSWORD, amigosword, )
+
+    #undef DISPATCH
+  }
 }
 
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z )

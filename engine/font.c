@@ -21,17 +21,20 @@
 #define ISCOLORCODE(s) ((s)[0]=='\\' && (s)[1]=='#' && isxdigit((s)[2]) && isxdigit((s)[3]) && isxdigit((s)[4]))
 #define UNHEX(x) (unsigned char)(17*((x)>'9' ? ((x)&~('a'^'A'))-'A'+10 : (x)-'0'))
 
-
-SJF_t SJF = {0, 8, 12, 128,
-  { 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
+GLuint tex = 0;
+static int glyph_w = 8;
+static int glyph_h = 12;
+static int space[256] = {
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<space> - </>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<0> - <?>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<@> - <O>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<P> - <_>
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<`> - <o>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 }, //<p> - <127>
-{
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0    //<p> - <127>
+};
+static char raw[128*128] = {
 "                                                                                                                                "
 "         O                                                                                                                      "
 " OOOO     O      OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO   OOOOO  "
@@ -102,7 +105,7 @@ SJF_t SJF = {0, 8, 12, 128,
 " OOOO     OOO    OOOO     OOOO   OOOOO   O   O   O   O   O   O   O   O   O   O   OOOOO    OOO    O        OOO      O            "
 " O   O   O   O   O   O   O         O     O   O   O   O   O   O   O   O   O   O       O    O      O          O     O O           "
 " O   O   O   O   O   O   O         O     O   O   O   O   O   O    O O    O   O      O     O       O         O    O   O          "
-" OOOO    O   O   OOOO     OOO      O     O   O   O   O   O O O     O      OOO      O      O       O         O                   "
+" OOOO    O   O   OOOO     OOO      O     O   O   O   O   O O O     O      O O      O      O       O         O                   "
 " O       O   O   O  O        O     O     O   O    O O    O O O    O O      O      O       O        O        O                   "
 " O       O   O   O   O       O     O     O   O    O O    O O O   O   O     O     O        O        O        O                   "
 " O        OOO    O   O   OOOO      O      OOOO     O      O O    O   O     O     OOOOO    O         O       O                   "
@@ -138,11 +141,10 @@ SJF_t SJF = {0, 8, 12, 128,
 // -------------------------------------------------------------------------------------------------------------------------------
 "                                                                                                                                "
 "                                                                                                                                "
-  }};
+};
 
-
-//initializes the SuperJer Font library
-void SJF_Init()
+//initializes the font library
+void font_init()
 {
   Uint32 pixels[NATIVE_TEX_SZ*NATIVE_TEX_SZ];
   Uint32 u;
@@ -156,37 +158,37 @@ void SJF_Init()
 
   for( u=0; u<128; u++ )
     for( v=0; v<128; v++ )
-      if( SJF.raw[u+v*128]!=' ' )
+      if( raw[u+v*128]!=' ' )
         pixels[u+v*NATIVE_TEX_SZ] = white;
-      else if( (u<127 && SJF.raw[(u+1)+(v  )*128]!=' ')
-            || (u>0   && SJF.raw[(u-1)+(v  )*128]!=' ')
-            || (v<127 && SJF.raw[(u  )+(v+1)*128]!=' ')
-            || (v>0   && SJF.raw[(u  )+(v-1)*128]!=' ') )
+      else if( (u<127 && raw[(u+1)+(v  )*128]!=' ')
+            || (u>0   && raw[(u-1)+(v  )*128]!=' ')
+            || (v<127 && raw[(u  )+(v+1)*128]!=' ')
+            || (v>0   && raw[(u  )+(v-1)*128]!=' ') )
         pixels[u+v*NATIVE_TEX_SZ] = black;
       else
         pixels[u+v*NATIVE_TEX_SZ] = clear;
 
   //make into a GL texture
   glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-  glDeleteTextures(1, &SJF.tex);
-  glGenTextures(1, &SJF.tex);
+  glDeleteTextures(1, &tex);
+  glGenTextures(1, &tex);
 
-  glBindTexture(GL_TEXTURE_2D, SJF.tex);
+  glBindTexture(GL_TEXTURE_2D, tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, NATIVE_TEX_SZ, NATIVE_TEX_SZ, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
 //draws a single character with GL
-void SJF_DrawCharScaled(int scale, int x, int y, char ch)
+void font_char(int scale, int x, int y, char ch)
 {
-  int sx = (ch%16)*SJF.w;
-  int sy = (ch/16)*SJF.h;
+  int sx = (ch%16)*glyph_w;
+  int sy = (ch/16)*glyph_h;
   int w  = 8;
   int h  = 12;
 
   glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D, SJF.tex);
+  glBindTexture(GL_TEXTURE_2D, tex);
   glBegin(GL_QUADS);
   glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
   glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
@@ -196,9 +198,9 @@ void SJF_DrawCharScaled(int scale, int x, int y, char ch)
 }
 
 //prints a message at location x,y with GL
-//align: SJF_LEFT, SJF_CENTER, SJF_RIGHT
+//align: FONT_LEFT, FONT_CENTER, FONT_RIGHT
 //str and ... work like printf
-void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...)
+void font_text(int scale, int x, int y, int align, const char *str, ...)
 {
   if( !str ) str = "<null>";
 
@@ -210,7 +212,7 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
 
   str = buf;
   if( align >= 0 )
-    x -= SJF_TextExtents(str, 999) / ( align > 0 ? 1 : 2 );
+    x -= font_extents(str, 999) / ( align > 0 ? 1 : 2 );
 
   int sx;
   int sy;
@@ -218,7 +220,7 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
   int h = 12;
 
   glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D, SJF.tex);
+  glBindTexture(GL_TEXTURE_2D, tex);
   glBegin(GL_QUADS);
   glColor4f(1, 1, 1, 1);
   while( *str )
@@ -233,9 +235,9 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
       }
     }
 
-    sx = (*str%16)*SJF.w;
-    sy = (*str/16)*SJF.h;
-    w = SJF.space[(Uint8)*str];
+    sx = (*str%16)*glyph_w;
+    sy = (*str/16)*glyph_h;
+    w = space[(Uint8)*str];
     glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
     glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
     glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
@@ -248,7 +250,7 @@ void SJF_DrawTextScaled(int scale, int x, int y, int align, const char *str, ...
 
 //returns number of pixels text will consume horizontally
 //non-printable characters will cause weird behavior
-int SJF_TextExtents(const char *str, int n)
+int font_extents(const char *str, int n)
 {
   int ext = 0;
   if( str==NULL )
@@ -262,7 +264,7 @@ int SJF_TextExtents(const char *str, int n)
       n -= 4;
       continue;
     }
-    ext += SJF.space[(Uint8)*str++];
+    ext += space[(Uint8)*str++];
   }
   return ext;
 }

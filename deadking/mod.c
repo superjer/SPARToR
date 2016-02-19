@@ -541,22 +541,6 @@ void mod_predraw(Uint32 vidfr)
   }
 }
 
-void mod_draw(int objid, Uint32 vidfrmod, OBJ_t *o)
-{
-  if( !fr[vidfrmod].objs[o->context].type )
-  {
-    echo("No context: can not draw object %d", objid);
-    return;
-  }
-
-  CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
-  switch(o->type)
-  {
-    case OBJT_GHOST:          obj_ghost_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_PERSON:         obj_person_draw(     objid, vidfrmod, o, co );     break;
-  }
-}
-
 void mod_huddraw(Uint32 vidfr)
 {
   Uint32 vidfrmod = vidfr%maxframes;
@@ -743,28 +727,6 @@ void mod_outerdraw(Uint32 vidfr, int w, int h)
   glPopAttrib();
 
   drawtext(i_mousex+7, i_mousey+15, FONT_LEFT, "%d", ylayer);
-}
-
-void mod_adv(int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)
-{
-  switch( ob->type )
-  {
-    case OBJT_MOTHER:
-      assert(ob->size==sizeof(MOTHER_t));
-      assert(objid==0);
-      obj_mother_adv( objid, a, b, oa, ob );
-      break;
-
-    case OBJT_GHOST:
-      assert(ob->size==sizeof(GHOST_t));
-      obj_ghost_adv(  objid, a, b, oa, ob );
-      break;
-
-    case OBJT_PERSON:
-      assert(ob->size==sizeof(PERSON_t));
-      obj_person_adv( objid, a, b, oa, ob );
-      break;
-  } //end switch ob->type
 }
 
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z )

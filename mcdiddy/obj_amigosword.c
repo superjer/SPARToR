@@ -10,9 +10,9 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 
-void obj_amigosword_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(AMIGOSWORD)
 {
   AMIGOSWORD_t *sw = o->data;
   int posx = sw->pos.x;
@@ -21,7 +21,7 @@ void obj_amigosword_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   SJGL_Blit( &(REC){ 200, 50+50*(hotfr%3), 56, 50 }, posx-25, posy-28, sw->pos.y );
 }
 
-void obj_amigosword_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(AMIGOSWORD)
 {
   AMIGOSWORD_t *sw = ob->data;
   sw->spincounter++;

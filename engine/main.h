@@ -34,9 +34,7 @@
 //macros
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
-#define TRY do{
-#define HARDER }while(0);
-#define SWAP(a,b,T) TRY T SWAP_tmp__ = (a); (a) = (b); (b) = SWAP_tmp__; HARDER
+#define SWAP(a,b,T) do{ T SWAP_tmp__ = (a); (a) = (b); (b) = SWAP_tmp__; }while(0)
 #define HAS(v,flags) (((v)&(flags)) == (flags))
 #define COUNTOF(ident) ((sizeof (ident)) / (sizeof *(ident)))
 
@@ -164,11 +162,31 @@ typedef struct {
   int    releasecmd;
 } INPUTNAME_t;
 
-// object struct definitions
+//macro all object struct definitions
 #define EXPOSE(T,N,A) T N A;
 #define HIDE(X) X
 #define STRUCT() typedef struct {
 #define ENDSTRUCT(TYPE) } TOKEN_PASTE(TYPE,_t);
+#include "engine_structs.h"
+#include "game_structs.h"
+#undef EXPOSE
+#undef HIDE
+#undef STRUCT
+#undef ENDSTRUCT
+
+#define ARGS_ADVANCE (int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)
+#define ARGS_DRAW (int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co)
+
+#define PROTO_ADVANCE(T) void TOKEN_PASTE(advance_,T) ARGS_ADVANCE
+#define PROTO_DRAW(T) void TOKEN_PASTE(draw_,T) ARGS_DRAW
+
+//macro all advance_object and draw_object prototypes
+#define EXPOSE(T,N,A)
+#define HIDE(X)
+#define STRUCT()                                  \
+  void TOKEN_PASTE(advance_,TYPE) ARGS_ADVANCE; \
+  void TOKEN_PASTE(draw_,TYPE) ARGS_DRAW;
+#define ENDSTRUCT(TYPE)
 #include "engine_structs.h"
 #include "game_structs.h"
 #undef EXPOSE

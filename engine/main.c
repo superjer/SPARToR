@@ -83,6 +83,10 @@ static void init_flexers()
         #define ENDSTRUCT(TYPE)
         #include "engine_structs.h"
         #include "game_structs.h"
+        #undef EXPOSE
+        #undef HIDE
+        #undef STRUCT
+        #undef ENDSTRUCT
 }
 
 #ifdef __APPLE__
@@ -271,7 +275,7 @@ static void readvanceobject(char recheck[2][maxobjs], int r, int i, Uint32 a, Ui
 
                 for( iy=0; iy<=upy-dny; iy++ ) for( ix=0; ix<=upx-dnx; ix++ ) for( iz=0; iz<=upz-dnz; iz++ )
                 {
-                        int x = oldmevel->x>0 ? dnx+ix : upx-ix; //iteriate in an order matching direction of movement
+                        int x = oldmevel->x>0 ? dnx+ix : upx-ix; //iterate in an order matching direction of movement
                         int y = oldmevel->y>0 ? dny+iy : upy-iy;
                         int z = oldmevel->z>0 ? dnz+iz : upz-iz;
 
@@ -400,8 +404,22 @@ void advance()
                 {
                         OBJ_t *oa = fr[a].objs+i;
                         OBJ_t *ob = fr[b].objs+i;
-                        if( ob->type )
-                                mod_adv(i, a, b, oa, ob);
+                        #define EXPOSE(T,N,A)
+                        #define HIDE(X)
+                        #define STRUCT()                                      \
+                        case TOKEN_PASTE(OBJT_,TYPE):                       \
+                                assert(ob->size == sizeof(TOKEN_PASTE(TYPE,_t))); \
+                                TOKEN_PASTE(advance_,TYPE)(i, a, b, oa, ob);      \
+                                break;
+                        #define ENDSTRUCT(TYPE)
+                        switch( ob->type )
+                        {
+                                #include "game_structs.h"
+                        }
+                        #undef EXPOSE
+                        #undef HIDE
+                        #undef STRUCT
+                        #undef ENDSTRUCT
                 }
 
                 adv_game_time += SDL_GetTicks() - adv_game_start;

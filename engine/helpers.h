@@ -1,6 +1,8 @@
 #ifndef SPARTOR_HELPERS_
 #define SPARTOR_HELPERS_
 
+#include "main.h"
+
 // macro wrapper for thread-safe strtok-like function tok_
 #define tok(buf,sep) tok_(&(buf),(sep))
 

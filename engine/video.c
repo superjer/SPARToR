@@ -214,11 +214,35 @@ void render()
   mod_predraw(vidfr);
 
   //display objects
-  for( i=0; i<maxobjs; i++ )
+  int objid;
+  for( objid=0; objid<maxobjs; objid++ )
   {
-    OBJ_t *o = fr[vidfrmod].objs+i;
-    if( o->flags&OBJF_VIS )
-      mod_draw(i, vidfrmod, o); // have the mod draw the actual thing
+    OBJ_t *o = fr[vidfrmod].objs+objid;
+    if( !(o->flags & OBJF_VIS) )
+      continue;
+
+    if( !fr[vidfrmod].objs[o->context].type )
+    {
+      echo("No context: can not draw object %d", objid);
+      return;
+    }
+    
+    CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
+    switch(o->type)
+    {
+      #define EXPOSE(T,N,A)
+      #define HIDE(X)
+      #define STRUCT()                                      \
+        case TOKEN_PASTE(OBJT_,TYPE):                       \
+          TOKEN_PASTE(draw_,TYPE)(objid, vidfrmod, o, co);  \
+          break;
+      #define ENDSTRUCT(TYPE)
+      #include "game_structs.h"
+      #undef EXPOSE
+      #undef HIDE
+      #undef STRUCT
+      #undef ENDSTRUCT
+    }
   }
 
   mod_postdraw(vidfr);

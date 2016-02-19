@@ -10,14 +10,14 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "helpers.h"
 
 //FIXME REMOVE! force amigo to flykick
 int flykick = 0;
 //
 
-void obj_amigo_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(AMIGO)
 {
   typedef struct { int x, y, w, h, dx, dy; } XSPR;
   XSPR tip = {0,0,0,0,0,0}; // extra sprite for tip of sword
@@ -80,7 +80,7 @@ void obj_amigo_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   SJGL_Blit(&(REC){ tip.x, tip.y, tip.w, tip.h }, c-34+tip.dx, d-32+tip.dy, z);
 }
 
-void obj_amigo_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(AMIGO)
 {
   AMIGO_t   *am            = ob->data;
   float      amigo_gravity = 0.6f;

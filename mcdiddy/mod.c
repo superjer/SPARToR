@@ -551,27 +551,6 @@ void mod_predraw(Uint32 vidfr)
   }
 }
 
-void mod_draw(int objid, Uint32 vidfrmod, OBJ_t *o)
-{
-  if( !fr[vidfrmod].objs[o->context].type )
-  {
-    echo("No context: can not draw object %d", objid);
-    return;
-  }
-
-  CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
-  switch(o->type)
-  {
-    case OBJT_PLAYER:         obj_player_draw(     objid, vidfrmod, o, co );     break;
-    case OBJT_GHOST:          obj_ghost_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_BULLET:         obj_bullet_draw(     objid, vidfrmod, o, co );     break;
-    case OBJT_SLUG:           obj_slug_draw(       objid, vidfrmod, o, co );     break;
-    case OBJT_DUMMY:          obj_dummy_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_AMIGO:          obj_amigo_draw(      objid, vidfrmod, o, co );     break;
-    case OBJT_AMIGOSWORD:     obj_amigosword_draw( objid, vidfrmod, o, co );     break;
-  }
-}
-
 void mod_huddraw(Uint32 vidfr)
 {
   // draw HUD here!
@@ -731,30 +710,6 @@ void mod_outerdraw(Uint32 vidfr, int w, int h)
   glPopAttrib();
 
   drawtext(i_mousex+7, i_mousey+15, FONT_LEFT, "%d", ylayer);
-}
-
-void mod_adv(int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)
-{
-  switch( ob->type )
-  {
-    #define DISPATCH(T, func, optional)            \
-      case OBJT_ ## T:                             \
-        assert(ob->size == sizeof(T ## _t));       \
-        optional                                   \
-        obj_ ## func ## _adv(objid, a, b, oa, ob); \
-        break;
-
-    DISPATCH(MOTHER, mother, assert(objid == 0))
-    DISPATCH(GHOST, ghost, )
-    DISPATCH(DUMMY, dummy, )
-    DISPATCH(PLAYER, player, )
-    DISPATCH(BULLET, bullet, )
-    DISPATCH(SLUG, slug, )
-    DISPATCH(AMIGO, amigo, )
-    DISPATCH(AMIGOSWORD, amigosword, )
-
-    #undef DISPATCH
-  }
 }
 
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z )

@@ -10,10 +10,10 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "audio.h"
 
-void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(SLUG)
 {
   SLUG_t *sl = o->data;
 
@@ -23,7 +23,7 @@ void obj_slug_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
     sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), sl->pos.x, sl->pos.y );
 }
 
-void obj_slug_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(SLUG)
 {
   int i;
   SLUG_t    *sl = ob->data;

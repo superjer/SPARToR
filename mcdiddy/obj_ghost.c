@@ -10,7 +10,7 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "saveload.h"
 #include "sprite.h"
 #include "sprite_helpers.h"
@@ -20,7 +20,7 @@
 static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
 
 
-void obj_ghost_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(GHOST)
 {
   if( !v_drawhulls ) return;
 
@@ -28,7 +28,7 @@ void obj_ghost_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   //GHOST_t *gh = o->data;
 }
 
-void obj_ghost_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(GHOST)
 {
   GHOST_t   *gh = ob->data;
   PLAYER_t  *pl = fr[b].objs[gh->avatar].data;

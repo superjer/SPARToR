@@ -10,8 +10,8 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#include "mod.h"
 #include "main.h"
-#include "obj_.h"
 
 #define SPRITECOUNT 10
 
@@ -20,7 +20,7 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe);
 static void get_slug_sprites(   SPRITE_T **sprs, PERSON_t *pe);
 
 
-void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(PERSON)
 {
   PERSON_t *pe = o->data;
   int i;
@@ -46,7 +46,7 @@ void obj_person_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   sprblit3d( &SM(shadow), pe->pos.x, pe->pos.y, pe->pos.z );
 }
 
-void obj_person_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(PERSON)
 {
   PERSON_t  *oldpe = oa->data;
   PERSON_t  *newpe = ob->data;

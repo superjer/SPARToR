@@ -10,15 +10,15 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 
-void obj_dummy_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(DUMMY)
 {
   DUMMY_t *du = o->data;
   sprblit( &SM(tnl_weight_silver), du->pos.x, du->pos.y );
 }
 
-void obj_dummy_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(DUMMY)
 {
   DUMMY_t *du = ob->data;
 

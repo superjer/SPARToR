@@ -10,9 +10,9 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 
-void obj_bullet_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(BULLET)
 {
   BULLET_t *bu = o->data;
   int g = bu->pos.x;
@@ -21,7 +21,7 @@ void obj_bullet_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
   SJGL_Blit( &(REC){144,150,4,4}, g-2, h-2, NATIVEH );
 }
 
-void obj_bullet_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(BULLET)
 {
   int i;
   BULLET_t  *bu = ob->data;

@@ -10,7 +10,7 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "sprite.h"
 #include "audio.h"
 #include "helpers.h"
@@ -19,7 +19,7 @@
 int    setmodel = -1;
 //
 
-void obj_player_draw( int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co )
+PROTO_DRAW(PLAYER)
 {
   PLAYER_t *pl = o->data;
   int c = pl->pos.x;
@@ -100,7 +100,7 @@ void create_bullet(Uint32 objid, Uint32 b, OBJ_t *ob)
   pl->projectiles++;
 }
 
-void obj_player_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_ADVANCE(PLAYER)
 {
   int i;
   PLAYER_t *oldme = oa->data;

@@ -10,13 +10,17 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "helpers.h"
 
 int in_party(MOTHER_t *mo, int objid);
 void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b);
 
-void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_DRAW(MOTHER)
+{
+}
+
+PROTO_ADVANCE(MOTHER)
 {
   int i;
   MOTHER_t *mo = ob->data;

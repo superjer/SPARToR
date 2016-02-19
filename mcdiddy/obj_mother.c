@@ -10,7 +10,7 @@
  **  http://github.com/superjer/SPARToR
  **/
 
-#include "obj_.h"
+#include "mod.h"
 #include "helpers.h"
 
 void mk_ghost_and_player(int client, int context, Uint32 frame)
@@ -43,7 +43,11 @@ void mk_ghost_and_player(int client, int context, Uint32 frame)
   pl->facingr        = 1;
 }
 
-void obj_mother_adv( int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob )
+PROTO_DRAW(MOTHER)
+{
+}
+
+PROTO_ADVANCE(MOTHER)
 {
   int i, j;
 

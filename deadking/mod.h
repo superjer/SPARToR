@@ -18,7 +18,6 @@
 #include "input.h"
 #include "patt.h"
 #include "mod_private.h"
-#include "obj_.h"
 #include "sprite.h"
 #include <math.h>
 
@@ -43,12 +42,8 @@ int  mod_mkcmd(FCMD_t *c, int device, int sym, int press);
 int  mod_command(char *q, char *args);
 void mod_loadsurfs(int quit);
 void mod_predraw(Uint32 vidfr);
-void mod_draw(int objid, Uint32 vidfr, OBJ_t *o);
 void mod_postdraw(Uint32 vidfr);
 void mod_huddraw(Uint32 vidfr);
 void mod_outerdraw(Uint32 vidfr, int w, int h);
-void mod_adv(int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob);
-
 
 #endif
-

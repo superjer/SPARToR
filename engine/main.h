@@ -43,6 +43,9 @@
 
 #define assert(expr) { if(!(expr)) echo( "%s(%d) Assert failed! %s", __FILE__, __LINE__, #expr ); }
 
+#define BEGIN "structbegin.h"
+#define END "structend.h"
+
 #define TOKEN_PASTE_(a,b) a ## b
 #define TOKEN_PASTE(a,b) TOKEN_PASTE_(a,b)
 #define STRINGIFY_(a) #a
@@ -50,29 +53,29 @@
 
 // list of object types
 enum {
-  #define EXPOSE(T,N,A)
-  #define HIDE(X)
-  #define STRUCT() TOKEN_PASTE(OBJT_,TYPE),
-  #define ENDSTRUCT(TYPE)
-  #include "engine_structs.h"
-  #include "game_structs.h"
-  #undef EXPOSE
-  #undef HIDE
-  #undef STRUCT
-  #undef ENDSTRUCT
-  OBJT_MAX
+        #define EXPOSE(T,N,A)
+        #define HIDE(X)
+        #define STRUCT() TOKEN_PASTE(OBJT_,TYPE),
+        #define ENDSTRUCT(TYPE)
+        #include "engine_structs.h"
+        #include "game_structs.h"
+        #undef EXPOSE
+        #undef HIDE
+        #undef STRUCT
+        #undef ENDSTRUCT
+        OBJT_MAX
 };
 
 struct {
-  const char *name;
-  ptrdiff_t pos;
-  ptrdiff_t vel;
-  ptrdiff_t hull;
-  ptrdiff_t pvel;
-  ptrdiff_t model;
-  ptrdiff_t refcount;
+        const char *name;
+        ptrdiff_t pos;
+        ptrdiff_t vel;
+        ptrdiff_t hull;
+        ptrdiff_t pvel;
+        ptrdiff_t model;
+        ptrdiff_t refcount;
 #ifdef FLEXER_EXTRAS
-  FLEXER_EXTRAS
+        FLEXER_EXTRAS
 #endif
 } flexer[OBJT_MAX];
 
@@ -107,59 +110,59 @@ struct {
 #define DIMETRIC     2
 
 typedef struct {
-  float     x, y, z;
+        float     x, y, z;
 } V;
 
 // frame buffer structures //
 typedef struct {
-  char      cmd;
-  char      mousehi;
-  char      mousex;
-  char      mousey;
-  short     flags;
-  size_t    datasz;
-  Uint8     data[MAXCMDDATA];
+        char      cmd;
+        char      mousehi;
+        char      mousex;
+        char      mousey;
+        short     flags;
+        size_t    datasz;
+        Uint8     data[MAXCMDDATA];
 } FCMD_t;
 
 typedef struct {
-  short     type;
-  short     flags;
-  int       context;
-  size_t    size;
-  void     *data;
+        short     type;
+        short     flags;
+        int       context;
+        size_t    size;
+        void     *data;
 } OBJ_t;
 
 typedef struct {
-  int       dirty;
-  Uint32    realfr;
-  FCMD_t   *cmds;
-  OBJ_t    *objs;
+        int       dirty;
+        Uint32    realfr;
+        FCMD_t   *cmds;
+        OBJ_t    *objs;
 } FRAME_t;
 
 // map structures //
 typedef struct {
-  short     flags;
-  int       spr;
-  Uint8     data[CBDATASIZE];
+        short     flags;
+        int       spr;
+        Uint8     data[CBDATASIZE];
 } CB;
 
 // texture structures //
 typedef struct {
-  char   *filename;
-  int     generated;
-  GLuint  glname;
+        char   *filename;
+        int     generated;
+        GLuint  glname;
 } TEX_T;
 
 typedef struct {
-  char   name[100];
-  int    num;
+        char   name[100];
+        int    num;
 } SYS_TEX_T;
 
 // input structures //
 typedef struct {
-  char   name[16];
-  int    presscmd;
-  int    releasecmd;
+        char   name[16];
+        int    presscmd;
+        int    releasecmd;
 } INPUTNAME_t;
 
 //macro all object struct definitions
@@ -183,9 +186,9 @@ typedef struct {
 //macro all advance_object and draw_object prototypes
 #define EXPOSE(T,N,A)
 #define HIDE(X)
-#define STRUCT()                                  \
-  void TOKEN_PASTE(advance_,TYPE) ARGS_ADVANCE; \
-  void TOKEN_PASTE(draw_,TYPE) ARGS_DRAW;
+#define STRUCT()                                      \
+        void TOKEN_PASTE(advance_,TYPE) ARGS_ADVANCE; \
+        void TOKEN_PASTE(draw_,TYPE) ARGS_DRAW;
 #define ENDSTRUCT(TYPE)
 #include "engine_structs.h"
 #include "game_structs.h"

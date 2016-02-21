@@ -2,7 +2,6 @@
 #ifndef DEADKING_MOD_H_
 #define DEADKING_MOD_H_
 
-
 #ifdef DOGLEW
 #include <GL/glew.h>
 #else
@@ -21,7 +20,6 @@
 #include "sprite.h"
 #include <math.h>
 
-
 extern SYS_TEX_T  sys_tex[];
 extern size_t     num_sys_tex;
 
@@ -30,7 +28,6 @@ extern int numinputnames;
 
 extern CB *hack_map; //FIXME REMOVE SOMEDAY
 extern CB *hack_dmap;
-
 
 void mod_setup(Uint32 setupfr);
 void mod_recvobj(OBJ_t *o);

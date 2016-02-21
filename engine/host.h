@@ -10,12 +10,12 @@
 #include "SDL_net.h"
 
 typedef struct {
-  IPaddress addr;
-  int connected;
-  int lastconga;
-  size_t buflen;
-  size_t maxlen;
-  Uint8 *buf;
+        IPaddress addr;
+        int connected;
+        int lastconga;
+        size_t buflen;
+        size_t maxlen;
+        Uint8 *buf;
 } CLIENT_t;
 
 void host_send_state(int clientid);

@@ -25,14 +25,14 @@ GLuint tex = 0;
 static int glyph_w = 8;
 static int glyph_h = 12;
 static int space[256] = {
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<space> - </>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<0> - <?>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<@> - <O>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<P> - <_>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<`> - <o>
-    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0    //<p> - <127>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //non-printable
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<space> - </>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<0> - <?>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<@> - <O>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<P> - <_>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,   //<`> - <o>
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0    //<p> - <127>
 };
 static char raw[128*128] = {
 "                                                                                                                                "
@@ -146,55 +146,55 @@ static char raw[128*128] = {
 //initializes the font library
 void font_init()
 {
-  Uint32 pixels[NATIVE_TEX_SZ*NATIVE_TEX_SZ];
-  Uint32 u;
-  Uint32 v;
+        Uint32 pixels[NATIVE_TEX_SZ*NATIVE_TEX_SZ];
+        Uint32 u;
+        Uint32 v;
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  Uint32 black = 0x000000FF, white = 0xFFFFFFFF, clear = 0x00000000;
-#else
-  Uint32 black = 0xFF000000, white = 0xFFFFFFFF, clear = 0x00000000;
-#endif
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                Uint32 black = 0x000000FF, white = 0xFFFFFFFF, clear = 0x00000000;
+        #else
+                Uint32 black = 0xFF000000, white = 0xFFFFFFFF, clear = 0x00000000;
+        #endif
 
-  for( u=0; u<128; u++ )
-    for( v=0; v<128; v++ )
-      if( raw[u+v*128]!=' ' )
-        pixels[u+v*NATIVE_TEX_SZ] = white;
-      else if( (u<127 && raw[(u+1)+(v  )*128]!=' ')
-            || (u>0   && raw[(u-1)+(v  )*128]!=' ')
-            || (v<127 && raw[(u  )+(v+1)*128]!=' ')
-            || (v>0   && raw[(u  )+(v-1)*128]!=' ') )
-        pixels[u+v*NATIVE_TEX_SZ] = black;
-      else
-        pixels[u+v*NATIVE_TEX_SZ] = clear;
+        for( u=0; u<128; u++ )
+                for( v=0; v<128; v++ )
+                        if( raw[u+v*128]!=' ' )
+                                pixels[u+v*NATIVE_TEX_SZ] = white;
+                        else if( (u<127 && raw[(u+1)+(v  )*128]!=' ')
+                              || (u>0   && raw[(u-1)+(v  )*128]!=' ')
+                              || (v<127 && raw[(u  )+(v+1)*128]!=' ')
+                              || (v>0   && raw[(u  )+(v-1)*128]!=' ') )
+                                pixels[u+v*NATIVE_TEX_SZ] = black;
+                        else
+                                pixels[u+v*NATIVE_TEX_SZ] = clear;
 
-  //make into a GL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-  glDeleteTextures(1, &tex);
-  glGenTextures(1, &tex);
+        //make into a GL texture
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glDeleteTextures(1, &tex);
+        glGenTextures(1, &tex);
 
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, NATIVE_TEX_SZ, NATIVE_TEX_SZ, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, NATIVE_TEX_SZ, NATIVE_TEX_SZ, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
 //draws a single character with GL
 void font_char(int scale, int x, int y, char ch)
 {
-  int sx = (ch%16)*glyph_w;
-  int sy = (ch/16)*glyph_h;
-  int w  = 8;
-  int h  = 12;
+        int sx = (ch%16)*glyph_w;
+        int sy = (ch/16)*glyph_h;
+        int w  = 8;
+        int h  = 12;
 
-  glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glBegin(GL_QUADS);
-  glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
-  glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
-  glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
-  glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
-  glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glBegin(GL_QUADS);
+        glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
+        glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
+        glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
+        glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
+        glEnd();
 }
 
 //prints a message at location x,y with GL
@@ -202,69 +202,69 @@ void font_char(int scale, int x, int y, char ch)
 //str and ... work like printf
 void font_text(int scale, int x, int y, int align, const char *str, ...)
 {
-  if( !str ) str = "<null>";
+        if( !str ) str = "<null>";
 
-  char buf[800];
-  va_list args;
-  va_start(args, str);
-  vsnprintf(buf, 800, str, args);
-  va_end(args);
+        char buf[800];
+        va_list args;
+        va_start(args, str);
+        vsnprintf(buf, 800, str, args);
+        va_end(args);
 
-  str = buf;
-  if( align >= 0 )
-    x -= font_extents(str, 999) / ( align > 0 ? 1 : 2 );
+        str = buf;
+        if( align >= 0 )
+                x -= font_extents(str, 999) / ( align > 0 ? 1 : 2 );
 
-  int sx;
-  int sy;
-  int w;
-  int h = 12;
+        int sx;
+        int sy;
+        int w;
+        int h = 12;
 
-  glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glBegin(GL_QUADS);
-  glColor4f(1, 1, 1, 1);
-  while( *str )
-  {
-    if( ISCOLORCODE(str) )
-    {
-      glColor3ub( UNHEX(str[2]), UNHEX(str[3]), UNHEX(str[4]) );
-      if( str[5] )
-      {
-        str += 5;
-        continue;
-      }
-    }
+        glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glBegin(GL_QUADS);
+        glColor4f(1, 1, 1, 1);
+        while( *str )
+        {
+                if( ISCOLORCODE(str) )
+                {
+                        glColor3ub( UNHEX(str[2]), UNHEX(str[3]), UNHEX(str[4]) );
+                        if( str[5] )
+                        {
+                                str += 5;
+                                continue;
+                        }
+                }
 
-    sx = (*str%16)*glyph_w;
-    sy = (*str/16)*glyph_h;
-    w = space[(Uint8)*str];
-    glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
-    glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
-    glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
-    glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
-    x += w * scale;
-    str++;
-  }
-  glEnd();
+                sx = (*str%16)*glyph_w;
+                sy = (*str/16)*glyph_h;
+                w = space[(Uint8)*str];
+                glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
+                glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
+                glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
+                glTexCoord2i(sx  , sy+h); glVertex2i(x        , y+h*scale);
+                x += w * scale;
+                str++;
+        }
+        glEnd();
 }
 
 //returns number of pixels text will consume horizontally
 //non-printable characters will cause weird behavior
 int font_extents(const char *str, int n)
 {
-  int ext = 0;
-  if( str==NULL )
-    return 0;
+        int ext = 0;
+        if( str==NULL )
+                return 0;
 
-  while( *str && n-- > 0 )
-  {
-    if( ISCOLORCODE(str) && str[5] )
-    {
-      str += 5;
-      n -= 4;
-      continue;
-    }
-    ext += space[(Uint8)*str++];
-  }
-  return ext;
+        while( *str && n-- > 0 )
+        {
+                if( ISCOLORCODE(str) && str[5] )
+                {
+                        str += 5;
+                        n -= 4;
+                        continue;
+                }
+                ext += space[(Uint8)*str++];
+        }
+        return ext;
 }

@@ -1,4 +1,2 @@
-
 ENDSTRUCT(TYPE)
 #undef TYPE
-

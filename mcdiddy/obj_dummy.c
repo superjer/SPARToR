@@ -14,22 +14,21 @@
 
 PROTO_DRAW(DUMMY)
 {
-  DUMMY_t *du = o->data;
-  sprblit( &SM(tnl_weight_silver), du->pos.x, du->pos.y );
+        DUMMY_t *du = o->data;
+        sprblit( &SM(tnl_weight_silver), du->pos.x, du->pos.y );
 }
 
 PROTO_ADVANCE(DUMMY)
 {
-  DUMMY_t *du = ob->data;
+        DUMMY_t *du = ob->data;
 
-  // friction
-  if(      du->vel.x> 0.1f ) du->vel.x -= 0.1f;
-  else if( du->vel.x>-0.1f ) du->vel.x  = 0.0f;
-  else                       du->vel.x += 0.1f;
+        // friction
+        if(      du->vel.x> 0.1f ) du->vel.x -= 0.1f;
+        else if( du->vel.x>-0.1f ) du->vel.x  = 0.0f;
+        else                       du->vel.x += 0.1f;
 
-  if( objid==(int)(hotfr+100)%2000 ) //tee-hee
-    du->vel.x += (float)(b%4)-1.5;
+        if( objid==(int)(hotfr+100)%2000 ) //tee-hee
+                du->vel.x += (float)(b%4)-1.5;
 
-  du->vel.y += 0.7f;        //gravity
+        du->vel.y += 0.7f;        //gravity
 }
-

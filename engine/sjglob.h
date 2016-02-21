@@ -11,9 +11,9 @@
 #define SJGLOB_NOESCAPE 2
 
 typedef struct {
-  size_t   gl_pathc;
-  char   **gl_pathv;
-  size_t   gl_offs;
+        size_t   gl_pathc;
+        char   **gl_pathv;
+        size_t   gl_offs;
 } SJGLOB_T;
 
 #else //ifdef _WIN32

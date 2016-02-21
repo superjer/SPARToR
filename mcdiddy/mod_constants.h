@@ -19,12 +19,12 @@
 
 // Amigo's states
 enum {
-  AMIGO_HELLO,
-  AMIGO_COOLDOWN,
-  AMIGO_JUMP,
-  AMIGO_SLASH,
-  AMIGO_FLYKICK,
-  AMIGO_DASH
+        AMIGO_HELLO,
+        AMIGO_COOLDOWN,
+        AMIGO_JUMP,
+        AMIGO_SLASH,
+        AMIGO_FLYKICK,
+        AMIGO_DASH
 };
 
 #endif

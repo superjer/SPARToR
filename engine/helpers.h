@@ -9,8 +9,8 @@
 int pointlis_add(void ***list, void *item);
 char *tok_(char **restrict buf, const char *restrict sep);
 
-#define mkobj(t, slot, context, frame, flags) \
-  mkobj_(sizeof(t ## _t), OBJT_ ## t, slot, context, frame, flags)
+#define mkobj(t, slot, context, frame, flags)                            \
+        mkobj_(sizeof(t ## _t), OBJT_ ## t, slot, context, frame, flags)
 
 void *mkobj_(size_t sz, int type, int *slot, int context, int frame, int flags);
 

@@ -36,4 +36,3 @@ void font_text(int scale, int x, int y, int align, const char *str, ...);
 int font_extents(const char *str, int n);
 
 #endif
-

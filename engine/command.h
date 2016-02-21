@@ -2,9 +2,9 @@
 #define SPARTOR_COMMAND_H_
 
 enum NETMODE {
-  NM_NONE = 0,
-  NM_HOST,
-  NM_CLIENT,
+        NM_NONE = 0,
+        NM_HOST,
+        NM_CLIENT,
 };
 
 extern int netmode;

@@ -19,24 +19,24 @@
 #define RING_SIZE 6
 
 typedef struct {
-  int         count;            // number of packets in the ring segment
-  UDPpacket **pkt;              // all the packets
+        int         count;            // number of packets in the ring segment
+        UDPpacket **pkt;              // all the packets
 } RINGSEG_t;
 
 typedef struct {
-  IPaddress addr;               // address of peer
-  int       state;              // connection state, new, connected, etc.
-  int       desync;             // not meaningful yet
-  int       outconga;           // the next conga to send
-  int       readconga;          // the next conga for the game to read
-  int       inconga;            // the latest conga we have
-  int       inpart;             // the latest part we have
-  int       needconga;          // the earliest conga we need
-  int       needpart;           // the earliest part we need
-  int       peerconga;          // the latest sequential conga of ours the peer has
-  int       peerpart;           // the latest sequential part of ours the peer has
-  RINGSEG_t ringout[RING_SIZE]; // ring buffer outgoing
-  RINGSEG_t ringin[RING_SIZE];  // ring buffer incoming
+        IPaddress addr;               // address of peer
+        int       state;              // connection state, new, connected, etc.
+        int       desync;             // not meaningful yet
+        int       outconga;           // the next conga to send
+        int       readconga;          // the next conga for the game to read
+        int       inconga;            // the latest conga we have
+        int       inpart;             // the latest part we have
+        int       needconga;          // the earliest conga we need
+        int       needpart;           // the earliest part we need
+        int       peerconga;          // the latest sequential conga of ours the peer has
+        int       peerpart;           // the latest sequential part of ours the peer has
+        RINGSEG_t ringout[RING_SIZE]; // ring buffer outgoing
+        RINGSEG_t ringin[RING_SIZE];  // ring buffer incoming
 } CONNEX_t;
 
 extern int net_retries;

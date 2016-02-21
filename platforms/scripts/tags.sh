@@ -13,14 +13,14 @@ do
         -e 's/^ *EXPOSE(\([^,]*\),\([^,]*\),\([^,]*\)).*$/\1 \2\3; \/\/~:~\0/' \
         $file.bak                                                              \
         | awk -F'('                                                            \
-        '                  { nom=1; }
-        $1 ~ "^ *TYPE$"    { nom=0; type=$2; print "typedef struct " $2 "_t { //" $0; }
-        $1 ~ "^ *STRUCT$" ||
-        $1 ~ "^ *EXPOSE$" ||
-        $1 ~ "^ *HIDE$"   ||
-        $1 ~ "^ *)"        { nom=0; print "//" $0; }
-        $1 ~ "endstruct.h" { nom=0; print "} " type "_t;"; }
-        nom                { print $0; }
+        '                   { nom=1; }
+        $1 ~ "^ *TYPE$"     { nom=0; type=$2; print "typedef struct " $2 "_t { //" $0; }
+        $1 ~ "include *BEGIN" ||
+        $1 ~ "^ *EXPOSE$"     ||
+        $1 ~ "^ *HIDE$"       ||
+        $1 ~ "^ *)"         { nom=0; print "//" $0; }
+        $1 ~ "include *END" { nom=0; print "} " type "_t;"; }
+        nom                 { print $0; }
         ' >$file
 done
 

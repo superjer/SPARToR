@@ -23,12 +23,12 @@
 #include "command.h"
 #include "pack.h"
 
-Uint8 *packframe(Uint32 packfr, size_t *n)
+unsigned char *packframe(unsigned int packfr, size_t *n)
 {
-        FRAME_t *pfr  = fr + packfr % maxframes;
-        int      i;
-        size_t   s    = 80;
-        Uint8   *data = malloc(s);
+        FRAME_t       *pfr  = fr + packfr % maxframes;
+        int            i;
+        size_t         s    = 80;
+        unsigned char *data = malloc(s);
 
         *n = 0;
 
@@ -54,12 +54,12 @@ Uint8 *packframe(Uint32 packfr, size_t *n)
         return data;
 }
 
-Uint8 *packframecmds(Uint32 packfr, size_t *n)
+unsigned char *packframecmds(unsigned int packfr, size_t *n)
 {
-        FRAME_t *pfr  = fr + packfr % maxframes;
-        int      i;
-        size_t   s    = maxclients*6+4;
-        Uint8   *data = malloc(s);
+        FRAME_t       *pfr  = fr + packfr % maxframes;
+        int            i;
+        size_t         s    = maxclients*6+4;
+        unsigned char *data = malloc(s);
 
         *n = 0;
 
@@ -88,7 +88,7 @@ Uint8 *packframecmds(Uint32 packfr, size_t *n)
         return data;
 }
 
-int unpackframe(Uint32 packfr, Uint8 *data, size_t len)
+int unpackframe(unsigned int packfr, unsigned char *data, size_t len)
 {
         FRAME_t *pfr = fr + packfr % maxframes;
         int i;
@@ -129,7 +129,7 @@ int unpackframe(Uint32 packfr, Uint8 *data, size_t len)
         return 0;
 }
 
-int unpackframecmds(Uint32 packfr, Uint8 *data, size_t len)
+int unpackframecmds(unsigned int packfr, unsigned char *data, size_t len)
 {
         FRAME_t *pfr = fr + packfr % maxframes;
         int i;
@@ -171,11 +171,11 @@ int unpackframecmds(Uint32 packfr, Uint8 *data, size_t len)
         return n;
 }
 
-void packbytes(Uint8 *_data, Uint64 value, size_t *_offset, int width)
+void packbytes(unsigned char *_data, unsigned long value, size_t *_offset, int width)
 {
-        static Uint8  *data;
-        static size_t *offset;
-        size_t         n = 0;
+        static unsigned char *data;
+        static size_t        *offset;
+        size_t                n = 0;
 
         if( _data )
         {
@@ -187,24 +187,24 @@ void packbytes(Uint8 *_data, Uint64 value, size_t *_offset, int width)
 
         switch( width )
         {
-                case 8: *(data+(*offset)++) = (Uint8)(value>>56);
-                case 7: *(data+(*offset)++) = (Uint8)(value>>48);
-                case 6: *(data+(*offset)++) = (Uint8)(value>>40);
-                case 5: *(data+(*offset)++) = (Uint8)(value>>32);
-                case 4: *(data+(*offset)++) = (Uint8)(value>>24);
-                case 3: *(data+(*offset)++) = (Uint8)(value>>16);
-                case 2: *(data+(*offset)++) = (Uint8)(value>>8 );
-                case 1: *(data+(*offset)++) = (Uint8)(value    );
+                case 8: *(data+(*offset)++) = (unsigned char)(value>>56);
+                case 7: *(data+(*offset)++) = (unsigned char)(value>>48);
+                case 6: *(data+(*offset)++) = (unsigned char)(value>>40);
+                case 5: *(data+(*offset)++) = (unsigned char)(value>>32);
+                case 4: *(data+(*offset)++) = (unsigned char)(value>>24);
+                case 3: *(data+(*offset)++) = (unsigned char)(value>>16);
+                case 2: *(data+(*offset)++) = (unsigned char)(value>>8 );
+                case 1: *(data+(*offset)++) = (unsigned char)(value    );
         }
 }
 
-Uint64 unpackbytes(Uint8 *_data, size_t _len, size_t *_offset, int width)
+unsigned long unpackbytes(unsigned char *_data, size_t _len, size_t *_offset, int width)
 {
-        static Uint8  *data;
-        static size_t  len;
-        static size_t *offset;
-        Uint64         value = 0;
-        size_t         n = 0;
+        static unsigned char *data;
+        static size_t         len;
+        static size_t        *offset;
+        unsigned long         value = 0;
+        size_t                n = 0;
 
         // new buffer incoming
         if( _data )
@@ -224,20 +224,20 @@ Uint64 unpackbytes(Uint8 *_data, size_t _len, size_t *_offset, int width)
 
         switch( width )
         {
-                case 8: value |= ((Uint64)*(data+(*offset)++))<<56;
-                case 7: value |= ((Uint64)*(data+(*offset)++))<<48;
-                case 6: value |= ((Uint64)*(data+(*offset)++))<<40;
-                case 5: value |= ((Uint64)*(data+(*offset)++))<<32;
-                case 4: value |= ((Uint64)*(data+(*offset)++))<<24;
-                case 3: value |= ((Uint64)*(data+(*offset)++))<<16;
-                case 2: value |= ((Uint64)*(data+(*offset)++))<<8 ;
-                case 1: value |= ((Uint64)*(data+(*offset)++))    ;
+                case 8: value |= ((unsigned long)*(data+(*offset)++))<<56;
+                case 7: value |= ((unsigned long)*(data+(*offset)++))<<48;
+                case 6: value |= ((unsigned long)*(data+(*offset)++))<<40;
+                case 5: value |= ((unsigned long)*(data+(*offset)++))<<32;
+                case 4: value |= ((unsigned long)*(data+(*offset)++))<<24;
+                case 3: value |= ((unsigned long)*(data+(*offset)++))<<16;
+                case 2: value |= ((unsigned long)*(data+(*offset)++))<<8 ;
+                case 1: value |= ((unsigned long)*(data+(*offset)++))    ;
         }
 
         return value;
 }
 
-void inspectbytes( Uint8 *data, int n )
+void inspectbytes( unsigned char *data, int n )
 {
         int i = 0;
         for( ; i<n; i++ )

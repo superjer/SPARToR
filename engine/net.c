@@ -41,7 +41,7 @@ static int get_free_conn();
 static void check_recv();
 static void send_connect();
 static void create_ring(RINGSEG_t *r, int count);
-static void create_part(int connexid, int partid, int count, Uint8 *data, size_t len);
+static void create_part(int connexid, int partid, int count, unsigned char *data, size_t len);
 static void welcome();
 static void acknowlege(int connexid);
 static void accept_from(int connexid);
@@ -120,14 +120,14 @@ int net_connect(const char *hostname, int port)
 
 void net_loop()
 {
-        int           i;
-        static Uint64 prevticks = 0;
+        int                  i;
+        static unsigned long prevticks = 0;
 
         if( !sock ) return;
 
         if( !prevticks ) prevticks = ticks;
 
-        Uint32 tickdiff = ticks - prevticks;
+        unsigned int tickdiff = ticks - prevticks;
 
         if( net_retries )
         {
@@ -144,7 +144,7 @@ void net_loop()
 
         check_recv();
 
-        static Uint64 ticksoup = 0;
+        static unsigned long ticksoup = 0;
         if( net_resend ) { ticksoup += 5000001; net_resend = 0; }
         /* ticksoup += tickdiff; */
 
@@ -202,7 +202,7 @@ void net_test()
 
         for( i=0; i<maxconns; i++ )
         {
-                Uint8 *p = net_read(i);
+                unsigned char *p = net_read(i);
                 if( p )
                 {
                         echo("net_test message: \"%s\"", p);
@@ -211,7 +211,7 @@ void net_test()
         }
 }
 
-int net_write(int connexid, Uint8 *data, size_t len)
+int net_write(int connexid, unsigned char *data, size_t len)
 {
         CONNEX_t *conn = conns + connexid;
 
@@ -248,7 +248,7 @@ int net_write(int connexid, Uint8 *data, size_t len)
         return 0;
 }
 
-Uint8 *net_read(int connexid)
+unsigned char *net_read(int connexid)
 {
         int i;
         size_t sum = 0;
@@ -272,8 +272,8 @@ Uint8 *net_read(int connexid)
                 sum += r->pkt[i]->len - HEADER_SIZE;
         }
 
-        Uint8 *output = malloc(sum+1);
-        Uint8 *p = output;
+        unsigned char *output = malloc(sum+1);
+        unsigned char *p = output;
 
         for( i=0; i<r->count; i++ )
         {
@@ -325,7 +325,7 @@ void create_ring(RINGSEG_t *r, int count)
                 memset(r->pkt, 0, sizeof *r->pkt * count);
 }
 
-void create_part(int connexid, int partid, int count, Uint8 *data, size_t datalen)
+void create_part(int connexid, int partid, int count, unsigned char *data, size_t datalen)
 {
         CONNEX_t *conn = conns + connexid;
         int len = datalen + HEADER_SIZE;

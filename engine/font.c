@@ -21,7 +21,7 @@
 #define ISCOLORCODE(s) ((s)[0]=='\\' && (s)[1]=='#' && isxdigit((s)[2]) && isxdigit((s)[3]) && isxdigit((s)[4]))
 #define UNHEX(x) (unsigned char)(17*((x)>'9' ? ((x)&~('a'^'A'))-'A'+10 : (x)-'0'))
 
-GLuint tex = 0;
+unsigned int tex = 0;
 static int glyph_w = 8;
 static int glyph_h = 12;
 static int space[256] = {
@@ -146,14 +146,14 @@ static char raw[128*128] = {
 //initializes the font library
 void font_init()
 {
-        Uint32 pixels[NATIVE_TEX_SZ*NATIVE_TEX_SZ];
-        Uint32 u;
-        Uint32 v;
+        unsigned int pixels[NATIVE_TEX_SZ*NATIVE_TEX_SZ];
+        unsigned int u;
+        unsigned int v;
 
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                Uint32 black = 0x000000FF, white = 0xFFFFFFFF, clear = 0x00000000;
+                unsigned int black = 0x000000FF, white = 0xFFFFFFFF, clear = 0x00000000;
         #else
-                Uint32 black = 0xFF000000, white = 0xFFFFFFFF, clear = 0x00000000;
+                unsigned int black = 0xFF000000, white = 0xFFFFFFFF, clear = 0x00000000;
         #endif
 
         for( u=0; u<128; u++ )
@@ -237,7 +237,7 @@ void font_text(int scale, int x, int y, int align, const char *str, ...)
 
                 sx = (*str%16)*glyph_w;
                 sy = (*str/16)*glyph_h;
-                w = space[(Uint8)*str];
+                w = space[(unsigned char)*str];
                 glTexCoord2i(sx  , sy  ); glVertex2i(x        , y        );
                 glTexCoord2i(sx+w, sy  ); glVertex2i(x+w*scale, y        );
                 glTexCoord2i(sx+w, sy+h); glVertex2i(x+w*scale, y+h*scale);
@@ -264,7 +264,7 @@ int font_extents(const char *str, int n)
                         n -= 4;
                         continue;
                 }
-                ext += space[(Uint8)*str++];
+                ext += space[(unsigned char)*str++];
         }
         return ext;
 }

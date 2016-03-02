@@ -41,11 +41,11 @@ const char *create_context(context *co, const context *ref, int x, int y, int z)
 
 static char b85alphabet[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
 
-Uint32 from_b85( const char *s )
+unsigned int from_b85( const char *s )
 {
         int i;
         char *p;
-        Uint32 sum = 0;
+        unsigned int sum = 0;
 
         for( i=0; i<5; i++ )
         {
@@ -255,9 +255,9 @@ int load_context(const char *name, int mycontext, int loadfr)
 
         for( i=0; i<volume; i++ )
         {
-                Uint32  flags = 0;
-                int     n;
-                char    b85str[6] = {0};
+                unsigned int flags = 0;
+                int          n;
+                char         b85str[6] = {0};
 
                 if( 1 > fscanf(f, " %5[^ vwxyz{|}~]~%x ", b85str, &flags) ) //return fail(f, "failed to read block data");
                         n = 0;

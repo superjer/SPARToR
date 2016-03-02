@@ -28,7 +28,7 @@ extern int numinputnames;
 extern CB *hack_map; //FIXME REMOVE SOMEDAY
 extern CB *hack_dmap;
 
-void mod_setup(Uint32 setupfr);
+void mod_setup(unsigned int setupfr);
 void mod_recvobj(object *o);
 void mod_setvideo(int w, int h);
 void mod_quit();
@@ -37,9 +37,9 @@ void mod_keybind(int device, int sym, int press, char cmd, char *script);
 int  mod_mkcmd(FCMD_t *c, int device, int sym, int press);
 int  mod_command(char *q, char *args);
 void mod_loadsurfs(int quit);
-void mod_predraw(Uint32 vidfr);
-void mod_postdraw(Uint32 vidfr);
-void mod_huddraw(Uint32 vidfr);
-void mod_outerdraw(Uint32 vidfr, int w, int h);
+void mod_predraw(unsigned int vidfr);
+void mod_postdraw(unsigned int vidfr);
+void mod_huddraw(unsigned int vidfr);
+void mod_outerdraw(unsigned int vidfr, int w, int h);
 
 #endif

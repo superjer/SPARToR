@@ -42,12 +42,12 @@ typedef struct {
 extern int net_retries;
 extern int net_resend;
 
-int    net_start(int port, int _maxconns);               // start up networking
-void   net_stop();                                       // stop networking
-int    net_connect(const char *hostname, int port);      // establish a new connection
-void   net_loop();                                       // check for updates once per main loop
-void   net_test();                                       // TEMPORARY
-int    net_write(int connexid, Uint8 *data, size_t len); // write to one or more connections
-Uint8 *net_read(int connexid);                           // read from a connection
+int    net_start(int port, int _maxconns);                       // start up networking
+void   net_stop();                                               // stop networking
+int    net_connect(const char *hostname, int port);              // establish a new connection
+void   net_loop();                                               // check for updates once per main loop
+void   net_test();                                               // TEMPORARY
+int    net_write(int connexid, unsigned char *data, size_t len); // write to one or more connections
+unsigned char *net_read(int connexid);                           // read from a connection
 
 #endif

@@ -115,13 +115,13 @@ typedef struct {
 
 // frame buffer structures //
 typedef struct {
-        char      cmd;
-        char      mousehi;
-        char      mousex;
-        char      mousey;
-        short     flags;
-        size_t    datasz;
-        Uint8     data[MAXCMDDATA];
+        char          cmd;
+        char          mousehi;
+        char          mousex;
+        char          mousey;
+        short         flags;
+        size_t        datasz;
+        unsigned char data[MAXCMDDATA];
 } FCMD_t;
 
 typedef struct {
@@ -133,24 +133,24 @@ typedef struct {
 } object;
 
 typedef struct {
-        int       dirty;
-        Uint32    realfr;
-        FCMD_t   *cmds;
-        object   *objs;
+        int           dirty;
+        unsigned int  realfr;
+        FCMD_t       *cmds;
+        object       *objs;
 } FRAME_t;
 
 // map structures //
 typedef struct {
-        short     flags;
-        int       spr;
-        Uint8     data[CBDATASIZE];
+        short         flags;
+        int           spr;
+        unsigned char data[CBDATASIZE];
 } CB;
 
 // texture structures //
 typedef struct {
-        char   *filename;
-        int     generated;
-        GLuint  glname;
+        char         *filename;
+        int           generated;
+        unsigned int  glname;
 } TEX_T;
 
 typedef struct {
@@ -238,14 +238,14 @@ void clearframebuffer();
 void cleanup();
 
 //frame setters
-void setmetafr( Uint32 to);
-void setsurefr( Uint32 to);
-void setdrawnfr(Uint32 to);
-void sethotfr(  Uint32 to);
-void setcmdfr(  Uint32 to);
-void jogframebuffer(Uint32 newmetafr, Uint32 newsurefr);
+void setmetafr (unsigned int to);
+void setsurefr (unsigned int to);
+void setdrawnfr(unsigned int to);
+void sethotfr  (unsigned int to);
+void setcmdfr  (unsigned int to);
+void jogframebuffer(unsigned int newmetafr, unsigned int newsurefr);
 
 //timing
-Uint64 getticks();
+unsigned long getticks();
 
 #endif

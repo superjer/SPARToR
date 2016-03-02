@@ -13,7 +13,7 @@
 #include "mod.h"
 #include "helpers.h"
 
-void mk_ghost_and_player(int client, int context, Uint32 frame)
+void mk_ghost_and_player(int client, int context, unsigned int frame)
 {
         int mostflags = OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB;
         int ghostslot;

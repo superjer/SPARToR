@@ -16,7 +16,7 @@
 // globals
 int gui_hover = 0;
 
-void gui_update( Uint32 guifr )
+void gui_update(unsigned int guifr)
 {
         /*
         object *ob = fr[guifr%maxframes].objs + gui_hover;
@@ -31,7 +31,7 @@ void gui_update( Uint32 guifr )
 }
 
 // returns obj index of a GUI element (popup) or 0
-int gui_element_at(Uint32 guifr, int x, int y)
+int gui_element_at(unsigned int guifr, int x, int y)
 {
         int i;
         x /= v_scale;

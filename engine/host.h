@@ -15,7 +15,7 @@ typedef struct {
         int lastconga;
         size_t buflen;
         size_t maxlen;
-        Uint8 *buf;
+        unsigned char *buf;
 } CLIENT_t;
 
 void host_send_state(int clientid);

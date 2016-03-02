@@ -25,8 +25,8 @@
 #include "host.h"
 #include "pack.h"
 
-static Uint32 pktnum;
-static Uint32 sentfr = 0;
+static unsigned int pktnum;
+static unsigned int sentfr = 0;
 static int negotiated;
 static UDPpacket *pkt;
 
@@ -35,7 +35,7 @@ void client()
         int status;
         int i;
         size_t n;
-        Uint32 packfr;
+        unsigned int packfr;
 
         return;
 
@@ -43,7 +43,7 @@ void client()
         while( negotiated && sentfr<metafr-1 )
         {
                 sentfr++;
-                Uint32 sentfrmod = sentfr%maxframes;
+                unsigned int sentfrmod = sentfr%maxframes;
                 if( fr[sentfrmod].dirty )
                 {
                         n = 0;
@@ -94,9 +94,9 @@ void client()
 
                         case 'S': //state
                                 clearframebuffer();
-                                me               = unpackbytes(pkt->data+1, 4, NULL, 1);
-                                Uint32 newmetafr = unpackbytes(pkt->data+2, 4, NULL, 4);
-                                Uint32 newsurefr = unpackbytes(pkt->data+6, 4, NULL, 4);
+                                me                     = unpackbytes(pkt->data+1, 4, NULL, 1);
+                                unsigned int newmetafr = unpackbytes(pkt->data+2, 4, NULL, 4);
+                                unsigned int newsurefr = unpackbytes(pkt->data+6, 4, NULL, 4);
                                 sentfr = newmetafr-1;
                                 jogframebuffer( newmetafr, newsurefr );
                                 echo("Receiving state of frame %d, %d bytes, syncing up at frame %d as client %d",

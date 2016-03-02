@@ -533,7 +533,7 @@ void mod_loadsurfs(int quit)
         SJglobfree( files );
 }
 
-void mod_predraw(Uint32 vidfr)
+void mod_predraw(unsigned int vidfr)
 {
         int i, j, k;
 
@@ -558,12 +558,12 @@ void mod_predraw(Uint32 vidfr)
         }
 }
 
-void mod_huddraw(Uint32 vidfr)
+void mod_huddraw(unsigned int vidfr)
 {
         // draw HUD here!
 
         // popups
-        Uint32 vidfrmod = vidfr % maxframes;
+        unsigned int vidfrmod = vidfr % maxframes;
         int i;
         for( i=0; i<maxobjs; i++ )
         {
@@ -586,7 +586,7 @@ void mod_huddraw(Uint32 vidfr)
         }
 }
 
-void mod_postdraw(Uint32 vidfr)
+void mod_postdraw(unsigned int vidfr)
 {
         int i, j, k;
 
@@ -647,7 +647,7 @@ void mod_postdraw(Uint32 vidfr)
         glPopAttrib();
 }
 
-void mod_outerdraw(Uint32 vidfr, int w, int h)
+void mod_outerdraw(unsigned int vidfr, int w, int h)
 {
         if( !editmode ) return;
 

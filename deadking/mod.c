@@ -92,7 +92,7 @@ static void screen_unproject( int screenx, int screeny, int height, int *x, int 
 static void draw_sprite_on_tile( SPRITE_T *spr, context *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
 
-void mod_setup(Uint32 setupfr)
+void mod_setup(unsigned int setupfr)
 {
         //default key bindings
         exec_commands("defaults");
@@ -403,7 +403,7 @@ static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
         return 0;
 }
 
-int safe_atoi(const char *s)
+static int safe_atoi(const char *s)
 {
         if( !s ) return 0;
         return atoi(s);
@@ -524,7 +524,7 @@ void mod_loadsurfs(int quit)
         SJglobfree( files );
 }
 
-void mod_predraw(Uint32 vidfr)
+void mod_predraw(unsigned int vidfr)
 {
         int i, j, k;
 
@@ -549,9 +549,9 @@ void mod_predraw(Uint32 vidfr)
         }
 }
 
-void mod_huddraw(Uint32 vidfr)
+void mod_huddraw(unsigned int vidfr)
 {
-        Uint32 vidfrmod = vidfr%maxframes;
+        unsigned int vidfrmod = vidfr%maxframes;
         mother *mo = fr[vidfrmod].objs[0].data;
 
         if( mo->active && mo->pc )
@@ -604,7 +604,7 @@ void mod_huddraw(Uint32 vidfr)
         }
 }
 
-void mod_postdraw(Uint32 vidfr)
+void mod_postdraw(unsigned int vidfr)
 {
         int i, j, k;
 
@@ -665,7 +665,7 @@ void mod_postdraw(Uint32 vidfr)
         glPopAttrib();
 }
 
-void mod_outerdraw(Uint32 vidfr, int w, int h)
+void mod_outerdraw(unsigned int vidfr, int w, int h)
 {
         if( !editmode ) return;
 

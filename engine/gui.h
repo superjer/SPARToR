@@ -17,7 +17,7 @@
 extern int gui_hover;
 
 // prototypes
-int gui_element_at( Uint32 guifr, int x, int y );
-void gui_update( Uint32 guifr );
+int gui_element_at(unsigned int guifr, int x, int y);
+void gui_update(unsigned int guifr);
 
 #endif

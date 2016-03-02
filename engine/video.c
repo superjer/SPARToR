@@ -118,12 +118,12 @@ void render()
 {
         int x, y, w, h;
         int i;
-        Uint32 vidfr = metafr;
-        Uint32 vidfrmod = vidfr%maxframes;
+        unsigned int vidfr = metafr;
+        unsigned int vidfrmod = vidfr%maxframes;
 
-        Uint64 render_start = getticks();
-        static Uint32 total_start = 0;
-        Uint32 tmp;
+        unsigned long render_start = getticks();
+        static unsigned int total_start = 0;
+        unsigned int tmp;
 
         if( metafr==0 || vidfr<=drawnfr ) //==0 prevent never-draw bug
                 return;
@@ -209,7 +209,7 @@ void render()
         glGetDoublev(GL_PROJECTION_MATRIX, v_projtrix);
         glGetIntegerv(GL_VIEWPORT, v_viewport);
 
-        SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
+        SJGL_SetTex((unsigned int)-1); //forget previous texture name
         mod_predraw(vidfr);
 
         //display objects
@@ -379,7 +379,7 @@ void render()
                 glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
-        SJGL_SetTex( (GLuint)-1 ); //forget previous texture name
+        SJGL_SetTex((unsigned int)-1); //forget previous texture name
         mod_outerdraw(vidfr, w, h);
 
         //display console
@@ -422,10 +422,11 @@ void render()
         total_time += (tmp = getticks()) - total_start;
         render_time += tmp - render_start;
         total_start = tmp;
-        Uint64 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
+        unsigned long unaccounted_time =
+                total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
         if( v_showstats )
         {
-                Uint32 denom = vidfrmod+1;
+                unsigned int denom = vidfrmod+1;
                 drawtext(w-20, 10, FONT_RIGHT, "idle_time %8llu"       ,        idle_time/denom);
                 drawtext(w-20, 20, FONT_RIGHT, "render_time %8llu"     ,      render_time/denom);
                 drawtext(w-20, 30, FONT_RIGHT, "adv_move_time %8llu"   ,    adv_move_time/denom);
@@ -469,7 +470,7 @@ void render()
 
 void setvideo(int w, int h, int go_full, int quiet)
 {
-        Uint32 flags = 0;
+        unsigned int flags = 0;
 
         if( !w || !h ) //default to previous res
         {

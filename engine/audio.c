@@ -31,9 +31,9 @@
 #define NUM_ENVS 20
 
 struct sample {
-        Uint8 *data;
-        Uint32 dpos;
-        Uint32 dlen;
+        unsigned char *data;
+        unsigned int dpos;
+        unsigned int dlen;
 } playing[NUM_PLAYING];
 
 typedef struct {
@@ -366,23 +366,23 @@ static void music_test( int *buf, int len )
         }
 }
 
-void mixaudio(void *unused, Uint8 *stream, int len)
+void mixaudio(void *unused, unsigned char *stream, int len)
 {
         int i, j;
-        Uint32 amount;
+        unsigned int amount;
         int buf[len];
-        Sint16 *out = (Sint16*)stream;
+        short *out = (short*)stream;
 
         memset(buf, 0, sizeof *buf * len); // twice as big as it needs to be, if 16bit
 
         for( i=0; i<NUM_PLAYING; ++i )
         {
                 amount = playing[i].dlen-playing[i].dpos;
-                if( amount > (Uint32)len )
+                if( amount > (unsigned int)len )
                         amount = len;
                 for( j=0; j<(int)amount/2; j++ )
                 {
-                        Sint16 *in = (Sint16*)(playing[i].data + playing[i].dpos) + j;
+                        short *in = (short*)(playing[i].data + playing[i].dpos) + j;
                         buf[j] += *in;
                 }
                 playing[i].dpos += amount;
@@ -392,9 +392,9 @@ void mixaudio(void *unused, Uint8 *stream, int len)
 
         for( j=0; j<len/2; j++ )
         {
-                if(      buf[j] >  32767 ) out[j] = (Sint16) 32767;
-                else if( buf[j] < -32768 ) out[j] = (Sint16)-32768;
-                else                       out[j] = (Sint16)buf[j];
+                if(      buf[j] >  32767 ) out[j] = (short) 32767;
+                else if( buf[j] < -32768 ) out[j] = (short)-32768;
+                else                       out[j] = (short)buf[j];
 
                 full_waveform[full_waveform_pos] = out[j];
                 full_waveform_pos = (full_waveform_pos+1) % full_waveform_len;
@@ -529,8 +529,8 @@ void make_sure_sound_is_loaded(const char *file)
 
         SOUND_T *s = sounds + sound_count;
         SDL_AudioSpec wave;
-        Uint8 *data;
-        Uint32 dlen;
+        unsigned char *data;
+        unsigned int dlen;
 
         // Load the sound file and convert it to 16-bit stereo at 22kHz
         if( SDL_LoadWAV(file, &wave, &data, &dlen) == NULL )

@@ -287,7 +287,7 @@ void mousemove(SDL_MouseMotionEvent mmotion)
 
 void readinput()
 {
-        Uint32 infr = hotfr+1; //TODO: _should_ we always insert on hotfr+1?
+        unsigned int infr = hotfr+1; //TODO: _should_ we always insert on hotfr+1?
 
         if( cmdfr<infr ) //this is the new cmdfr, so clear it, unless we already have cmds stored in the future!
                 setcmdfr(infr);

@@ -21,10 +21,10 @@
 #include "sjdl.h"
 
 //create a new surface by copying and scaling another
-SDL_Surface *SJDL_CopyScaled(SDL_Surface *src, Uint32 flags, int scale)
+SDL_Surface *SJDL_CopyScaled(SDL_Surface *src, unsigned int flags, int scale)
 {
         int u, v, i, j;
-        Uint8 r, g, b;
+        unsigned char r, g, b;
         SDL_Surface *dst = SDL_CreateRGBSurface(flags, src->w*scale, src->h*scale,
                                                 src->format->BitsPerPixel,
                                                 src->format->Rmask,
@@ -48,12 +48,12 @@ SDL_Surface *SJDL_CopyScaled(SDL_Surface *src, Uint32 flags, int scale)
 
 
 //sets the current texture unless it is already set
-void SJGL_SetTex(GLuint tex)
+void SJGL_SetTex(unsigned int tex)
 {
-        static GLuint prev = (GLuint)-1;
+        static unsigned int prev = (unsigned int)-1;
         if( prev==tex ) return;
         prev = tex;
-        if( prev==(GLuint)-1 ) return;
+        if( prev==(unsigned int)-1 ) return;
 
         glBindTexture(GL_TEXTURE_2D, 0); //FIXME: hack 4 win, suddenly also useful for handling an invalid tex
 
@@ -227,29 +227,29 @@ int SJGL_Wall3D(SPRITE_T *spr, int x, int y, int z)
 
 
 //sets a pixel on an sdl surface
-void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+void SJDL_SetPixel(SDL_Surface *surf, int x, int y, unsigned char R, unsigned char G, unsigned char B)
 {
-        Uint32 color = SDL_MapRGB(surf->format, R, G, B);
+        unsigned int color = SDL_MapRGB(surf->format, R, G, B);
         switch(surf->format->BytesPerPixel)
         {
                 case 1: // 8-bpp
                         {
-                                Uint8 *bufp;
-                                bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
+                                unsigned char *bufp;
+                                bufp = (unsigned char *)surf->pixels + y*surf->pitch + x;
                                 *bufp = color;
                         }
                         break;
                 case 2: // 15-bpp or 16-bpp
                         {
-                                Uint16 *bufp;
-                                bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
+                                unsigned short *bufp;
+                                bufp = (unsigned short *)surf->pixels + y*surf->pitch/2 + x;
                                 *bufp = color;
                         }
                         break;
                 case 3: // 24-bpp mode, usually not used
                         {
-                                Uint8 *bufp;
-                                bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
+                                unsigned char *bufp;
+                                bufp = (unsigned char *)surf->pixels + y*surf->pitch + x * 3;
                                 if( SDL_BYTEORDER == SDL_LIL_ENDIAN )
                                 {
                                         bufp[0] = color;
@@ -266,8 +266,8 @@ void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)
                         break;
                 case 4: // 32-bpp
                         {
-                                Uint32 *bufp;
-                                bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
+                                unsigned int *bufp;
+                                bufp = (unsigned int *)surf->pixels + y*surf->pitch/4 + x;
                                 *bufp = color;
                         }
                         break;
@@ -276,29 +276,29 @@ void SJDL_SetPixel(SDL_Surface *surf, int x, int y, Uint8 R, Uint8 G, Uint8 B)
 
 
 //gets a pixel on an sdl surface
-void SJDL_GetPixel(SDL_Surface *surf, int x, int y, Uint8 *R, Uint8 *G, Uint8 *B)
+void SJDL_GetPixel(SDL_Surface *surf, int x, int y, unsigned char *R, unsigned char *G, unsigned char *B)
 {
-        Uint32 color;
+        unsigned int color;
         switch( surf->format->BytesPerPixel )
         {
                 case 1: // 8-bpp
                         {
-                                Uint8 *bufp;
-                                bufp = (Uint8 *)surf->pixels + y*surf->pitch + x;
+                                unsigned char *bufp;
+                                bufp = (unsigned char *)surf->pixels + y*surf->pitch + x;
                                 color = *bufp;
                         }
                         break;
                 case 2: // 15-bpp or 16-bpp
                         {
-                                Uint16 *bufp;
-                                bufp = (Uint16 *)surf->pixels + y*surf->pitch/2 + x;
+                                unsigned short *bufp;
+                                bufp = (unsigned short *)surf->pixels + y*surf->pitch/2 + x;
                                 color = *bufp;
                         }
                         break;
                 case 3: // 24-bpp mode, usually not used
                         {
-                                Uint8 *bufp;
-                                bufp = (Uint8 *)surf->pixels + y*surf->pitch + x * 3;
+                                unsigned char *bufp;
+                                bufp = (unsigned char *)surf->pixels + y*surf->pitch + x * 3;
                                 if( SDL_BYTEORDER == SDL_LIL_ENDIAN )
                                         color  = bufp[0] | (bufp[1] << 8) | (bufp[2] << 16);
                                 else
@@ -307,8 +307,8 @@ void SJDL_GetPixel(SDL_Surface *surf, int x, int y, Uint8 *R, Uint8 *G, Uint8 *B
                         break;
                 case 4: // 32-bpp
                         {
-                                Uint32 *bufp;
-                                bufp = (Uint32 *)surf->pixels + y*surf->pitch/4 + x;
+                                unsigned int *bufp;
+                                bufp = (unsigned int *)surf->pixels + y*surf->pitch/4 + x;
                                 color = *bufp;
                         }
                         break;

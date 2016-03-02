@@ -61,7 +61,7 @@ draw_object_sig(player)
         }
 }
 
-void create_bullet(Uint32 objid, Uint32 b, object *ob)
+void create_bullet(unsigned int objid, unsigned int b, object *ob)
 {
         player *pl = ob->data;
         bullet *bu = mkbullet(NULL, ob->context, b, OBJF_POS|OBJF_VEL|OBJF_VIS);

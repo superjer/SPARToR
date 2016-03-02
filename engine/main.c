@@ -44,32 +44,32 @@ void IMG_Quit() {}
 #endif
 
 //globals
-Uint64 ticksaframe = TICKSAFRAME;
+unsigned long ticksaframe = TICKSAFRAME;
 int maxframes = 360;
 int maxobjs = 100;
 int maxclients = 32;
 
 FRAME_t *fr;
-Uint32 frameoffset;
-Uint32 metafr;
-Uint32 surefr;
-Uint32 drawnfr;
-Uint32 hotfr;
-Uint32 cmdfr = 1; //DO NOT clear frame 1, it is prefilled with client-connect for local person
+unsigned int frameoffset;
+unsigned int metafr;
+unsigned int surefr;
+unsigned int drawnfr;
+unsigned int hotfr;
+unsigned int cmdfr = 1; //DO NOT clear frame 1, it is prefilled with client-connect for local person
 
-Uint64 ticks, newticks;
+unsigned long ticks, newticks;
 int me;
 int console_open;
 
-Uint64 total_time = 0;
-Uint64 idle_time = 0;
-Uint64 render_time = 0;
-Uint64 adv_move_time = 0;
-Uint64 adv_collide_time = 0;
-Uint64 adv_game_time = 0;
-Uint64 adv_frames = 0;
-Uint64 pump_time = 0;
-Uint64 slough_time = 0;
+unsigned long total_time = 0;
+unsigned long idle_time = 0;
+unsigned long render_time = 0;
+unsigned long adv_move_time = 0;
+unsigned long adv_collide_time = 0;
+unsigned long adv_game_time = 0;
+unsigned long adv_frames = 0;
+unsigned long pump_time = 0;
+unsigned long slough_time = 0;
 
 //runtime engine options
 int eng_realtime = 0;
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 {
 #endif
         int i;
-        Uint32 idle_start = 0;
+        unsigned int idle_start = 0;
 
         init_flexers();
 
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
                 fr[i].objs = calloc(sizeof (object), maxobjs);
         }
 
-        Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER;
+        unsigned int sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER;
 
         if( SDL_Init(sdlflags)<0 )                 { fprintf(stderr, "SDL_Init: %s\n",    SDL_GetError()); exit(-1); }
         if( SDLNet_Init()<0 )                      { fprintf(stderr, "SDLNet_Init: %s\n", SDL_GetError()); exit(-2); }
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
                         SDL_Delay(1);
                 ticks = newticks;
                 metafr = ticks/ticksaframe + frameoffset;
-                Uint64 idle_ticks = getticks();
+                unsigned long idle_ticks = getticks();
                 idle_time += idle_ticks - idle_start;
                 while( SDL_PollEvent(&e) ) switch(e.type)
                 {
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
                 net_test();
                 /* if( netmode == NM_HOST   ) host(); */
                 /* if( netmode == NM_CLIENT ) client(); */
-                Uint64 pump_ticks = getticks();
+                unsigned long pump_ticks = getticks();
                 pump_time += pump_ticks - idle_ticks;
                 advance();
                 render();
@@ -213,7 +213,7 @@ void toggleconsole()
         }
 }
 
-static void advanceobject(int i, Uint32 a, Uint32 b)
+static void advanceobject(int i, unsigned int a, unsigned int b)
 {
         object *oa = fr[a].objs + i;
         object *ob = fr[b].objs + i;
@@ -252,7 +252,7 @@ static void advanceobject(int i, Uint32 a, Uint32 b)
         }
 }
 
-static void readvanceobject(char recheck[2][maxobjs], int r, int i, Uint32 a, Uint32 b)
+static void readvanceobject(char recheck[2][maxobjs], int r, int i, unsigned int a, unsigned int b)
 {
         if( r!=0 && !recheck[(r+1)%2][i] )
                 return;
@@ -382,14 +382,14 @@ void advance()
                 if( cmdfr<hotfr ) //need to clear out the cmds in forward frame since it hasn't been done yet!
                         setcmdfr(hotfr);
 
-                Uint32 a = (hotfr-1)%maxframes; //a: frame to advance from, b: frame to advance to
-                Uint32 b = (hotfr  )%maxframes;
-                Uint64 adv_move_start = getticks();
+                unsigned int a = (hotfr-1)%maxframes; //a: frame to advance from, b: frame to advance to
+                unsigned int b = (hotfr  )%maxframes;
+                unsigned long adv_move_start = getticks();
 
                 for( i=0; i<maxobjs; i++ ) //first pass -- copy forward, move, clip with world
                         advanceobject(i, a, b);
 
-                Uint64 adv_collide_start = getticks();
+                unsigned long adv_collide_start = getticks();
                 adv_move_time += adv_collide_start - adv_move_start;
 
                 int r;
@@ -403,7 +403,7 @@ void advance()
                                 readvanceobject(recheck, r, i, a, b);
                 }
 
-                Uint64 adv_game_start = getticks();
+                unsigned long adv_game_start = getticks();
                 adv_collide_time += adv_game_start - adv_collide_start;
 
                 for( i=0; i<maxobjs; i++ ) //mod pass
@@ -508,27 +508,27 @@ void clearframebuffer()
 }
 
 //frame setters
-void setmetafr( Uint32 to)
+void setmetafr( unsigned int to)
 {
         metafr = to;
 }
 
-void setsurefr( Uint32 to)
+void setsurefr( unsigned int to)
 {
         surefr = to;
 }
 
-void setdrawnfr(Uint32 to)
+void setdrawnfr(unsigned int to)
 {
         drawnfr = to;
 }
 
-void sethotfr(  Uint32 to)
+void sethotfr(  unsigned int to)
 {
         hotfr = to;
 }
 
-void setcmdfr(  Uint32 to)
+void setcmdfr(  unsigned int to)
 {
         while( cmdfr<to )
         {
@@ -544,7 +544,7 @@ void setcmdfr(  Uint32 to)
                 echo("*** DESYNC: cmdfr has been set = or before surefr! ***");
 }
 
-void jogframebuffer(Uint32  newmetafr, Uint32 newsurefr)
+void jogframebuffer(unsigned int  newmetafr, unsigned int newsurefr)
 {
         metafr = newmetafr;
         frameoffset = metafr - ticks/ticksaframe;
@@ -554,12 +554,12 @@ void jogframebuffer(Uint32  newmetafr, Uint32 newsurefr)
         cmdfr   = newsurefr;
 }
 
-Uint64 getticks()
+unsigned long getticks()
 {
-        static Uint64 base;
-        static Uint64 freq;
+        static unsigned long base;
+        static unsigned long freq;
         if( !base ) base = SDL_GetPerformanceCounter();
         if( !freq ) freq = SDL_GetPerformanceFrequency();
-        Uint64 t = ((SDL_GetPerformanceCounter() - base) * 1e6) / freq;
+        unsigned long t = ((SDL_GetPerformanceCounter() - base) * 1e6) / freq;
         return t;
 }

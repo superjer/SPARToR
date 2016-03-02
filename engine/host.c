@@ -28,10 +28,10 @@
 void host_send_state(int clientid)
 {
         // TODO: write to client outbox rather than sending packet directly
-        size_t     n;
-        Uint32     u;
-        Uint8     *data;
-        UDPpacket *pkt;
+        size_t         n;
+        unsigned int   u;
+        unsigned char *data;
+        UDPpacket     *pkt;
 
         pkt = SDLNet_AllocPacket(80000);
 
@@ -76,13 +76,13 @@ void host_send_state(int clientid)
 
 void host_outbox_write()
 {
-        Uint32  u;
-        Uint8  *data;
+        unsigned int   u;
+        unsigned char *data;
         size_t  n;
         int     framecount = 0;
 
         //send to clients
-        Uint8 outbox[80000];
+        unsigned char outbox[80000];
         outbox[0] = 'C';
         outbox[1] = 0;
         outbox[2] = 0;
@@ -128,7 +128,7 @@ void host_inbox_read(int clientid, CLIENT_t *cl)
 
         echo("Inbox from client %d has %d bytes", clientid, cl->buflen);
 
-        Uint32 packfr = unpackbytes(cl->buf, cl->buflen, &n, 4);
+        unsigned int packfr = unpackbytes(cl->buf, cl->buflen, &n, 4);
 
         if( packfr<metafr-30 )
         {

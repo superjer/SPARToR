@@ -121,7 +121,7 @@ void command(const char *s)
         {
                 if( p && *p )
                 {
-                        int ret = net_write(0, (Uint8*)p, strlen(p));
+                        int ret = net_write(0, (unsigned char*)p, strlen(p));
                         if( ret ) echo("Net write error: %d", ret);
                 }
         }

@@ -13,24 +13,24 @@
 #include "mod.h"
 #include "helpers.h"
 
-int in_party(MOTHER_t *mo, int objid);
-void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b);
+int in_party(mother *mo, int objid);
+void init_new_player(mother *mo, int client_nr, unsigned int b);
 
-PROTO_DRAW(MOTHER)
+draw_object_sig(mother)
 {
 }
 
-PROTO_ADVANCE(MOTHER)
+advance_object_sig(mother)
 {
         int i;
-        MOTHER_t *mo = ob->data;
+        mother *mo = ob->data;
 
         // if there's no active, find one!
         if( !mo->active )
                 for( i=0; i<maxobjs; i++ )
-                        if( fr[b].objs[i].type==OBJT_PERSON )
+                        if( fr[b].objs[i].type == person_type )
                         {
-                                PERSON_t *pe = fr[b].objs[i].data;
+                                person *pe = fr[b].objs[i].data;
                                 if( pe->to >= pe->max_to )
                                 {
                                         mo->active = i;
@@ -48,9 +48,9 @@ PROTO_ADVANCE(MOTHER)
                         }
 
         for( i=0; i<maxobjs; i++ )
-                if( fr[b].objs[i].type==OBJT_POPUP )
+                if( fr[b].objs[i].type == popup_type )
                 {
-                        POPUP_t *pop = fr[b].objs[i].data;
+                        popup *pop = fr[b].objs[i].data;
                         pop->visible = (pop->layer == mo->menulayer);
                 }
 
@@ -63,12 +63,12 @@ PROTO_ADVANCE(MOTHER)
                         init_new_player(mo, i, b);
 }
 
-void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
+void init_new_player(mother *mo, int client_nr, unsigned int b)
 {
         int j;
 
         for( j=0; j<maxobjs; j++ )
-                if( fr[b].objs[j].type==OBJT_GHOST && ((GHOST_t *)fr[b].objs[j].data)->client==client_nr )
+                if( fr[b].objs[j].type == ghost_type && ((ghost *)fr[b].objs[j].data)->client==client_nr )
                         echo( "%d: Client %i already has a ghost at obj#%d!", hotfr, client_nr, j );
 
         #define PERS_FLAGS OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDX|OBJF_BNDZ
@@ -78,10 +78,10 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
         int azslot;
         int gyslot;
 
-        GHOST_t *gh = mkobj(GHOST, &ghostslot, 1, b, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT);
-        PERSON_t *az = mkobj(PERSON, &azslot, 1, b, PERS_FLAGS);
-        PERSON_t *gy = mkobj(PERSON, &gyslot, 1, b, PERS_FLAGS);
-        PERSON_t *en = mkobj(PERSON, NULL, 1, b, PERS_FLAGS);
+        ghost *gh = mkghost(&ghostslot, 1, b, OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB|OBJF_BNDT);
+        person *az = mkperson(&azslot, 1, b, PERS_FLAGS);
+        person *gy = mkperson(&gyslot, 1, b, PERS_FLAGS);
+        person *en = mkperson(NULL, 1, b, PERS_FLAGS);
 
         if( !gh || !az || !gy || !en )
         {
@@ -188,7 +188,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
 
         #define MKMENU(text_, ypos, layer_)                            \
                 do {                                                   \
-                        POPUP_t *button = mkobj(POPUP, NULL, 0, b, 0); \
+                        popup *button = mkpopup(NULL, 0, b, 0); \
                         if( !button ) break;                           \
                         button->pos     = (V){NATIVEW-62, ypos, 0};    \
                         button->hull[1] = (V){50, 18, 0};              \
@@ -212,7 +212,7 @@ void init_new_player(MOTHER_t *mo, int client_nr, Uint32 b)
         #undef MKMENU
 }
 
-int in_party(MOTHER_t *mo, int objid)
+int in_party(mother *mo, int objid)
 {
         int i;
         for( i=0; i<PARTY_SIZE; i++ )

@@ -1,6 +1,6 @@
 #include "video_helpers.h"
 
-void draw_guides(CONTEXT_t *co, int x, int y, int z)
+void draw_guides(context *co, int x, int y, int z)
 {
         int i;
 

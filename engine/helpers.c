@@ -60,17 +60,27 @@ char *tok_( char **restrict buf, const char *restrict sep )
         return p;
 }
 
-void *mkobj_( size_t sz, int type, int *slot, int context, int frame, int flags)
-{
-        // in case slot is NULL
-        int slot_;
-        if( !slot ) slot = &slot_;
-
-        *slot = findfreeslot(frame);
-        if( *slot < 0 ) return NULL;
-        fr[frame].objs[*slot].type = type;
-        fr[frame].objs[*slot].flags = flags;
-        fr[frame].objs[*slot].context = context;
-        fr[frame].objs[*slot].size = sz;
-        return fr[frame].objs[*slot].data = calloc(1, sz);
+// define mkobject helper functions
+#define EXPOSE(T,N,A)
+#define HIDE(X)
+#define STRUCT()                                                                  \
+void * TOKEN_PASTE(mk,TYPE) (int *slot, int context, int frame, int flags)        \
+{                                                                                 \
+        int sentinel_slot;                                                        \
+        if( !slot ) slot = &sentinel_slot;                                        \
+                                                                                  \
+        *slot = findfreeslot(frame);                                              \
+        if( *slot < 0 ) return NULL;                                              \
+        fr[frame].objs[*slot].type = TOKEN_PASTE(TYPE,_type);                     \
+        fr[frame].objs[*slot].flags = flags;                                      \
+        fr[frame].objs[*slot].context = context;                                  \
+        fr[frame].objs[*slot].size = sizeof(TYPE);                                \
+        return fr[frame].objs[*slot].data = calloc(1, sizeof(TYPE));              \
 }
+#define ENDSTRUCT(TYPE)
+#include "engine_structs.h"
+#include "game_structs.h"
+#undef EXPOSE
+#undef HIDE
+#undef STRUCT
+#undef ENDSTRUCT

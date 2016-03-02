@@ -1,6 +1,6 @@
 // DO NOT USE INCLUDE GUARDS HERE
 
-#define TYPE MOTHER
+#define TYPE mother
 #include BEGIN
 HIDE(
         int ghost;
@@ -14,7 +14,7 @@ HIDE(
 )
 #include END
 
-#define TYPE GHOST
+#define TYPE ghost
 #include BEGIN
 EXPOSE(V, vel, )
 EXPOSE(V, pos, )
@@ -34,7 +34,7 @@ HIDE(
 )
 #include END
 
-#define TYPE PERSON
+#define TYPE person
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )

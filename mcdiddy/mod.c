@@ -32,7 +32,7 @@ SYS_TEX_T sys_tex[] = {
 
 size_t num_sys_tex = COUNTOF(sys_tex);
 
-INPUTNAME_t inputnames[] = {
+INPUTNAME inputnames[] = {
         {"left"       ,CMDT_1LEFT    ,CMDT_0LEFT    },
         {"right"      ,CMDT_1RIGHT   ,CMDT_0RIGHT   },
         {"up"         ,CMDT_1UP      ,CMDT_0UP      },
@@ -84,21 +84,21 @@ static FCMD_t magic_c;      // magical storage for an extra command, triggered f
 static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press);
 static int gui_click( int press );
 static void screen_unproject( int screenx, int screeny, int height, int *x, int *y, int *z );
-static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z );
+static void draw_sprite_on_tile( SPRITE_T *spr, context *co, int x, int y, int z );
 static int sprite_at(int texnum, int x, int y);
 
-void mod_setup(Uint32 setupfr)
+void mod_setup(unsigned int setupfr)
 {
         //default key bindings
         exec_commands("defaults");
 
         //make the mother object
-        fr[setupfr].objs[0] = (OBJ_t){ OBJT_MOTHER, 0, 0, sizeof(MOTHER_t), malloc(sizeof(MOTHER_t)) };
-        memset( fr[setupfr].objs[0].data, 0, sizeof(MOTHER_t) );
+        fr[setupfr].objs[0] = (object){ mother_type, 0, 0, sizeof(mother), malloc(sizeof(mother)) };
+        memset( fr[setupfr].objs[0].data, 0, sizeof(mother) );
 
         //make default context object (map)
-        fr[setupfr].objs[1] = (OBJ_t){ OBJT_CONTEXT, OBJF_REFC, 0, sizeof(CONTEXT_t), malloc(sizeof(CONTEXT_t)) };
-        CONTEXT_t *co = fr[setupfr].objs[1].data;
+        fr[setupfr].objs[1] = (object){ context_type, OBJF_REFC, 0, sizeof(context), malloc(sizeof(context)) };
+        context *co = fr[setupfr].objs[1].data;
         co->bsx = co->bsy = co->bsz = 16;
         co->x   = co->y   = co->z   = 15;
         co->tileuw = 48;
@@ -119,8 +119,8 @@ void mod_setup(Uint32 setupfr)
 
         //make some dummys
         #define MAYBE_A_DUMMY(i,x,y,w,h) {                                                               \
-                DUMMY_t *du;                                                                             \
-                fr[setupfr].objs[i+20].type = OBJT_DUMMY;                                                \
+                dummy *du;                                                                               \
+                fr[setupfr].objs[i+20].type = dummy_type;                                                \
                 fr[setupfr].objs[i+20].flags = OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP| \
                                                OBJF_BNDX|OBJF_BNDZ|OBJF_BNDB;                            \
                 fr[setupfr].objs[i+20].context = 1;                                                      \
@@ -149,13 +149,13 @@ void mod_setup(Uint32 setupfr)
         echo("Default controls: \\#F80A, S, Numpad Arrows, F11");
 }
 
-void mod_recvobj(OBJ_t *o)
+void mod_recvobj(object *o)
 {
-        CONTEXT_t *co;
+        context *co;
 
         switch( o->type )
         {
-                case OBJT_CONTEXT:
+                case context_type:
                         co = o->data;
                         co->map  = hack_map;  // FIXME: horrible hack FOR NOW!
                         co->dmap = hack_dmap; //        when receiving map, use data we already have
@@ -295,14 +295,14 @@ static int gui_click( int press )
         if( !elem || !press )
                 return 0;
 
-        POPUP_t *pop = fr[hotfr%maxframes].objs[elem].data;
+        popup *pop = fr[hotfr%maxframes].objs[elem].data;
         echo("Clicked on button: %s", pop->text);
         return 1;
 }
 
 static int proc_edit_cmd(FCMD_t *c, int device, int sym, int press)
 {
-        CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
+        context *co = fr[hotfr%maxframes].objs[mycontext].data;
 
         if( c->cmd==CMDT_0EPREV || c->cmd==CMDT_0ENEXT ) //these shouldn't really happen and wouldn't mean anything
                 return -1;
@@ -446,7 +446,7 @@ int mod_command(char *q, char *args)
 
                 if( !x || !y || !z )
                 {
-                        CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
+                        context *co = fr[hotfr%maxframes].objs[mycontext].data; // FIXME is mycontext always set here?
                         if( chr == 'b' )
                                 echo("The current bounds are (X,Y,Z): %d %d %d", co->x, co->y, co->z);
                         else
@@ -473,7 +473,7 @@ int mod_command(char *q, char *args)
 
                 if( !tileuw || !tileuh )
                 {
-                        CONTEXT_t *co = fr[hotfr%maxframes].objs[mycontext].data;
+                        context *co = fr[hotfr%maxframes].objs[mycontext].data;
                         echo("The current tilespacing is (W,H): %d %d", co->tileuw, co->tileuh);
                         return 0;
                 }
@@ -540,7 +540,7 @@ void mod_predraw(Uint32 vidfr)
         glClear(GL_COLOR_BUFFER_BIT);
 
         //draw context
-        CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data; // FIXME: is mycontext always set here?
+        context *co = fr[vidfr%maxframes].objs[mycontext].data; // FIXME: is mycontext always set here?
 
         for( k=0; k<co->z; k++ ) for( j=0; j<co->y; j++ ) for( i=0; i<co->x; i++ )
         {
@@ -567,9 +567,9 @@ void mod_huddraw(Uint32 vidfr)
         int i;
         for( i=0; i<maxobjs; i++ )
         {
-                OBJ_t *ob = fr[vidfrmod].objs+i;
-                if( ob->type != OBJT_POPUP ) continue;
-                POPUP_t *pop = ob->data;
+                object *ob = fr[vidfrmod].objs+i;
+                if( ob->type != popup_type ) continue;
+                popup *pop = ob->data;
 
                 if( pop->visible )
                 {
@@ -592,8 +592,8 @@ void mod_postdraw(Uint32 vidfr)
 
         if( !editmode || !i_hasmouse ) return;
 
-        GHOST_t   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?
-        CONTEXT_t *co = fr[vidfr%maxframes].objs[mycontext].data;
+        ghost   *gh = fr[vidfr%maxframes].objs[myghost].data; // FIXME is myghost/mycontext always set here?
+        context *co = fr[vidfr%maxframes].objs[mycontext].data;
 
         //map to game coordinates
         int upx, upy, upz;
@@ -728,7 +728,7 @@ static void screen_unproject( int screenx, int screeny, int height, int *x, int 
         *z = (int)floorf( (v_eyez + (height-v_eyey) * ray.z / ray.y) / 24 );
 }
 
-static void draw_sprite_on_tile( SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z )
+static void draw_sprite_on_tile( SPRITE_T *spr, context *co, int x, int y, int z )
 {
         if( !spr ) return;
         SJGL_SetTex( spr->texnum );

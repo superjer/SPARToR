@@ -1,13 +1,13 @@
 // DO NOT USE INCLUDE GUARDS HERE
 
-#define TYPE EMPTY
+#define TYPE empty
 #include BEGIN
 HIDE(
         int decoy;
 )
 #include END
 
-#define TYPE CONTEXT
+#define TYPE context
 #include BEGIN
 EXPOSE(int, refcount, ) // for memory management
 HIDE(
@@ -25,7 +25,7 @@ HIDE(
 )
 #include END
 
-#define TYPE POPUP
+#define TYPE popup
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, hull, [2])
@@ -34,7 +34,7 @@ HIDE(
         int enabled;
         int active;
         unsigned int layer;
-        int (*click)(OBJ_t *obj);
+        int (*click)(object *obj);
         char *text;
 )
 #include END

@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, int z);
+const char *create_context(context *co, const context *ref, int x, int y, int z);
 
 #define B85_1(x) (b85alphabet[((x)              )%85])
 #define B85_2(x) (b85alphabet[((x)/(         85))%85])
@@ -74,7 +74,7 @@ char *sjtempnam(const char *dir, const char *pfx, const char *ext)
         return NULL;
 }
 
-int save_context(const char *name, int context, int savefr)
+int save_context(const char *name, int mycontext, int savefr)
 {
         char  path[256];
         char  bakdir[256];
@@ -115,8 +115,8 @@ int save_context(const char *name, int context, int savefr)
                 return -1;
         }
 
-        savefr = savefr%maxframes;
-        CONTEXT_t *co = fr[savefr].objs[context].data;
+        savefr = savefr % maxframes;
+        context *co = fr[savefr].objs[mycontext].data;
         int x, y, z;
 
         // find textures in use
@@ -195,7 +195,7 @@ int fail(FILE *f, const char *msg)
         return -1;
 }
 
-int load_context(const char *name, int context, int loadfr)
+int load_context(const char *name, int mycontext, int loadfr)
 {
         char path[256];
         int i;
@@ -245,7 +245,7 @@ int load_context(const char *name, int context, int loadfr)
         if( 3 != fscanf(f, "%d %d %d\n", &x, &y, &z) )                  return fail(f, "failed to read dimensions");
 
         const char *error = NULL;
-        CONTEXT_t tmp_co;
+        context tmp_co;
 
         if( (error = create_context(&tmp_co, NULL, x, y, z)) )          return fail(f, error);
 
@@ -273,7 +273,7 @@ int load_context(const char *name, int context, int loadfr)
 
         // everything ok? swap it in
         loadfr = loadfr%maxframes;
-        CONTEXT_t *co = fr[loadfr].objs[context].data;
+        context *co = fr[loadfr].objs[mycontext].data;
         co->projection = proj;
         co->tileuw = tileuw;
         co->tileuh = tileuh;
@@ -301,7 +301,7 @@ int load_context(const char *name, int context, int loadfr)
 }
 
 // allocate the map, dmap for a new context, copying data from a reference context if not NULL
-const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, int z)
+const char *create_context(context *co, const context *ref, int x, int y, int z)
 {
         if( x<1 || x>9000 || y<1 || y>9000 || z<1 || z>9000 )
         {
@@ -348,7 +348,7 @@ const char *create_context(CONTEXT_t *co, const CONTEXT_t *ref, int x, int y, in
         return NULL;
 }
 
-void destroy_context(CONTEXT_t *co, int really)
+void destroy_context(context *co, int really)
 {
         if( really )
         {
@@ -359,16 +359,16 @@ void destroy_context(CONTEXT_t *co, int really)
 }
 
 #define UNDOLEVELS 25
-static CONTEXT_t constack[UNDOLEVELS];
+static context constack[UNDOLEVELS];
 
-void push_context(CONTEXT_t *co)
+void push_context(context *co)
 {
         destroy_context( constack + UNDOLEVELS-1, 1 );
         memmove( constack+1, constack, sizeof *constack * (UNDOLEVELS-1) );
         create_context( constack, co, 0, 0, 0 );
 }
 
-void pop_context(CONTEXT_t *co)
+void pop_context(context *co)
 {
         if( !constack->map ) { echo("No context to pop!"); return; }
         destroy_context( co, 1 );

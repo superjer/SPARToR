@@ -22,7 +22,7 @@ enum MENULAYER { NOLAYER=0, MAIN, MOVE };
 
 enum GAIT { NOGAIT=0, WALKING, RUNNING, SPRINTING };
 
-//character types for PERSON_t
+//character types for person_type
 enum CHARACTERS {
         CHR_AZMA,
         CHR_GYLLIOC,

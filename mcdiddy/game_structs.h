@@ -1,13 +1,13 @@
 // DO NOT USE INCLUDE GUARDS HERE
 
-#define TYPE MOTHER
+#define TYPE mother
 #include BEGIN
 HIDE(
         char edit;
 )
 #include END
 
-#define TYPE GHOST
+#define TYPE ghost
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -23,7 +23,7 @@ HIDE(
 )
 #include END
 
-#define TYPE DUMMY
+#define TYPE dummy
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -31,7 +31,7 @@ EXPOSE(V, hull, [2])
 EXPOSE(int, model, )
 #include END
 
-#define TYPE PLAYER
+#define TYPE player
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -59,7 +59,7 @@ HIDE(
 )
 #include END
 
-#define TYPE BULLET
+#define TYPE bullet
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -72,7 +72,7 @@ HIDE(
 )
 #include END
 
-#define TYPE SLUG
+#define TYPE slug
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -84,7 +84,7 @@ HIDE(
 )
 #include END
 
-#define TYPE AMIGO
+#define TYPE amigo
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )
@@ -99,7 +99,7 @@ HIDE(
 )
 #include END
 
-#define TYPE AMIGOSWORD
+#define TYPE amigosword
 #include BEGIN
 EXPOSE(V, pos, )
 EXPOSE(V, vel, )

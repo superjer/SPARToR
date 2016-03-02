@@ -19,9 +19,9 @@
 int    setmodel = -1;
 //
 
-PROTO_DRAW(PLAYER)
+draw_object_sig(player)
 {
-        PLAYER_t *pl = o->data;
+        player *pl = o->data;
         int c = pl->pos.x;
         int d = pl->pos.y;
 
@@ -61,10 +61,10 @@ PROTO_DRAW(PLAYER)
         }
 }
 
-void create_bullet(Uint32 objid, Uint32 b, OBJ_t *ob)
+void create_bullet(Uint32 objid, Uint32 b, object *ob)
 {
-        PLAYER_t *pl = ob->data;
-        BULLET_t *bu = mkobj(BULLET, NULL, ob->context, b, OBJF_POS|OBJF_VEL|OBJF_VIS);
+        player *pl = ob->data;
+        bullet *bu = mkbullet(NULL, ob->context, b, OBJF_POS|OBJF_VEL|OBJF_VIS);
         if( !bu ) return;
 
         play("mp5_shot");
@@ -72,40 +72,40 @@ void create_bullet(Uint32 objid, Uint32 b, OBJ_t *ob)
         if( pl->facingr )
         {
                 bu->pos = (V){pl->pos.x+19,pl->pos.y-19,pl->pos.z};
-                bu->vel = (V){ 6,0,0};
+                bu->vel = (V){ 3,0,0};
         }
         else
         {
                 bu->pos = (V){pl->pos.x-19,pl->pos.y-19,pl->pos.z};
-                bu->vel = (V){-6,0,0};
+                bu->vel = (V){-3,0,0};
         }
 
         if( pl->goingu ) // aiming
         {
-                bu->vel.y += -8;
+                bu->vel.y += -4;
                 bu->pos.y += -6;
         }
 
         if( pl->goingd )
         {
-                bu->vel.y +=  8;
+                bu->vel.y +=  4;
                 bu->pos.y += 10;
         }
 
         bu->model       = 1;
         bu->owner       = objid;
-        bu->ttl         = 50;
+        bu->ttl         = 100;
         pl->cooldown = 5;
         pl->gunback  = 2;
         pl->projectiles++;
 }
 
-PROTO_ADVANCE(PLAYER)
+advance_object_sig(player)
 {
         int i;
-        PLAYER_t *oldme = oa->data;
-        PLAYER_t *newme = ob->data;
-        GHOST_t *gh = fr[b].objs[newme->ghost].data;
+        player *oldme = oa->data;
+        player *newme = ob->data;
+        ghost *gh = fr[b].objs[newme->ghost].data;
 
         switch( fr[b].cmds[gh->client].cmd )
         {
@@ -169,7 +169,7 @@ PROTO_ADVANCE(PLAYER)
         {
                 if( newme->stabbing>0 )
                 {
-                        newme->vel.y -= 0.8f*oldme->vel.y;
+                        newme->vel.y -= 0.4f*oldme->vel.y;
                         play("tink");
                 }
                 else
@@ -208,8 +208,8 @@ PROTO_ADVANCE(PLAYER)
                 if(      newme->velxz> amt ) newme->velxz -= amt;  \
                 else if( newme->velxz>-amt ) newme->velxz  = 0.0f; \
                 else                         newme->velxz += amt;
-        P_FRIC( vel.x, 0.2f)
-        P_FRIC(pvel.x, 0.5f)
+        P_FRIC( vel.x, 0.1f)
+        P_FRIC(pvel.x, 0.25f)
         #undef P_FRIC
 
         if( newme->turning )
@@ -217,15 +217,15 @@ PROTO_ADVANCE(PLAYER)
 
         // -- WALK --
         if( newme->goingl )
-                newme->vel.x = newme->vel.x<-2.0f ? -2.0f : newme->vel.x-1.0f;
+                newme->vel.x = newme->vel.x<-1.0f ? -1.0f : newme->vel.x-0.5f;
         if( newme->goingr )
-                newme->vel.x = newme->vel.x> 2.0f ?  2.0f : newme->vel.x+1.0f;
+                newme->vel.x = newme->vel.x> 1.0f ?  1.0f : newme->vel.x+0.5f;
 
         // -- JUMP --
-        if( newme->pvel.y <= -2.0f )    //jumping in progress
+        if( newme->pvel.y <= -1.0f )    //jumping in progress
         {
-                newme->pvel.y += 2.0f;        //jumpvel fades into real velocity
-                newme->vel.y += -2.0f;
+                newme->pvel.y += 1.0f;        //jumpvel fades into real velocity
+                newme->vel.y += -1.0f;
         }
         else if( newme->pvel.y < 0.0f ) //jumping ending
         {
@@ -239,10 +239,11 @@ PROTO_ADVANCE(PLAYER)
 
         if( (newme->vel.y==0.0f || oldme->vel.y==0.0f) && newme->jumping ) //FIXME 0 velocity means grounded? not really
         {
-                newme->pvel.y = -9.1f; //initiate jump!
+                newme->pvel.y = -6.3; //initiate jump!
                 play("jump2");
         }
 
+        // hit head or land on feet sound effects
         if( newme->vel.y==0.0f )
         {
                 if( oldme->vel.y>0.0f && oldme->pos.y < newme->pos.y )
@@ -255,12 +256,13 @@ PROTO_ADVANCE(PLAYER)
                         play("headbump");
         }
 
-        if( newme->vel.y==0.0f && fabsf(newme->vel.x)>0.9f )
+        // walk sound effects
+        if( newme->vel.y==0.0f && fabsf(newme->vel.x)>0.45f )
         {
-                newme->walkcounter = (newme->walkcounter+1) % 14;
+                newme->walkcounter = (newme->walkcounter+1) % 28;
                 if( newme->walkcounter==0 )
                         play("footstep1");
-                else if( newme->walkcounter==7 )
+                else if( newme->walkcounter==14 )
                         play("footstep2");
         }
 
@@ -272,10 +274,10 @@ PROTO_ADVANCE(PLAYER)
                 create_bullet(objid, b, ob);
 
         for( i=0; i<objid; i++ )  //find other players to interact with -- who've already MOVED
-                if( fr[b].objs[i].type==OBJT_PLAYER )
+                if( fr[b].objs[i].type == player_type )
                 {
-                        PLAYER_t *oldyou = fr[a].objs[i].data;
-                        PLAYER_t *newyou = fr[b].objs[i].data;
+                        player *oldyou = fr[a].objs[i].data;
+                        player *newyou = fr[b].objs[i].data;
 
                         if(    !oldyou
                             || fabsf(newme->pos.x - newyou->pos.x)>5.0f //we're not on top of each other
@@ -287,23 +289,23 @@ PROTO_ADVANCE(PLAYER)
 
                         if( newme->pos.x < newyou->pos.x )
                         {
-                                newme->pvel.x  -= 0.2f;
-                                newyou->pvel.x += 0.2f;
+                                newme->pvel.x  -= 0.1f;
+                                newyou->pvel.x += 0.1f;
                         }
                         else
                         {
-                                newme->pvel.x  += 0.2f;
-                                newyou->pvel.x -= 0.2f;
+                                newme->pvel.x  += 0.1f;
+                                newyou->pvel.x -= 0.1f;
                         }
                 }
 
         if( newme->hovertime ) //gravity?
         {
                 newme->hovertime--;
-                newme->vel.y += 0.1f;
+                newme->vel.y += 0.05f;
         }
         else
         {
-                newme->vel.y += 0.7f;
+                newme->vel.y += 0.35f;
         }
 }

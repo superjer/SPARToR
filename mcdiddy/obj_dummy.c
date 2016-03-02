@@ -12,15 +12,15 @@
 
 #include "mod.h"
 
-PROTO_DRAW(DUMMY)
+draw_object_sig(dummy)
 {
-        DUMMY_t *du = o->data;
+        dummy *du = o->data;
         sprblit( &SM(tnl_weight_silver), du->pos.x, du->pos.y );
 }
 
-PROTO_ADVANCE(DUMMY)
+advance_object_sig(dummy)
 {
-        DUMMY_t *du = ob->data;
+        dummy *du = ob->data;
 
         // friction
         if(      du->vel.x> 0.1f ) du->vel.x -= 0.1f;

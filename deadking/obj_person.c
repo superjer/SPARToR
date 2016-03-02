@@ -15,13 +15,13 @@
 
 #define SPRITECOUNT 10
 
-static void get_azma_sprites(   SPRITE_T **sprs, PERSON_t *pe);
-static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe);
-static void get_slug_sprites(   SPRITE_T **sprs, PERSON_t *pe);
+static void get_azma_sprites(   SPRITE_T **sprs, person *pe);
+static void get_gyllioc_sprites(SPRITE_T **sprs, person *pe);
+static void get_slug_sprites(   SPRITE_T **sprs, person *pe);
 
-PROTO_DRAW(PERSON)
+draw_object_sig(person)
 {
-        PERSON_t *pe = o->data;
+        person *pe = o->data;
         int i;
         SPRITE_T *sprs[SPRITECOUNT] = {NULL};
 
@@ -45,12 +45,12 @@ PROTO_DRAW(PERSON)
         sprblit3d( &SM(shadow), pe->pos.x, pe->pos.y, pe->pos.z );
 }
 
-PROTO_ADVANCE(PERSON)
+advance_object_sig(person)
 {
-        PERSON_t  *oldpe = oa->data;
-        PERSON_t  *newpe = ob->data;
-        CONTEXT_t *co = fr[b].objs[ob->context].data;
-        MOTHER_t  *mo = fr[b].objs[0].data;
+        person  *oldpe = oa->data;
+        person  *newpe = ob->data;
+        context *co = fr[b].objs[ob->context].data;
+        mother  *mo = fr[b].objs[0].data;
 
         enum DIR8 dir = NODIR;  // direction we want to move
         int stop = 0;           // whether to end the current turn
@@ -86,7 +86,7 @@ PROTO_ADVANCE(PERSON)
                 // check for input if player controlled
                 if( mo->pc )
                 {
-                        GHOST_t *gh = fr[b].objs[mo->ghost].data;
+                        ghost *gh = fr[b].objs[mo->ghost].data;
 
                         switch( fr[b].cmds[gh->client].cmd )
                         {
@@ -147,14 +147,14 @@ PROTO_ADVANCE(PERSON)
                 int i;
                 int required_ap;
                 int required_st;
-                PERSON_t *obstructor = NULL;
+                person *obstructor = NULL;
 
                 // FIXME make it easier to check for obstructions
                 for( i=0; i<maxobjs; i++ )
                 {
-                        if( fr[b].objs[i].type==OBJT_PERSON )
+                        if( fr[b].objs[i].type == person_type )
                         {
-                                PERSON_t *pe = fr[b].objs[i].data;
+                                person *pe = fr[b].objs[i].data;
                                 if( pe->tilex!=newx || pe->tilez!=newz )
                                         continue;
                                 obstructor = pe;
@@ -262,7 +262,7 @@ PROTO_ADVANCE(PERSON)
 // Different persons' drawing routines! //
 //////////////////////////////////////////
 
-static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
+static void get_azma_sprites(SPRITE_T **sprs, person *pe)
 {
         SPRITE_T *defspr = &SM(azma_c_idle_s);
         if( pe->armed )
@@ -369,7 +369,7 @@ static void get_azma_sprites(SPRITE_T **sprs, PERSON_t *pe)
         }
 }
 
-static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
+static void get_gyllioc_sprites(SPRITE_T **sprs, person *pe)
 {
         SPRITE_T *defspr = &SM(gyllioc_idle_s);
 
@@ -446,7 +446,7 @@ static void get_gyllioc_sprites(SPRITE_T **sprs, PERSON_t *pe)
         }
 }
 
-static void get_slug_sprites(SPRITE_T **sprs, PERSON_t *pe)
+static void get_slug_sprites(SPRITE_T **sprs, person *pe)
 {
         sprs[0] = &SM(slug_r);
 }

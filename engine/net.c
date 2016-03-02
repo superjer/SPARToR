@@ -121,7 +121,7 @@ int net_connect(const char *hostname, int port)
 void net_loop()
 {
         int           i;
-        static Uint32 prevticks = 0;
+        static Uint64 prevticks = 0;
 
         if( !sock ) return;
 
@@ -144,12 +144,12 @@ void net_loop()
 
         check_recv();
 
-        static Uint32 ticksoup = 0;
-        if( net_resend ) { ticksoup += 5001; net_resend = 0; }
+        static Uint64 ticksoup = 0;
+        if( net_resend ) { ticksoup += 5000001; net_resend = 0; }
         /* ticksoup += tickdiff; */
 
         // resend packets or something?
-        if( ticksoup > 5000 )
+        if( ticksoup > 5000000 )
         {
                 ticksoup = 0;
                 for( i=0; i<maxconns; i++ )

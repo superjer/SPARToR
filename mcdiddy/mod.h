@@ -22,14 +22,14 @@
 extern SYS_TEX_T  sys_tex[];
 extern size_t     num_sys_tex;
 
-extern INPUTNAME_t inputnames[];
+extern INPUTNAME inputnames[];
 extern int numinputnames;
 
 extern CB *hack_map; //FIXME REMOVE SOMEDAY
 extern CB *hack_dmap;
 
 void mod_setup(Uint32 setupfr);
-void mod_recvobj(OBJ_t *o);
+void mod_recvobj(object *o);
 void mod_setvideo(int w, int h);
 void mod_quit();
 void mod_showbinds();

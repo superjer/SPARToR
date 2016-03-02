@@ -14,12 +14,12 @@ do
         $file.bak                                                              \
         | awk -F'('                                                            \
         '                   { nom=1; }
-        $1 ~ "^ *TYPE$"     { nom=0; type=$2; print "typedef struct " $2 "_t { //" $0; }
+        $1 ~ "^ *TYPE$"     { nom=0; type=$2; print "void " $2 "_type; void * mk" $2 " (){}; typedef struct " $2 " { //" $0; }
         $1 ~ "include *BEGIN" ||
         $1 ~ "^ *EXPOSE$"     ||
         $1 ~ "^ *HIDE$"       ||
         $1 ~ "^ *)"         { nom=0; print "//" $0; }
-        $1 ~ "include *END" { nom=0; print "} " type "_t;"; }
+        $1 ~ "include *END" { nom=0; print "} " type ";"; }
         nom                 { print $0; }
         ' >$file
 done

@@ -16,21 +16,21 @@
 #include "sprite_helpers.h"
 #include "saveload.h"
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co );
+static void ghost_paint( FCMD_t *c, ghost *gh, player *pl, context *co );
 
-PROTO_DRAW(GHOST)
+draw_object_sig(ghost)
 {
         if( !v_drawhulls ) return;
 
         // draw ghost (optional)
-        //GHOST_t *gh = o->data;
+        //ghost *gh = o->data;
 }
 
-PROTO_ADVANCE(GHOST)
+advance_object_sig(ghost)
 {
-        GHOST_t   *gh = ob->data;
-        PLAYER_t  *pl = fr[b].objs[gh->avatar].data;
-        CONTEXT_t *co = fr[b].objs[ob->context].data;
+        ghost   *gh = ob->data;
+        player  *pl = fr[b].objs[gh->avatar].data;
+        context *co = fr[b].objs[ob->context].data;
 
         if( gh->client==me )
         {
@@ -84,7 +84,7 @@ PROTO_ADVANCE(GHOST)
                                         int y = (int)unpackbytes(c->data, MAXCMDDATA, &n, 4);
                                         int z = (int)unpackbytes(c->data, MAXCMDDATA, &n, 4);
 
-                                        CONTEXT_t tmp;
+                                        context tmp;
                                         const char *error = create_context(&tmp, co, x, y, z);
 
                                         if( error )
@@ -128,7 +128,7 @@ PROTO_ADVANCE(GHOST)
         }
 }
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, PLAYER_t *pl, CONTEXT_t *co )
+static void ghost_paint( FCMD_t *c, ghost *gh, player *pl, context *co )
 {
         size_t n = 0;
         int  i, j, k;

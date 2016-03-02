@@ -13,9 +13,9 @@
 #include "mod.h"
 #include "audio.h"
 
-PROTO_DRAW(SLUG)
+draw_object_sig(slug)
 {
-        SLUG_t *sl = o->data;
+        slug *sl = o->data;
 
         if( sl->vel.x>0 )
                 sprblit( sl->dead ? &SM(slug_ouch_r) : &SM(slug_r), sl->pos.x, sl->pos.y );
@@ -23,13 +23,13 @@ PROTO_DRAW(SLUG)
                 sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), sl->pos.x, sl->pos.y );
 }
 
-PROTO_ADVANCE(SLUG)
+advance_object_sig(slug)
 {
         int i;
-        SLUG_t    *sl = ob->data;
-        CONTEXT_t *co = fr[b].objs[ob->context].data;
+        slug    *sl = ob->data;
+        context *co = fr[b].objs[ob->context].data;
         int kill = 0;
-        sl->vel.y += 0.6f;      //gravity
+        sl->vel.y += 0.3f;      //gravity
 
         if( sl->dead )          //decay
         {
@@ -37,9 +37,9 @@ PROTO_ADVANCE(SLUG)
         }
         else for( i=0;i<maxobjs;i++ ) //find players, bullets to hit
         {
-                if( fr[b].objs[i].type==OBJT_PLAYER )
+                if( fr[b].objs[i].type == player_type )
                 {
-                        PLAYER_t *pl = fr[b].objs[i].data;
+                        player *pl = fr[b].objs[i].data;
 
                         int up_stabbed = pl->stabbing<0
                                 && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
@@ -52,26 +52,26 @@ PROTO_ADVANCE(SLUG)
                         if( up_stabbed )
                         {
                                 pl->vel.y = sl->vel.y;
-                                sl->vel.y = -5.0f;
+                                sl->vel.y = -2.5f;
                                 kill = 1;
                                 play("stab");
                         }
                         else if( dn_stabbed )
                         {
-                                pl->vel.y = -4.5f;
-                                pl->hovertime = 7;
+                                pl->vel.y = -2.25f;
+                                pl->hovertime = 14;
                                 sl->vel.y = 0.0f;
                                 kill = 1;
                                 play("stab");
                         }
                 }
-                else if( fr[b].objs[i].type==OBJT_BULLET )
+                else if( fr[b].objs[i].type == bullet_type )
                 {
-                        BULLET_t *bu = fr[b].objs[i].data;
+                        bullet *bu = fr[b].objs[i].data;
                         if( fabsf(sl->pos.x - bu->pos.x)>8.0f || fabsf(sl->pos.y - bu->pos.y)>8.0f )
                                 continue; // no hit
                         bu->ttl = 0;
-                        sl->vel.y = -3.0f;
+                        sl->vel.y = -1.5f;
                         kill = 1;
                         play("wibbity");
                 }
@@ -79,17 +79,18 @@ PROTO_ADVANCE(SLUG)
 
         if( kill )
         {
-                sl->vel.x /= 100; //preserve direction while dead
+                sl->vel.x /= 100.0f; //preserve direction while dead
                 sl->dead = 1;
                 ob->flags &= ~OBJF_PLAT;
         }
 
+        // slug stops clipping after 5th frame of death
         if( sl->dead==5 )
                 ob->flags &= ~(OBJF_CLIP|OBJF_BNDB);
 
+        // delete the slug if it's gone out-of-bounds, or is too dead, or has stopped
         if(    sl->dead > 100 || sl->vel.x == 0 || sl->pos.x < -10.0f
             || sl->pos.x > co->x*co->bsx+10.0f
             || sl->pos.y > co->y*co->bsy+10.0f )
                 ob->flags |= OBJF_DEL;
 }
-

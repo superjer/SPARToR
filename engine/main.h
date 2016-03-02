@@ -29,7 +29,7 @@
 #define GAME "GAME"
 #endif
 
-#define TICKSAFRAME 30
+#define TICKSAFRAME 16667
 
 //macros
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -55,7 +55,7 @@
 enum {
         #define EXPOSE(T,N,A)
         #define HIDE(X)
-        #define STRUCT() TOKEN_PASTE(OBJT_,TYPE),
+        #define STRUCT() TOKEN_PASTE(TYPE,_type),
         #define ENDSTRUCT(TYPE)
         #include "engine_structs.h"
         #include "game_structs.h"
@@ -63,7 +63,7 @@ enum {
         #undef HIDE
         #undef STRUCT
         #undef ENDSTRUCT
-        OBJT_MAX
+        MAX_TYPES
 };
 
 struct {
@@ -77,7 +77,7 @@ struct {
 #ifdef FLEXER_EXTRAS
         FLEXER_EXTRAS
 #endif
-} flexer[OBJT_MAX];
+} flexer[MAX_TYPES];
 
 //OBJect Flags
 #define OBJF_POS  (1<< 0) //has position
@@ -130,13 +130,13 @@ typedef struct {
         int       context;
         size_t    size;
         void     *data;
-} OBJ_t;
+} object;
 
 typedef struct {
         int       dirty;
         Uint32    realfr;
         FCMD_t   *cmds;
-        OBJ_t    *objs;
+        object   *objs;
 } FRAME_t;
 
 // map structures //
@@ -163,13 +163,13 @@ typedef struct {
         char   name[16];
         int    presscmd;
         int    releasecmd;
-} INPUTNAME_t;
+} INPUTNAME;
 
 //macro all object struct definitions
 #define EXPOSE(T,N,A) T N A;
 #define HIDE(X) X
 #define STRUCT() typedef struct {
-#define ENDSTRUCT(TYPE) } TOKEN_PASTE(TYPE,_t);
+#define ENDSTRUCT(TYPE) } TYPE;
 #include "engine_structs.h"
 #include "game_structs.h"
 #undef EXPOSE
@@ -177,18 +177,18 @@ typedef struct {
 #undef STRUCT
 #undef ENDSTRUCT
 
-#define ARGS_ADVANCE (int objid, Uint32 a, Uint32 b, OBJ_t *oa, OBJ_t *ob)
-#define ARGS_DRAW (int objid, Uint32 vidfr, OBJ_t *o, CONTEXT_t *co)
+#define ARGS_ADVANCE (int objid, unsigned int a, unsigned int b, object *oa, object *ob)
+#define ARGS_DRAW (int objid, unsigned int vidfr, object *o, context *co)
 
-#define PROTO_ADVANCE(T) void TOKEN_PASTE(advance_,T) ARGS_ADVANCE
-#define PROTO_DRAW(T) void TOKEN_PASTE(draw_,T) ARGS_DRAW
+#define advance_object_sig(T) void TOKEN_PASTE(advance_object_,T) ARGS_ADVANCE
+#define draw_object_sig(T) void TOKEN_PASTE(draw_object_,T) ARGS_DRAW
 
 //macro all advance_object and draw_object prototypes
 #define EXPOSE(T,N,A)
 #define HIDE(X)
 #define STRUCT()                                      \
-        void TOKEN_PASTE(advance_,TYPE) ARGS_ADVANCE; \
-        void TOKEN_PASTE(draw_,TYPE) ARGS_DRAW;
+        void TOKEN_PASTE(advance_object_,TYPE) ARGS_ADVANCE; \
+        void TOKEN_PASTE(draw_object_,TYPE) ARGS_DRAW;
 #define ENDSTRUCT(TYPE)
 #include "engine_structs.h"
 #include "game_structs.h"
@@ -201,30 +201,32 @@ typedef struct {
 #define flex(o,memb) ((void *)((char *)((o)->data) + flexer[(o)->type].memb))
 
 //externs
-extern Uint32 ticksaframe;
+extern unsigned long ticksaframe;
 extern int    maxframes;
 extern int    maxobjs;
 extern int    maxclients;
 
 extern FRAME_t *fr;
-extern Uint32 frameoffset; //offset to sync client with server
-extern Uint32 metafr;  //the frame corresponding to "now"
-extern Uint32 surefr;  //newest frame we are sure of (i.e. it has all its inputs and has been advanced)
-extern Uint32 drawnfr; //most recently rendered frame
-extern Uint32 hotfr;   //newest fully advanced frame (it's hot and fresh)
-extern Uint32 cmdfr;   //newest frame with cmds inserted (possibly in future)
+extern unsigned int frameoffset; //offset to sync client with server
+extern unsigned int metafr;  //the frame corresponding to "now"
+extern unsigned int surefr;  //newest frame we are sure of (i.e. it has all its inputs and has been advanced)
+extern unsigned int drawnfr; //most recently rendered frame
+extern unsigned int hotfr;   //newest fully advanced frame (it's hot and fresh)
+extern unsigned int cmdfr;   //newest frame with cmds inserted (possibly in future)
 
-extern Uint32 ticks;
+extern unsigned long ticks;
 extern int    me;
 extern int    console_open;
 
-extern Uint32 total_time;
-extern Uint32 idle_time;
-extern Uint32 render_time;
-extern Uint32 adv_move_time;
-extern Uint32 adv_collide_time;
-extern Uint32 adv_game_time;
-extern Uint32 adv_frames;
+extern unsigned long total_time;
+extern unsigned long idle_time;
+extern unsigned long render_time;
+extern unsigned long adv_move_time;
+extern unsigned long adv_collide_time;
+extern unsigned long adv_game_time;
+extern unsigned long adv_frames;
+extern unsigned long pump_time;
+extern unsigned long slough_time;
 
 extern int    eng_realtime;
 
@@ -242,5 +244,8 @@ void setdrawnfr(Uint32 to);
 void sethotfr(  Uint32 to);
 void setcmdfr(  Uint32 to);
 void jogframebuffer(Uint32 newmetafr, Uint32 newsurefr);
+
+//timing
+Uint64 getticks();
 
 #endif

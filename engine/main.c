@@ -44,7 +44,7 @@ void IMG_Quit() {}
 #endif
 
 //globals
-Uint32 ticksaframe = TICKSAFRAME;
+Uint64 ticksaframe = TICKSAFRAME;
 int maxframes = 360;
 int maxobjs = 100;
 int maxclients = 32;
@@ -57,17 +57,19 @@ Uint32 drawnfr;
 Uint32 hotfr;
 Uint32 cmdfr = 1; //DO NOT clear frame 1, it is prefilled with client-connect for local person
 
-Uint32 ticks, newticks;
+Uint64 ticks, newticks;
 int me;
 int console_open;
 
-Uint32 total_time = 0;
-Uint32 idle_time = 0;
-Uint32 render_time = 0;
-Uint32 adv_move_time = 0;
-Uint32 adv_collide_time = 0;
-Uint32 adv_game_time = 0;
-Uint32 adv_frames = 0;
+Uint64 total_time = 0;
+Uint64 idle_time = 0;
+Uint64 render_time = 0;
+Uint64 adv_move_time = 0;
+Uint64 adv_collide_time = 0;
+Uint64 adv_game_time = 0;
+Uint64 adv_frames = 0;
+Uint64 pump_time = 0;
+Uint64 slough_time = 0;
 
 //runtime engine options
 int eng_realtime = 0;
@@ -77,9 +79,9 @@ static void args(int argc, char **argv);
 static void init_flexers()
 {
         memset(flexer, 0, sizeof flexer);
-        #define EXPOSE(T,N,A) flexer[TOKEN_PASTE(OBJT_,TYPE)].N=(ptrdiff_t)&((TOKEN_PASTE(TYPE,_t) *)0)->N;
+        #define EXPOSE(T,N,A) flexer[TOKEN_PASTE(TYPE,_type)].N=(ptrdiff_t)&((TYPE *)0)->N;
         #define HIDE(X)
-        #define STRUCT() flexer[TOKEN_PASTE(OBJT_,TYPE)].name = STRINGIFY(TYPE);
+        #define STRUCT() flexer[TOKEN_PASTE(TYPE,_type)].name = STRINGIFY(TYPE);
         #define ENDSTRUCT(TYPE)
         #include "engine_structs.h"
         #include "game_structs.h"
@@ -112,7 +114,7 @@ int main(int argc, char **argv)
         for( i=0; i<maxframes; i++ )
         {
                 fr[i].cmds = calloc(sizeof (FCMD_t), maxclients);
-                fr[i].objs = calloc(sizeof (OBJ_t), maxobjs);
+                fr[i].objs = calloc(sizeof (object), maxobjs);
         }
 
         Uint32 sdlflags = SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER;
@@ -142,11 +144,13 @@ int main(int argc, char **argv)
         for( ;; )
         {
                 SDL_Event e;
-                newticks = SDL_GetTicks();
-                if( !eng_realtime && newticks-ticks<5 ) // give system some time to breathe if we're not too busy
+                newticks = getticks();
+                if( !eng_realtime && newticks-ticks<5000 ) // give system some time to breathe if we're not too busy
                         SDL_Delay(1);
                 ticks = newticks;
                 metafr = ticks/ticksaframe + frameoffset;
+                Uint64 idle_ticks = getticks();
+                idle_time += idle_ticks - idle_start;
                 while( SDL_PollEvent(&e) ) switch(e.type)
                 {
                         case SDL_WINDOWEVENT:              winevent  (   e.window ); break;
@@ -165,15 +169,17 @@ int main(int argc, char **argv)
                         case SDL_CONTROLLERAXISMOTION:     padaxis   (   e.caxis  ); break;
                         case SDL_QUIT:                     cleanup   (            ); break;
                 }
-                idle_time += SDL_GetTicks() - idle_start;
                 readinput();
                 net_loop();
                 net_test();
                 /* if( netmode == NM_HOST   ) host(); */
                 /* if( netmode == NM_CLIENT ) client(); */
+                Uint64 pump_ticks = getticks();
+                pump_time += pump_ticks - idle_ticks;
                 advance();
                 render();
-                idle_start = SDL_GetTicks();
+                idle_start = getticks();
+                slough_time += idle_start - pump_ticks;
         }
 }
 
@@ -209,8 +215,8 @@ void toggleconsole()
 
 static void advanceobject(int i, Uint32 a, Uint32 b)
 {
-        OBJ_t *oa = fr[a].objs + i;
-        OBJ_t *ob = fr[b].objs + i;
+        object *oa = fr[a].objs + i;
+        object *ob = fr[b].objs + i;
         free(ob->data);
         memset(ob, 0, sizeof *ob);
 
@@ -223,7 +229,7 @@ static void advanceobject(int i, Uint32 a, Uint32 b)
 
         if( HAS(ob->flags, OBJF_POS|OBJF_VEL) && ob->context )
         {
-                CONTEXT_t *co = fr[b].objs[ob->context].data;
+                context *co = fr[b].objs[ob->context].data;
                 V *pos  = flex(ob, pos);
                 V *vel  = flex(ob, vel);
                 V *pvel = (ob->flags & OBJF_PVEL) ? flex(ob, pvel) : &(V[2]){{0, 0, 0}, {0, 0, 0}};
@@ -254,7 +260,7 @@ static void readvanceobject(char recheck[2][maxobjs], int r, int i, Uint32 a, Ui
         if( !HAS( fr[b].objs[i].flags, OBJF_POS|OBJF_VEL|OBJF_HULL ) )
                 return;
 
-        OBJ_t *oldme = fr[a].objs+i, *newme = fr[b].objs+i;
+        object *oldme = fr[a].objs+i, *newme = fr[b].objs+i;
         V *oldmepos  = flex(oldme, pos );
         V *newmepos  = flex(newme, pos );
         V *oldmevel  = flex(oldme, vel );
@@ -264,7 +270,7 @@ static void readvanceobject(char recheck[2][maxobjs], int r, int i, Uint32 a, Ui
 
         if( newme->context && (newme->flags & OBJF_CLIP) ) //check CBs (context blocks (map tiles))
         {
-                CONTEXT_t *co = fr[b].objs[newme->context].data;
+                context *co = fr[b].objs[newme->context].data;
                 int dnx = ((int)(newmepos->x + newmehull[0].x) / co->bsx);
                 int dny = ((int)(newmepos->y + newmehull[0].y) / co->bsy);
                 int dnz = ((int)(newmepos->z + newmehull[0].z) / co->bsz);
@@ -331,8 +337,8 @@ static void readvanceobject(char recheck[2][maxobjs], int r, int i, Uint32 a, Ui
                 if( !HAS(fr[b].objs[j].flags, OBJF_POS|OBJF_VEL|OBJF_HULL) )
                         continue;
 
-                OBJ_t *oldyou = fr[a].objs+j;
-                OBJ_t *newyou = fr[b].objs+j;
+                object *oldyou = fr[a].objs+j;
+                object *newyou = fr[b].objs+j;
                 V *oldyoupos  = flex(oldyou, pos );
                 V *newyoupos  = flex(newyou, pos );
                 V *newyouvel  = flex(newyou, vel );
@@ -378,12 +384,12 @@ void advance()
 
                 Uint32 a = (hotfr-1)%maxframes; //a: frame to advance from, b: frame to advance to
                 Uint32 b = (hotfr  )%maxframes;
-                Uint32 adv_move_start = SDL_GetTicks();
+                Uint64 adv_move_start = getticks();
 
                 for( i=0; i<maxobjs; i++ ) //first pass -- copy forward, move, clip with world
                         advanceobject(i, a, b);
 
-                Uint32 adv_collide_start = SDL_GetTicks();
+                Uint64 adv_collide_start = getticks();
                 adv_move_time += adv_collide_start - adv_move_start;
 
                 int r;
@@ -397,19 +403,19 @@ void advance()
                                 readvanceobject(recheck, r, i, a, b);
                 }
 
-                Uint32 adv_game_start = SDL_GetTicks();
+                Uint64 adv_game_start = getticks();
                 adv_collide_time += adv_game_start - adv_collide_start;
 
                 for( i=0; i<maxobjs; i++ ) //mod pass
                 {
-                        OBJ_t *oa = fr[a].objs+i;
-                        OBJ_t *ob = fr[b].objs+i;
+                        object *oa = fr[a].objs+i;
+                        object *ob = fr[b].objs+i;
                         #define EXPOSE(T,N,A)
                         #define HIDE(X)
-                        #define STRUCT()                                      \
-                        case TOKEN_PASTE(OBJT_,TYPE):                       \
-                                assert(ob->size == sizeof(TOKEN_PASTE(TYPE,_t))); \
-                                TOKEN_PASTE(advance_,TYPE)(i, a, b, oa, ob);      \
+                        #define STRUCT()                                            \
+                        case TOKEN_PASTE(TYPE,_type):                               \
+                                assert(ob->size == sizeof(TYPE));                   \
+                                TOKEN_PASTE(advance_object_,TYPE)(i, a, b, oa, ob); \
                                 break;
                         #define ENDSTRUCT(TYPE)
                         switch( ob->type )
@@ -422,7 +428,7 @@ void advance()
                         #undef ENDSTRUCT
                 }
 
-                adv_game_time += SDL_GetTicks() - adv_game_start;
+                adv_game_time += getticks() - adv_game_start;
                 adv_frames++;
                 setsurefr(hotfr>50 ? hotfr-50 : 0); //FIXME: UGLY HACK! surefr should be determined for REAL
         }
@@ -496,7 +502,7 @@ void clearframebuffer()
                 {
                         if( fr[i].objs[j].data )
                                 free( fr[i].objs[j].data );
-                        memset( fr[i].objs+j, 0, sizeof(OBJ_t) );
+                        memset( fr[i].objs+j, 0, sizeof(object) );
                 }
         }
 }
@@ -546,4 +552,14 @@ void jogframebuffer(Uint32  newmetafr, Uint32 newsurefr)
         drawnfr = newsurefr;
         hotfr   = newsurefr;
         cmdfr   = newsurefr;
+}
+
+Uint64 getticks()
+{
+        static Uint64 base;
+        static Uint64 freq;
+        if( !base ) base = SDL_GetPerformanceCounter();
+        if( !freq ) freq = SDL_GetPerformanceFrequency();
+        Uint64 t = ((SDL_GetPerformanceCounter() - base) * 1e6) / freq;
+        return t;
 }

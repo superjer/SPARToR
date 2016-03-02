@@ -25,7 +25,7 @@
 #include "helpers.h"
 #include <limits.h>
 
-SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, CONTEXT_t *co, int x, int y, int z, int drawx, int drawy, int draww, int drawh)
+SPRITE_T *sprite_grid_transform_xy(SPRITE_T *spr, context *co, int x, int y, int z, int drawx, int drawy, int draww, int drawh)
 {
         if( !spr->more )
                 return spr;
@@ -121,9 +121,9 @@ void renumber_sprites()
         {
                 for( j=0; j<maxobjs; j++ )
                 {
-                        if( fr[i].objs[j].type == OBJT_CONTEXT )
+                        if( fr[i].objs[j].type == context_type )
                         {
-                                CONTEXT_t *co = fr[i].objs[j].data;
+                                context *co = fr[i].objs[j].data;
                                 CB *map  = co->map;
                                 CB *dmap = co->dmap;
                                 int volume = co->x * co->y * co->z;

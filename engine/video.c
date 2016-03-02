@@ -121,7 +121,7 @@ void render()
         Uint32 vidfr = metafr;
         Uint32 vidfrmod = vidfr%maxframes;
 
-        Uint32 render_start = SDL_GetTicks();
+        Uint64 render_start = getticks();
         static Uint32 total_start = 0;
         Uint32 tmp;
 
@@ -173,7 +173,7 @@ void render()
 
         if( mycontext )
         {
-                CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
+                context *co = fr[vidfrmod].objs[mycontext].data;
                 if( co->projection == ORTHOGRAPHIC )
                         v_perspective = 0;
         }
@@ -216,7 +216,7 @@ void render()
         int objid;
         for( objid=0; objid<maxobjs; objid++ )
         {
-                OBJ_t *o = fr[vidfrmod].objs+objid;
+                object *o = fr[vidfrmod].objs+objid;
                 if( !(o->flags & OBJF_VIS) )
                         continue;
 
@@ -226,14 +226,14 @@ void render()
                         return;
                 }
                 
-                CONTEXT_t *co = fr[vidfrmod].objs[o->context].data;
+                context *co = fr[vidfrmod].objs[o->context].data;
                 switch(o->type)
                 {
                         #define EXPOSE(T,N,A)
                         #define HIDE(X)
-                        #define STRUCT()                                      \
-                                case TOKEN_PASTE(OBJT_,TYPE):                       \
-                                        TOKEN_PASTE(draw_,TYPE)(objid, vidfrmod, o, co);  \
+                        #define STRUCT()                                                        \
+                                case TOKEN_PASTE(TYPE,_type):                                   \
+                                        TOKEN_PASTE(draw_object_,TYPE)(objid, vidfrmod, o, co); \
                                         break;
                         #define ENDSTRUCT(TYPE)
                         #include "game_structs.h"
@@ -256,7 +256,7 @@ void render()
 
                 if( mycontext )
                 {
-                        CONTEXT_t *co = fr[vidfrmod].objs[mycontext].data;
+                        context *co = fr[vidfrmod].objs[mycontext].data;
                         int x, y, z;
 
                         for( z=0; z<co->z; z++ ) for( y=0; y<co->y; y++ ) for( x=0; x<co->x; x++ )
@@ -294,7 +294,7 @@ void render()
 
                 for( i=0; i<maxobjs; i++ )
                 {
-                        OBJ_t *o = fr[vidfrmod].objs+i;
+                        object *o = fr[vidfrmod].objs+i;
 
                         if( (o->flags & OBJF_POS) && (o->flags & OBJF_HULL) )
                         {
@@ -327,7 +327,7 @@ void render()
 
                 for( i=0; i<maxobjs; i++ )
                 {
-                        OBJ_t *o = fr[vidfrmod].objs+i;
+                        object *o = fr[vidfrmod].objs+i;
 
                         if( o->flags & OBJF_POS )
                         {
@@ -409,7 +409,7 @@ void render()
                         y -= 12 * v_conscale;
                 }
 
-                if( (ticks/200)%2 && i_hasfocus )
+                if( (ticks/300000)%2 && i_hasfocus )
                         font_char(
                                 v_conscale,
                                 x + (font_extents(prompt, 999) + font_extents(conbuf[0], conpos))*v_conscale,
@@ -419,23 +419,25 @@ void render()
         }
 
         //display stats
-        total_time += (tmp = SDL_GetTicks()) - total_start;
+        total_time += (tmp = getticks()) - total_start;
         render_time += tmp - render_start;
         total_start = tmp;
-        Uint32 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
+        Uint64 unaccounted_time = total_time - (idle_time + render_time + adv_move_time + adv_collide_time + adv_game_time);
         if( v_showstats )
         {
                 Uint32 denom = vidfrmod+1;
-                drawtext(w-20, 10, FONT_RIGHT, "idle_time %4d"       ,        idle_time/denom);
-                drawtext(w-20, 20, FONT_RIGHT, "render_time %4d"     ,      render_time/denom);
-                drawtext(w-20, 30, FONT_RIGHT, "adv_move_time %4d"   ,    adv_move_time/denom);
-                drawtext(w-20, 40, FONT_RIGHT, "adv_collide_time %4d", adv_collide_time/denom);
-                drawtext(w-20, 50, FONT_RIGHT, "adv_game_time %4d"   ,    adv_game_time/denom);
-                drawtext(w-20, 60, FONT_RIGHT, "unaccounted_time %4d", unaccounted_time/denom);
-                drawtext(w-20, 70, FONT_RIGHT, "adv_frames  %2.2f"   ,(float)adv_frames/denom);
-                drawtext(w-20, 80, FONT_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d"
+                drawtext(w-20, 10, FONT_RIGHT, "idle_time %8llu"       ,        idle_time/denom);
+                drawtext(w-20, 20, FONT_RIGHT, "render_time %8llu"     ,      render_time/denom);
+                drawtext(w-20, 30, FONT_RIGHT, "adv_move_time %8llu"   ,    adv_move_time/denom);
+                drawtext(w-20, 40, FONT_RIGHT, "adv_collide_time %8llu", adv_collide_time/denom);
+                drawtext(w-20, 50, FONT_RIGHT, "adv_game_time %8llu"   ,    adv_game_time/denom);
+                drawtext(w-20, 60, FONT_RIGHT, "pump_time %8llu"       ,        pump_time/denom);
+                drawtext(w-20, 70, FONT_RIGHT, "slough_time %8llu"     ,      slough_time/denom);
+                drawtext(w-20, 80, FONT_RIGHT, "unaccounted_time %8llu", unaccounted_time/denom);
+                drawtext(w-20, 90, FONT_RIGHT, "adv_frames %5.3f"      ,(float)adv_frames/denom);
+                drawtext(w-20,100, FONT_RIGHT, "fr: idx=%d meta=%d vid=%d hot=%d"
                                                                                                                                                    , metafr%maxframes, metafr, vidfr, hotfr);
-                drawtext(w-20, 90, FONT_RIGHT, "textedit: %d"        , SDL_IsTextInputActive());
+                drawtext(w-20,110, FONT_RIGHT, "textedit: %d", SDL_IsTextInputActive());
         }
 
         //display audio waveform

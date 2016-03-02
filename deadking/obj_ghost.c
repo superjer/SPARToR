@@ -16,20 +16,20 @@
 #include "sprite_helpers.h"
 #include "saveload.h"
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co );
+static void ghost_paint( FCMD_t *c, ghost *gh, context *co );
 
-PROTO_DRAW(GHOST)
+draw_object_sig(ghost)
 {
         if( !v_drawhulls ) return;
 
         // draw ghost (optional)
-        //GHOST_t *gh = o->data;
+        //ghost *gh = o->data;
 }
 
-PROTO_ADVANCE(GHOST)
+advance_object_sig(ghost)
 {
-        GHOST_t   *gh = ob->data;
-        CONTEXT_t *co = fr[b].objs[ob->context].data;
+        ghost   *gh = ob->data;
+        context *co = fr[b].objs[ob->context].data;
 
         static V dimetric_hull[2] = {{-64, 0, -64}, {64, 72, 64}};
         static V ortho_hull[2]    = {{-NATIVEW/2, -NATIVEH/2, 0}, {NATIVEW/2, NATIVEH/2, 0}};
@@ -100,7 +100,7 @@ PROTO_ADVANCE(GHOST)
                                         int y = (int)unpackbytes(c->data, MAXCMDDATA, &n, 4);
                                         int z = (int)unpackbytes(c->data, MAXCMDDATA, &n, 4);
 
-                                        CONTEXT_t tmp;
+                                        context tmp;
                                         const char *error = create_context(&tmp, co, x, y, z);
 
                                         if( error )
@@ -144,7 +144,7 @@ PROTO_ADVANCE(GHOST)
         }
 }
 
-static void ghost_paint( FCMD_t *c, GHOST_t *gh, CONTEXT_t *co )
+static void ghost_paint( FCMD_t *c, ghost *gh, context *co )
 {
         size_t n = 0;
         int  i, j, k;

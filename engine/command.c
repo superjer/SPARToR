@@ -229,13 +229,13 @@ void command(const char *s)
         else if( strcmp(q, "slow")==0 )
         {
                 echo("Speed is now slow");
-                ticksaframe = 300;
+                ticksaframe = 300000;
                 jogframebuffer(metafr, surefr);
         }
         else if( strcmp(q, "fast")==0 )
         {
                 echo("Speed is now fast");
-                ticksaframe = 30;
+                ticksaframe = 30000;
                 jogframebuffer(metafr, surefr);
         }
         else if( strcmp(q, "help")==0 )
@@ -254,7 +254,7 @@ void command(const char *s)
                 int i;
                 for( i=0; i<maxobjs; i++ )
                 {
-                        OBJ_t *o = fr[surefr%maxframes].objs+i;
+                        object *o = fr[surefr%maxframes].objs+i;
                         if( o->type )
                                 echo( "#%-3i %-20s C:%-3i F:%-5x", i, flexer[o->type].name, o->context, o->flags );
                 }

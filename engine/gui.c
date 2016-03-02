@@ -19,10 +19,10 @@ int gui_hover = 0;
 void gui_update( Uint32 guifr )
 {
         /*
-        OBJ_t *ob = fr[guifr%maxframes].objs + gui_hover;
-        if( ob->type != OBJT_POPUP )
+        object *ob = fr[guifr%maxframes].objs + gui_hover;
+        if( ob->type != popup_type )
         {
-                POPUP_t *pop = ob->data;
+                popup *pop = ob->data;
                 pop->hover = 0;
         }
         */
@@ -30,7 +30,7 @@ void gui_update( Uint32 guifr )
         gui_hover = gui_element_at(guifr, i_mousex, i_mousey);
 }
 
-// returns obj index of a GUI element (POPUP) or 0
+// returns obj index of a GUI element (popup) or 0
 int gui_element_at(Uint32 guifr, int x, int y)
 {
         int i;
@@ -39,12 +39,12 @@ int gui_element_at(Uint32 guifr, int x, int y)
 
         for( i=0; i<maxobjs; i++ )
         {
-                OBJ_t *ob = fr[guifr%maxframes].objs+i;
+                object *ob = fr[guifr%maxframes].objs+i;
 
-                if( ob->type!=OBJT_POPUP )
+                if( ob->type != popup_type )
                         continue;
 
-                POPUP_t *pop = ob->data;
+                popup *pop = ob->data;
                 V *pos  = flex(ob, pos);
                 V *hull = flex(ob, hull);
 

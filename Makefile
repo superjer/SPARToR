@@ -60,6 +60,13 @@ ifneq (,$(findstring MINGW,$(UNAME)))
 	INC += -Iplatforms/win32/include -Iplatforms/win32/include/SDL2
 	POSTCC = cp platforms/win32/bin/*.dll .
 endif
+ifneq (,$(findstring MINGW64,$(UNAME)))
+        LIBS = -L /mingw64/lib/
+        LIBS += -lmingw32 -lSDL2main -lSDL2 -lSDL2_net -lSDL2_image -lglew32 -lopengl32 -lglu32 -lm
+        INC += -I/mingw64/include -I/mingw64/include/SDL2
+        POSTCC = cp /mingw64/bin/glew32.dll /mingw64/bin/SDL2.dll /mingw64/bin/SDL2_image.dll /mingw64/bin/SDL2_net.dll .
+endif
+
 
 INC_MC = $(INC) -Imcdiddy
 INC_DK = $(INC) -Ideadking

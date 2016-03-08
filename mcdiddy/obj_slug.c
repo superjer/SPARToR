@@ -10,6 +10,10 @@
  **  http://github.com/superjer/SPARToR
  **/
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dlfcn.h>
 #include "mod.h"
 #include "audio.h"
 
@@ -25,72 +29,49 @@ draw_object_sig(slug)
 
 advance_object_sig(slug)
 {
-        int i;
-        slug    *sl = ob->data;
-        context *co = fr[b].objs[ob->context].data;
-        int kill = 0;
-        sl->vel.y += 0.3f;      //gravity
+        typedef void (*ftype)(FRAME_t *, int, int, unsigned int, unsigned int, object *, object *);
+        static ftype fp;
+        static time_t mtime;
+        static void *handle;
+        static char so_file[] = "./mcdiddy.so";
 
-        if( sl->dead )          //decay
+        // FIXME! clean up with: dlclose(handle);
+
+        struct stat fileinfo;
+        if (stat(so_file, &fileinfo))
         {
-                sl->dead++;
+                echo("Failed to stat %s", so_file);
+                return;
         }
-        else for( i=0;i<maxobjs;i++ ) //find players, bullets to hit
+
+        if (fileinfo.st_mtime != mtime)
         {
-                if( fr[b].objs[i].type == player_type )
+                echo("New mtime is %d", fileinfo.st_mtime);
+                if (handle)
                 {
-                        player *pl = fr[b].objs[i].data;
-
-                        int up_stabbed = pl->stabbing<0
-                                && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
-                                && fabsf(sl->pos.y + sl->hull[1].y - pl->pos.y - pl->hull[0].y)<=8.0f ;
-
-                        int dn_stabbed = pl->stabbing>0
-                                && fabsf(sl->pos.x                 - pl->pos.x                )<=14.0f
-                                && fabsf(sl->pos.y + sl->hull[0].y - pl->pos.y - pl->hull[1].y)<=4.0f ;
-
-                        if( up_stabbed )
-                        {
-                                pl->vel.y = sl->vel.y;
-                                sl->vel.y = -2.5f;
-                                kill = 1;
-                                play("stab");
-                        }
-                        else if( dn_stabbed )
-                        {
-                                pl->vel.y = -2.25f;
-                                pl->hovertime = 14;
-                                sl->vel.y = 0.0f;
-                                kill = 1;
-                                play("stab");
-                        }
+                        echo("Closing so file %s", so_file);
+                        if (dlclose(handle))
+                                echo("Error closing so file %s", so_file);
                 }
-                else if( fr[b].objs[i].type == bullet_type )
-                {
-                        bullet *bu = fr[b].objs[i].data;
-                        if( fabsf(sl->pos.x - bu->pos.x)>8.0f || fabsf(sl->pos.y - bu->pos.y)>8.0f )
-                                continue; // no hit
-                        bu->ttl = 0;
-                        sl->vel.y = -1.5f;
-                        kill = 1;
-                        play("wibbity");
-                }
+                echo("Opening so file %s", so_file);
+                handle = dlopen(so_file, RTLD_NOW);
+                if (!handle)
+                        echo("dlopen error: %s", dlerror());
         }
 
-        if( kill )
+        mtime = fileinfo.st_mtime;
+
+        if (!handle)
+                return;
+
+        fp = (ftype)dlsym(handle, "real_function");
+
+        char *error;
+        if ((error = dlerror()))
         {
-                sl->vel.x /= 100.0f; //preserve direction while dead
-                sl->dead = 1;
-                ob->flags &= ~OBJF_PLAT;
+                echo(error);
+                return;
         }
 
-        // slug stops clipping after 5th frame of death
-        if( sl->dead==5 )
-                ob->flags &= ~(OBJF_CLIP|OBJF_BNDB);
-
-        // delete the slug if it's gone out-of-bounds, or is too dead, or has stopped
-        if(    sl->dead > 100 || sl->vel.x == 0 || sl->pos.x < -10.0f
-            || sl->pos.x > co->x*co->bsx+10.0f
-            || sl->pos.y > co->y*co->bsy+10.0f )
-                ob->flags |= OBJF_DEL;
+        fp(fr, maxobjs, objid, a, b, oa, ob);
 }

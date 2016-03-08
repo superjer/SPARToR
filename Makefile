@@ -6,20 +6,28 @@ UNAME := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 # Same for all platforms, probably
 CC = gcc
 MKDIRP = mkdir -p
+MV = mv
 OBJDIR_MC = obj-mc
 OBJDIR_DK = obj-dk
 SRCS = $(wildcard engine/*.c)
 SRCS += $(wildcard engine/mt19937ar/*.c)
 SRCS_MC = $(SRCS) $(wildcard mcdiddy/*.c)
 SRCS_DK = $(SRCS) $(wildcard deadking/*.c)
+SRCS_ENTITY_MC = $(wildcard mcdiddy/entities/*.c)
+SRCS_ENTITY_DK = $(wildcard deadking/entities/*.c)
 OBJS_MC = $(patsubst %.c,$(OBJDIR_MC)/%.o,$(SRCS_MC))
 OBJS_DK = $(patsubst %.c,$(OBJDIR_DK)/%.o,$(SRCS_DK))
+OBJS_ENTITY_MC = $(patsubst %.c,$(OBJDIR_MC)/%.o,$(SRCS_ENTITY_MC))
+OBJS_ENTITY_DK = $(patsubst %.c,$(OBJDIR_DK)/%.o,$(SRCS_ENTITY_DK))
 DEPS_MC = $(OBJS_MC:.o=.d)
 DEPS_DK = $(OBJS_DK:.o=.d)
+DEPS_ENTITY_MC = $(OBJS_ENTITY_MC:.o=.d)
+DEPS_ENTITY_DK = $(OBJS_ENTITY_DK:.o=.d)
 
 GITCOMMIT := $(shell sh -c "git branch -v | grep '^\*' | sed 's/\s\+/ /g' | cut -d' ' -f2,3")
 
-FLAGS = -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings -pedantic -DGLEW_STATIC
+FLAGS = -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-overlength-strings
+FLAGS += -DGLEW_STATIC
 FLAGS += -DGITCOMMIT='"$(GITCOMMIT)"'
 FLAGS += -std=c99
 
@@ -30,10 +38,11 @@ OBJSRES =
 WINDRES =
 POSTCC =
 EXE_SUF = .bin
+DLL_SUF = .so
 
 ifeq ($(UNAME),Linux)
 	FLAGS += -DDOGLEW `sdl2-config --cflags`
-	LIBS = -lm -lSDL2 -lSDL2_net -lSDL2_image -lGL -lGLU -lGLEW
+	LIBS = -lm -ldl -lSDL2 -lSDL2_net -lSDL2_image -lGL -lGLU -lGLEW
 endif
 ifeq ($(UNAME),Darwin)
 	# Because GLU funcs are deprecated on Mac (?):
@@ -51,6 +60,7 @@ ifeq ($(UNAME),Darwin)
 endif
 ifneq (,$(findstring MINGW,$(UNAME)))
 	EXE_SUF = .exe
+	DLL_SUF = .dll
 	OBJSRES_MC = mcdiddy/icon.o
 	OBJSRES_DK = deadking/icon.o
 	WINDRES = windres
@@ -72,24 +82,34 @@ INC_MC = $(INC) -Imcdiddy
 INC_DK = $(INC) -Ideadking
 EXE_MC = mcdiddy$(EXE_SUF)
 EXE_DK = deadking$(EXE_SUF)
+DLL_MC = mcdiddy$(DLL_SUF)
+DLL_DK = deadking$(DLL_SUF)
 FLAGS_MC = $(FLAGS) -D'GAME="mcdiddy"'
 FLAGS_DK = $(FLAGS) -D'GAME="deadking"'
 
-all: $(EXE_MC) $(EXE_DK)
+all: $(EXE_MC) $(EXE_DK) $(DLL_MC) $(DLL_DK)
 
 mcdiddy: $(EXE_MC)
 
 deadking: $(EXE_DK)
 
 $(EXE_MC): $(OBJS_MC) $(OBJSRES_MC)
-	$(CC) -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS) $(XLIBS)
+	$(CC) -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS)
 	$(POSTCC)
 	$(POSTCC_MC)
 
 $(EXE_DK): $(OBJS_DK) $(OBJSRES_DK)
-	$(CC) -o $@ $(OBJS_DK) $(OBJSRES_DK) $(FLAGS_DK) $(INC_DK) $(LIBS) $(XLIBS)
+	$(CC) -o $@ $(OBJS_DK) $(OBJSRES_DK) $(FLAGS_DK) $(INC_DK) $(LIBS)
 	$(POSTCC)
 	$(POSTCC_DK)
+
+$(DLL_MC): $(OBJS_ENTITY_MC)
+	$(CC) -shared -o $@.new $(OBJS_ENTITY_MC) -fPIC $(FLAGS_MC) $(INC_MC)
+	$(MV) $@.new $@
+
+$(DLL_DK): $(OBJS_ENTITY_DK)
+	$(CC) -shared -o $@.new $(OBJS_ENTITY_DK) -fPIC $(FLAGS_DK) $(INC_DK)
+	$(MV) $@.new $@
 
 -include $(DEPS_MC)
 -include $(DEPS_DK)
@@ -97,12 +117,12 @@ $(EXE_DK): $(OBJS_DK) $(OBJSRES_DK)
 $(OBJDIR_MC)/%.o: %.c
 	@$(MKDIRP) $(dir $@)
 	$(CC) $(FLAGS_MC) $(INC_MC) -MM -MT $@ -MF $(patsubst %.o,%.d,$@) $<
-	$(CC) -o $@ -c $(FLAGS_MC) $(INC_MC) $<
+	$(CC) -o $@ -c -fPIC $(FLAGS_MC) $(INC_MC) $<
 
 $(OBJDIR_DK)/%.o: %.c
 	@$(MKDIRP) $(dir $@)
 	$(CC) $(FLAGS_DK) $(INC_DK) -MM -MT $@ -MF $(patsubst %.o,%.d,$@) $<
-	$(CC) -o $@ -c $(FLAGS_DK) $(INC_DK) $<
+	$(CC) -o $@ -c -fPIC $(FLAGS_DK) $(INC_DK) $<
 
 .rc.o:
 	$(WINDRES) $^ -o $@
@@ -113,6 +133,6 @@ clean:
 	-$(RM) $(OBJS_MC) $(OBJS_DK) $(OBJSRES_MC) $(OBJSRES_DK)
 
 mrproper: clean
-	-$(RM) -r $(EXE_MC) $(EXE_DK) $(OBJDIR_MC) $(OBJDIR_DK)
+	-$(RM) -r $(EXE_MC) $(EXE_DK) $(DLL_MC) $(DLL_DK) $(OBJDIR_MC) $(OBJDIR_DK)
 
 distclean: mrproper

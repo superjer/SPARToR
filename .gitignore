@@ -7,6 +7,10 @@ cscope.*
 tags
 *.exe
 *.bin
+mcdiddy.so
+deadking.so
+mcdiddy.dll
+deadking.dll
 mcdiddy.app
 deadking.app
 stdout.txt

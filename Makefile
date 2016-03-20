@@ -94,12 +94,12 @@ mcdiddy: $(EXE_MC)
 deadking: $(EXE_DK)
 
 $(EXE_MC): $(OBJS_MC) $(OBJSRES_MC)
-	$(CC) -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS)
+	$(CC) -Wl,--export-dynamic -o $@ $(OBJS_MC) $(OBJSRES_MC) $(FLAGS_MC) $(INC_MC) $(LIBS)
 	$(POSTCC)
 	$(POSTCC_MC)
 
 $(EXE_DK): $(OBJS_DK) $(OBJSRES_DK)
-	$(CC) -o $@ $(OBJS_DK) $(OBJSRES_DK) $(FLAGS_DK) $(INC_DK) $(LIBS)
+	$(CC) -Wl,--export-dynamic -o $@ $(OBJS_DK) $(OBJSRES_DK) $(FLAGS_DK) $(INC_DK) $(LIBS)
 	$(POSTCC)
 	$(POSTCC_DK)
 

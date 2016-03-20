@@ -308,4 +308,12 @@ advance_object_sig(player)
         {
                 newme->vel.y += 0.35f;
         }
+
+        /*
+        // LIVE: uncomment to move the player somewhere
+        newme->pos.x = 2300;
+        newme->pos.y = 100;
+        newme->vel.x = 0;
+        newme->vel.y = 0;
+        */
 }

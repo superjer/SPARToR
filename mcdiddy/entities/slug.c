@@ -1,7 +1,29 @@
+/**
+ **  McDiddy's: The Game: Vengeance
+ **  Implementation example for the SPARToR Network Game Engine
+ **  Copyright (c) 2010-2015  Jer Wilson
+ **
+ **  See COPYING for details.
+ **
+ **  http://www.superjer.com/
+ **  http://www.spartor.com/
+ **  http://github.com/superjer/SPARToR
+ **/
+
 #include "mod.h"
 #include "audio.h"
 
-void real_function(FRAME_t *fr, int maxobjs, int objid, unsigned int a, unsigned int b, object *oa, object *ob)
+draw_object_sig(slug)
+{
+        slug *sl = o->data;
+
+        if( sl->vel.x>0 )
+                sprblit( sl->dead ? &SM(slug_ouch_r) : &SM(slug_r), sl->pos.x, sl->pos.y );
+        else
+                sprblit( sl->dead ? &SM(slug_ouch_l) : &SM(slug_l), sl->pos.x, sl->pos.y );
+}
+
+advance_object_sig(slug)
 {
         int i;
         slug    *sl = ob->data;
@@ -32,7 +54,7 @@ void real_function(FRAME_t *fr, int maxobjs, int objid, unsigned int a, unsigned
                                 pl->vel.y = sl->vel.y;
                                 sl->vel.y = -2.5f;
                                 kill = 1;
-                                //play("stab"); FIXME add this back in!
+                                play("stab");
                         }
                         else if( dn_stabbed )
                         {
@@ -40,7 +62,7 @@ void real_function(FRAME_t *fr, int maxobjs, int objid, unsigned int a, unsigned
                                 pl->hovertime = 14;
                                 sl->vel.y = 0.0f;
                                 kill = 1;
-                                //play("stab"); FIXME add this back in!
+                                play("stab");
                         }
                 }
                 else if( fr[b].objs[i].type == bullet_type )
@@ -51,7 +73,7 @@ void real_function(FRAME_t *fr, int maxobjs, int objid, unsigned int a, unsigned
                         bu->ttl = 0;
                         sl->vel.y = -1.5f;
                         kill = 1;
-                        //play("wibbity");
+                        play("wibbity");
                 }
         }
 

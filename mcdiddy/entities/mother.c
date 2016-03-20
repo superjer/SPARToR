@@ -64,7 +64,7 @@ advance_object_sig(mother)
         }
 
         //create a slug every now and then
-        if (hotfr % 17 == 0)
+        if (hotfr % 67 == 0)
         {
                 slug *sl = mkslug(NULL, 1, b,
                                  OBJF_POS|OBJF_VEL|OBJF_HULL|OBJF_VIS|OBJF_PLAT|OBJF_CLIP|OBJF_BNDB|OBJF_BNDZ);

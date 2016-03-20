@@ -227,21 +227,8 @@ void render()
                 }
                 
                 context *co = fr[vidfrmod].objs[o->context].data;
-                switch(o->type)
-                {
-                        #define EXPOSE(T,N,A)
-                        #define HIDE(X)
-                        #define STRUCT()                                                        \
-                                case TOKEN_PASTE(TYPE,_type):                                   \
-                                        TOKEN_PASTE(draw_object_,TYPE)(objid, vidfrmod, o, co); \
-                                        break;
-                        #define ENDSTRUCT(TYPE)
-                        #include "game_structs.h"
-                        #undef EXPOSE
-                        #undef HIDE
-                        #undef STRUCT
-                        #undef ENDSTRUCT
-                }
+                if (draw_funcs[o->type])
+                        draw_funcs[o->type](fr, maxobjs, objid, vidfrmod, o, co);
         }
 
         mod_postdraw(vidfr);

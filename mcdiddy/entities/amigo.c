@@ -83,7 +83,7 @@ draw_object_sig(amigo)
 advance_object_sig(amigo)
 {
         amigo    *ami     = ob->data;
-        float     gravity = 0.6f;
+        float     gravity = 0.4f;
 
         //FIXME REMOVE! Wrap amigo since he can mostly only go left
         context *co = fr[b].objs[ob->context].data;
@@ -96,7 +96,7 @@ advance_object_sig(amigo)
         switch( ami->state )
         {
         case AMIGO_HELLO:
-                if( ami->statetime>120 )
+                if( ami->statetime>240 )
                 {
                         ami->state = AMIGO_COOLDOWN;
                         ami->statetime = 0;
@@ -108,26 +108,26 @@ advance_object_sig(amigo)
                         break;
 
                 ami->vel.x = 0.0f;
-                if( ami->statetime>30 ) // decide which attack to do!
+                if( ami->statetime>60 ) // decide which attack to do!
                 {
                         ami->statetime = 0;
                         switch( patt()%8 )
                         {
-                        case 0: ami->state = AMIGO_JUMP;    ami->vel.y -= 10.0f;                     break;
-                        case 1: ami->state = AMIGO_JUMP;    ami->vel.y -= 10.0f; ami->vel.x =  4.0f; break;
-                        case 2: ami->state = AMIGO_JUMP;    ami->vel.y -= 10.0f; ami->vel.x = -4.0f; break;
-                        case 3: ami->state = AMIGO_JUMP;    ami->vel.y -=  8.0f; ami->vel.x =  4.0f; break;
-                        case 4: ami->state = AMIGO_JUMP;    ami->vel.y -=  8.0f; ami->vel.x = -4.0f; break;
-                        case 5: ami->state = AMIGO_SLASH;                        ami->vel.x = -0.1f; break;
-                        case 6: ami->state = AMIGO_DASH;                         ami->vel.x = -7.6f; break;
-                        case 7: ami->state = AMIGO_FLYKICK; ami->vel.y  = -3.0f; ami->vel.x = -7.5f;
-                                ami->hatcounter = 0;                                                     break;
+                        case 0: ami->state = AMIGO_JUMP;    ami->vel.y -=  5.0f;                      break;
+                        case 1: ami->state = AMIGO_JUMP;    ami->vel.y -=  5.0f; ami->vel.x =  2.0f ; break;
+                        case 2: ami->state = AMIGO_JUMP;    ami->vel.y -=  5.0f; ami->vel.x = -2.0f ; break;
+                        case 3: ami->state = AMIGO_JUMP;    ami->vel.y -=  4.0f; ami->vel.x =  2.0f ; break;
+                        case 4: ami->state = AMIGO_JUMP;    ami->vel.y -=  4.0f; ami->vel.x = -2.0f ; break;
+                        case 5: ami->state = AMIGO_SLASH;                        ami->vel.x = -0.05f; break;
+                        case 6: ami->state = AMIGO_DASH;                         ami->vel.x = -3.8f ; break;
+                        case 7: ami->state = AMIGO_FLYKICK; ami->vel.y  = -1.5f; ami->vel.x = -3.75f;
+                                ami->hatcounter = 0;                                                  break;
                         }
                 }
                 break;
 
         case AMIGO_JUMP:
-                if( ami->statetime>20 )
+                if( ami->statetime>40 )
                 {
                         ami->state = AMIGO_COOLDOWN;
                         ami->statetime = 0;
@@ -135,10 +135,10 @@ advance_object_sig(amigo)
                 break;
 
         case AMIGO_SLASH:
-                ami->vel.x += 0.05f;
+                ami->vel.x += 0.025f;
                 if( ami->vel.x > 0.0f )
                         ami->vel.x = 0.0f;
-                if( ami->statetime>30 )
+                if( ami->statetime>60 )
                 {
                         ami->state = AMIGO_COOLDOWN;
                         ami->statetime = 0;
@@ -157,7 +157,7 @@ advance_object_sig(amigo)
                                 break;
                         }
                         sw->pos = ami->pos;
-                        sw->vel = (V){1.5f,-2.5f,0.0f};
+                        sw->vel = (V){0.75f,-1.25f,0.0f};
                         sw->hull[0] = (V){0,0,0};
                         sw->hull[1] = (V){0,0,0};
                         sw->model = 0;
@@ -167,8 +167,8 @@ advance_object_sig(amigo)
 
                 gravity = 0.0f;
                 ami->vel.y = 0.0f;
-                ami->hatcounter += fabsf(ami->vel.x)*10;
-                ami->vel.x += ami->vel.x < -2.0f ? 0.1f : 0.05;
+                ami->hatcounter += fabsf(ami->vel.x)*20;
+                ami->vel.x += ami->vel.x < -1.0f ? 0.05f : 0.025;
                 if( ami->vel.x > 0.0f )
                         ami->vel.x = 0.0f;
 
@@ -192,7 +192,7 @@ advance_object_sig(amigo)
                 if( ami->vel.y==0.0f && fabsf(ami->vel.x)>2.0f && !(patt()%60) )
                         ami->pos.y -= (patt()%2+2)*2.3f; // turbulence on the ground
 
-                if( ami->statetime>50 )
+                if( ami->statetime>100 )
                 {
                         ami->state = AMIGO_COOLDOWN;
                         ami->statetime = 0;
@@ -202,4 +202,11 @@ advance_object_sig(amigo)
 
         ami->statetime++;
         ami->vel.y += gravity;
+
+        // FIXME: this is just for testing
+        //        wrap Amigo around in his room so he don't get stuck
+        if (ami->pos.x > 2300)
+                ami->pos.x = 2300;
+        else if (ami->pos.x < 2100)
+                ami->pos.x = 2300;
 }

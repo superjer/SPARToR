@@ -177,8 +177,8 @@ typedef struct {
 #undef STRUCT
 #undef ENDSTRUCT
 
-#define ARGS_ADVANCE (int objid, unsigned int a, unsigned int b, object *oa, object *ob)
-#define ARGS_DRAW (int objid, unsigned int vidfr, object *o, context *co)
+#define ARGS_ADVANCE (FRAME_t *fr, int maxobjs, int objid, unsigned int a, unsigned int b, object *oa, object *ob)
+#define ARGS_DRAW (FRAME_t *fr, int maxobjs, int objid, unsigned int vidfr, object *o, context *co)
 
 #define advance_object_sig(T) void TOKEN_PASTE(advance_object_,T) ARGS_ADVANCE
 #define draw_object_sig(T) void TOKEN_PASTE(draw_object_,T) ARGS_DRAW
@@ -196,6 +196,11 @@ typedef struct {
 #undef HIDE
 #undef STRUCT
 #undef ENDSTRUCT
+
+typedef void (*dll_advance_func) ARGS_ADVANCE;
+typedef void (*dll_draw_func) ARGS_DRAW;
+extern dll_advance_func advance_funcs[];
+extern dll_draw_func draw_funcs[];
 
 //get a pointer to a member in 'flexible' struct -- whee polymorphism sort of
 #define flex(o,memb) ((void *)((char *)((o)->data) + flexer[(o)->type].memb))

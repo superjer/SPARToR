@@ -89,7 +89,7 @@ void init_new_player(mother *mo, int client_nr, unsigned int b)
                 return;
         }
 
-        debug( "%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot );
+        debug("%d: New client %i created ghost is obj#%d player is obj#%d", hotfr, client_nr, ghostslot, azslot);
 
         mo->ghost    = ghostslot;
         mo->party[0] = azslot;

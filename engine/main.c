@@ -36,6 +36,10 @@
 #include "sprite_helpers.h"
 #include "command.h"
 #include <math.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dlfcn.h>
 
 #if (SDL_IMAGE_MAJOR_VERSION*1000000 + SDL_IMAGE_MINOR_VERSION*1000 + SDL_IMAGE_PATCHLEVEL)<1002008 //support SDL_image pre 1.2.8
 #define IMG_INIT_PNG 1
@@ -73,6 +77,10 @@ unsigned long slough_time = 0;
 
 //runtime engine options
 int eng_realtime = 0;
+
+//stuff for loading game dll / live code updating
+dll_advance_func advance_funcs[100]; // FIXME get the right number
+dll_draw_func draw_funcs[100]; // FIXME get the right number
 
 static void args(int argc, char **argv);
 
@@ -370,10 +378,66 @@ static void readvanceobject(char recheck[2][maxobjs], int r, int i, unsigned int
         }
 }
 
+void open_game_dll()
+{
+        static time_t mtime;
+        static void *handle;
+        static char so_file[] = "./" GAME ".so";
+
+        struct stat fileinfo;
+        if (stat(so_file, &fileinfo))
+        {
+                echo("Failed to stat %s", so_file);
+                return;
+        }
+
+        if (fileinfo.st_mtime != mtime)
+        {
+                echo("New mtime is %d", fileinfo.st_mtime);
+                if (handle)
+                {
+                        echo("Closing so file %s", so_file);
+                        if (dlclose(handle))
+                                echo("Error closing so file %s", so_file);
+                }
+                echo("Opening so file %s", so_file);
+                handle = dlopen(so_file, RTLD_NOW);
+                if (!handle)
+                        echo("dlopen error: %s", dlerror());
+        }
+
+        mtime = fileinfo.st_mtime;
+
+        if (!handle)
+                return;
+
+        #define EXPOSE(T,N,A)
+        #define HIDE(X)
+        #define STRUCT()                                                  \
+                advance_funcs[TOKEN_PASTE(TYPE,_type)] = dlsym(handle,    \
+                        STRINGIFY(TOKEN_PASTE(advance_object_,TYPE)));    \
+                draw_funcs[TOKEN_PASTE(TYPE,_type)] = dlsym(handle,       \
+                        STRINGIFY(TOKEN_PASTE(draw_object_,TYPE)));
+        #define ENDSTRUCT(TYPE)
+        #include "game_structs.h"
+        #undef EXPOSE
+        #undef HIDE
+        #undef STRUCT
+        #undef ENDSTRUCT
+
+        // TODO: does this just print out the most recent error from dlsym?
+        //       and should we bother?
+        char *error;
+        if ((error = dlerror()))
+                echo(error);
+}
+
 void advance()
 {
         int i;
         findfreeslot(-1); // reset slot finder
+
+        open_game_dll();
 
         while( hotfr < metafr )
         {
@@ -410,22 +474,9 @@ void advance()
                 {
                         object *oa = fr[a].objs+i;
                         object *ob = fr[b].objs+i;
-                        #define EXPOSE(T,N,A)
-                        #define HIDE(X)
-                        #define STRUCT()                                            \
-                        case TOKEN_PASTE(TYPE,_type):                               \
-                                assert(ob->size == sizeof(TYPE));                   \
-                                TOKEN_PASTE(advance_object_,TYPE)(i, a, b, oa, ob); \
-                                break;
-                        #define ENDSTRUCT(TYPE)
-                        switch( ob->type )
-                        {
-                                #include "game_structs.h"
-                        }
-                        #undef EXPOSE
-                        #undef HIDE
-                        #undef STRUCT
-                        #undef ENDSTRUCT
+
+                        if (advance_funcs[ob->type])
+                                advance_funcs[ob->type](fr, maxobjs, i, a, b, oa, ob);
                 }
 
                 adv_game_time += getticks() - adv_game_start;

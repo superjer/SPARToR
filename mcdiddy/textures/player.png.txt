@@ -38,6 +38,16 @@
   ctgirl_duck_f
 .end
 
+.grid  cols 7  pos 140 0
+  ctpig_r
+  ctpig_l
+  ctpig_duck_r
+  ctpig_duck_l
+  ctpig_f
+  .
+  ctpig_duck_f
+.end
+
 .grid  cols 6  pos 0 150  size 24 25  bump 30
   mp5_r       anchor right  7
   mp5_l       anchor left   7
@@ -61,4 +71,6 @@ knife_up   153 150 5 27 top cen bump 500
 ghost 80 177 15 16 left top
 girlhair_r 95 177 12 14 top right+4
 girlhair_l 107 177 12 14 top left-4
+pigtail_r 119 177 17 10 top+15 right
+pigtail_l 136 177 17 10 top+15 left
 

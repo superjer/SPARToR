@@ -34,6 +34,12 @@ X(ctgirl_duck_r),\
 X(ctgirl_duck_l),\
 X(ctgirl_f),\
 X(ctgirl_duck_f),\
+X(ctpig_r),\
+X(ctpig_l),\
+X(ctpig_duck_r),\
+X(ctpig_duck_l),\
+X(ctpig_f),\
+X(ctpig_duck_f),\
 X(mp5_r),\
 X(mp5_l),\
 X(mp5_down_r),\
@@ -50,5 +56,7 @@ X(slug_ouch_r),\
 X(ghost),\
 X(girlhair_r),\
 X(girlhair_l),\
+X(pigtail_r),\
+X(pigtail_l),\
 X(tnl_weight_silver),\
 X(sprite_enum_unused)

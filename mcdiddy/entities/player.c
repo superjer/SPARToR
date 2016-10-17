@@ -30,19 +30,31 @@ draw_object_sig(player)
         else if( pl->facingr  ) sprblit( &SM(girlhair_r), c, d-30+(pl->goingd?4:0)+pl->gundown/7 );
         else                    sprblit( &SM(girlhair_l), c, d-30+(pl->goingd?4:0)+pl->gundown/7 );
 
-        //player sprite
-        if( pl->goingd )
-        {
-                if     ( pl->turning ) sprblit( &SM(ctblue_duck_f), c, d );
-                else if( pl->facingr ) sprblit( &SM(ctblue_duck_r), c, d );
-                else                   sprblit( &SM(ctblue_duck_l), c, d );
+        //pig tail
+        if     ( pl->model!=5 ) ;
+        else if( pl->facingr  ) sprblit( &SM(pigtail_r), c, d+(pl->goingd?2:0)+pl->gundown/7 );
+        else                    sprblit( &SM(pigtail_l), c, d+(pl->goingd?2:0)+pl->gundown/7 );
+
+        #define DRAW_PLAYER(which)                                             \
+        if( pl->goingd )                                                       \
+        {                                                                      \
+                if     ( pl->turning ) sprblit( &SM(which ## _duck_f), c, d ); \
+                else if( pl->facingr ) sprblit( &SM(which ## _duck_r), c, d ); \
+                else                   sprblit( &SM(which ## _duck_l), c, d ); \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+                if     ( pl->turning ) sprblit( &SM(which ## _f),      c, d ); \
+                else if( pl->facingr ) sprblit( &SM(which ## _r),      c, d ); \
+                else                   sprblit( &SM(which ## _l),      c, d ); \
         }
-        else
-        {
-                if     ( pl->turning ) sprblit( &SM(ctblue_f),      c, d );
-                else if( pl->facingr ) sprblit( &SM(ctblue_r),      c, d );
-                else                   sprblit( &SM(ctblue_l),      c, d );
-        }
+
+        if( pl->model == 0 ) { DRAW_PLAYER(ctblue);  }
+        if( pl->model == 1 ) { DRAW_PLAYER(ctgreen); }
+        if( pl->model == 2 ) { DRAW_PLAYER(ctblack); }
+        if( pl->model == 3 ) { DRAW_PLAYER(ctcamo);  }
+        if( pl->model == 4 ) { DRAW_PLAYER(ctgirl);  }
+        if( pl->model == 5 ) { DRAW_PLAYER(ctpig);   }
 
         // knife or gun
         if     ( pl->stabbing<0 ) sprblit( &SM(knife_up),   c, d-44 );
@@ -144,7 +156,8 @@ advance_object_sig(player)
 
                 if( setmodel>-1 ) //FIXME -- just for fun, will not sync!
                 {
-                        newme->model = setmodel;
+                        if( setmodel < 6 )
+                                newme->model = setmodel;
                         setmodel = -1;
                 }
         }

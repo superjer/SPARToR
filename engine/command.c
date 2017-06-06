@@ -35,6 +35,7 @@
 #include "sprite.h"
 #include "keynames.h"
 #include "helpers.h"
+#include "xorshift.h"
 
 int netmode;
 
@@ -59,6 +60,10 @@ void command(const char *s)
         if( q==NULL )
         {
                 ;
+        }
+        else if( strcmp(q, "xorshift")==0 )
+        {
+                echo("%lld", xorshift128plus());
         }
         else if( strcmp(q, "console")==0 )
         {
